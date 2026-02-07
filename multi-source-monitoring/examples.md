@@ -33,13 +33,13 @@ response = requests.get(BASE_URL, params={
 response.raise_for_status()
 
 data = response.json()
-print(f"Latest {len(data['articles'])} articles from trusted sources:\n")
+print(f"Latest {len(data['results'])} articles from trusted sources:\n")
 
-for article in data["articles"]:
+for article in data["results"]:
     date = article["published_at"][:10]
-    print(f"  [{date}] [{article['source']['name']}]")
+    print(f"  [{date}] [{article['source']['domain']}]")
     print(f"    {article['title']}")
-    print(f"    {article['url']}\n")
+    print(f"    {article['href']}\n")
 ```
 
 ### High-Authority Sources Only
@@ -64,9 +64,9 @@ response.raise_for_status()
 data = response.json()
 print(f"Top-ranked finance news ({data['total_results']} total):\n")
 
-for article in data["articles"]:
+for article in data["results"]:
     print(f"  {article['title']}")
-    print(f"    Source: {article['source']['name']} — {article['source']['url']}")
+    print(f"    Source: {article['source']['domain']} — {article['source']['home_page_url']}")
     print()
 ```
 
@@ -202,7 +202,7 @@ def fetch_multi_country_feed(country_codes, topic, max_per_country=50):
                 "page": page,
             })
             response.raise_for_status()
-            articles = response.json().get("articles", [])
+            articles = response.json().get("results", [])
 
             if not articles:
                 break
@@ -255,13 +255,13 @@ const params = new URLSearchParams({
 const response = await fetch(`${BASE_URL}?${params}`);
 const data = await response.json();
 
-console.log(`Latest ${data.articles.length} articles from trusted sources:\n`);
+console.log(`Latest ${data.results.length} articles from trusted sources:\n`);
 
-data.articles.forEach((article) => {
+data.results.forEach((article) => {
   const date = article.published_at.slice(0, 10);
-  console.log(`  [${date}] [${article.source.name}]`);
+  console.log(`  [${date}] [${article.source.domain}]`);
   console.log(`    ${article.title}`);
-  console.log(`    ${article.url}\n`);
+  console.log(`    ${article.href}\n`);
 });
 ```
 
@@ -372,9 +372,9 @@ async function getHighRankNews(topic, minRank = 0.8, perPage = 20) {
 const data = await getHighRankNews("finance");
 console.log(`Top-ranked finance news (${data.total_results} total):\n`);
 
-data.articles.forEach((article) => {
+data.results.forEach((article) => {
   console.log(`  ${article.title}`);
-  console.log(`    Source: ${article.source.name} — ${article.source.url}\n`);
+  console.log(`    Source: ${article.source.domain} — ${article.source.home_page_url}\n`);
 });
 ```
 
@@ -409,13 +409,13 @@ $query = http_build_query([
 
 $data = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
 
-echo "Latest " . count($data["articles"]) . " articles from trusted sources:\n\n";
+echo "Latest " . count($data["results"]) . " articles from trusted sources:\n\n";
 
-foreach ($data["articles"] as $article) {
+foreach ($data["results"] as $article) {
     $date = substr($article["published_at"], 0, 10);
-    echo "  [{$date}] [{$article['source']['name']}]\n";
+    echo "  [{$date}] [{$article['source']['domain']}]\n";
     echo "    {$article['title']}\n";
-    echo "    {$article['url']}\n\n";
+    echo "    {$article['href']}\n\n";
 }
 ```
 
@@ -538,8 +538,8 @@ if ($code !== 200) {
 $data = json_decode($body, true);
 echo "Top-ranked finance news ({$data['total_results']} total):\n\n";
 
-foreach ($data["articles"] as $article) {
+foreach ($data["results"] as $article) {
     echo "  {$article['title']}\n";
-    echo "    Source: {$article['source']['name']} — {$article['source']['url']}\n\n";
+    echo "    Source: {$article['source']['domain']} — {$article['source']['home_page_url']}\n\n";
 }
 ```

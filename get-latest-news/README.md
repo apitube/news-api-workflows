@@ -92,81 +92,155 @@ foreach ($response["results"] as $article) {
 ```json
 {
   "status": "ok",
+  "limit": 1,
   "page": 1,
-  "path": "https://api.apitube.io/v1/news/everything?language=en&limit=1",
+  "path": "https://api.apitube.io/v1/news/everything?language=en&per_page=1",
   "has_next_pages": true,
-  "next_page": "https://api.apitube.io/v1/news/everything?language=en&limit=1&page=2",
+  "next_page": "https://api.apitube.io/v1/news/everything?language=en&per_page=1&page=2",
   "has_previous_page": false,
-  "previous_page": null,
+  "previous_page": "",
   "request_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
   "export": {
-    "json": "https://api.apitube.io/v1/news/everything?language=en&limit=1&format=json",
-    "xlsx": "https://api.apitube.io/v1/news/everything?language=en&limit=1&format=xlsx",
-    "csv": "https://api.apitube.io/v1/news/everything?language=en&limit=1&format=csv",
-    "tsv": "https://api.apitube.io/v1/news/everything?language=en&limit=1&format=tsv",
-    "xml": "https://api.apitube.io/v1/news/everything?language=en&limit=1&format=xml"
+    "json": "https://api.apitube.io/v1/news/everything?language=en&per_page=1&export=json",
+    "xlsx": "https://api.apitube.io/v1/news/everything?language=en&per_page=1&export=xlsx",
+    "csv": "https://api.apitube.io/v1/news/everything?language=en&per_page=1&export=csv",
+    "tsv": "https://api.apitube.io/v1/news/everything?language=en&per_page=1&export=tsv",
+    "xml": "https://api.apitube.io/v1/news/everything?language=en&per_page=1&export=xml",
+    "rss": "https://api.apitube.io/v1/news/everything?language=en&per_page=1&export=rss"
   },
   "results": [
     {
-      "id": "abc123def456",
+      "id": 12345678,
+      "href": "https://example.com/article/12345",
+      "published_at": "2026-02-07T10:30:00Z",
       "title": "Breaking: Major Tech Company Announces New Product",
       "description": "A leading technology company unveiled its latest innovation today...",
-      "content": "Full article content goes here...",
-      "url": "https://example.com/article/12345",
+      "body": "Full article content goes here...",
+      "body_html": "<p>Full article content goes here...</p>",
+      "language": "en",
+      "author": {
+        "id": 5678,
+        "name": "John Smith"
+      },
       "image": "https://example.com/images/article.jpg",
-      "published_at": "2026-02-07T10:30:00Z",
-      "source": {
-        "name": "Tech Daily",
-        "domain": "example.com",
-        "url": "https://example.com",
-        "country": {
-          "code": "us",
-          "name": "United States"
-        },
-        "rank": {
-          "opr": 0.82
+      "categories": [
+        {
+          "id": 199,
+          "name": "economy, business and finance",
+          "score": 0.8,
+          "taxonomy": "iptc_mediatopics",
+          "links": {
+            "self": "https://api.apitube.io/v1/news/category/iptc_mediatopics/medtop:04000000"
+          }
         }
-      },
-      "language": {
-        "code": "en",
-        "name": "English"
-      },
-      "category": {
-        "id": "medtop:04000000",
-        "name": "economy, business and finance"
-      },
-      "topic": {
-        "id": "technology",
-        "name": "Technology"
-      },
-      "industry": {
-        "id": "tech",
-        "name": "Technology"
+      ],
+      "topics": [
+        {
+          "id": "technology",
+          "name": "Technology",
+          "score": 0.9,
+          "links": {
+            "self": "https://api.apitube.io/v1/news/topic/technology"
+          }
+        }
+      ],
+      "industries": [
+        {
+          "id": 456,
+          "name": "Consumer Electronics",
+          "links": {
+            "self": "https://api.apitube.io/v1/news/industry/456"
+          }
+        }
+      ],
+      "entities": [
+        {
+          "id": 789,
+          "name": "Apple",
+          "type": "organization",
+          "links": {
+            "self": "https://api.apitube.io/v1/news/entity/789",
+            "wikipedia": "https://en.wikipedia.org/wiki/Apple_Inc.",
+            "wikidata": "https://www.wikidata.org/wiki/Q312"
+          },
+          "frequency": 3,
+          "title": {
+            "pos": [{ "start": 4, "end": 9 }]
+          },
+          "body": {
+            "pos": [{ "start": 10, "end": 15 }, { "start": 120, "end": 125 }]
+          },
+          "metadata": {
+            "name": "Apple",
+            "type": "business",
+            "country": { "code": "US", "name": "United States" },
+            "description": "Technology company"
+          }
+        }
+      ],
+      "source": {
+        "id": 4232,
+        "domain": "example.com",
+        "home_page_url": "https://example.com",
+        "type": "news",
+        "bias": "center",
+        "rankings": {
+          "opr": 5
+        },
+        "location": {
+          "country_name": "United States",
+          "country_code": "us"
+        },
+        "favicon": "https://www.google.com/s2/favicons?domain=https://example.com"
       },
       "sentiment": {
         "overall": {
           "score": 0.75,
           "polarity": "positive"
+        },
+        "title": {
+          "score": 0.60,
+          "polarity": "positive"
+        },
+        "body": {
+          "score": 0.80,
+          "polarity": "positive"
         }
       },
-      "entities": [
+      "summary": [
         {
-          "name": "Apple",
-          "type": "organization"
+          "sentence": "A leading technology company unveiled its latest innovation today.",
+          "sentiment": {
+            "score": 0.6,
+            "polarity": "positive"
+          }
         }
       ],
-      "stories": [],
-      "links": [],
-      "media": [],
-      "hashtags": [],
-      "duplicate": false,
-      "paywall": false,
-      "breaking_news": true,
-      "sentences": 24,
-      "paragraphs": 8,
-      "words": 520,
-      "characters": 3100,
-      "reading_time": 2.5
+      "keywords": ["technology", "innovation", "product launch"],
+      "links": [
+        {
+          "url": "https://example.com/related-article",
+          "type": "link"
+        }
+      ],
+      "media": [
+        {
+          "url": "https://example.com/images/article.jpg",
+          "type": "image"
+        }
+      ],
+      "story": {
+        "id": 9876,
+        "uri": "https://api.apitube.io/v1/news/story/9876"
+      },
+      "is_duplicate": false,
+      "is_free": true,
+      "is_breaking": true,
+      "read_time": 2,
+      "sentences_count": 24,
+      "paragraphs_count": 8,
+      "words_count": 520,
+      "characters_count": 3100
     }
   ]
 }

@@ -30,9 +30,9 @@ def track_entity(name, entity_type="organization", language="en", per_page=20):
 data = track_entity("Google")
 print(f"Found {data['total_results']} articles mentioning Google\n")
 
-for article in data["articles"]:
+for article in data["results"]:
     print(f"  [{article['published_at'][:10]}] {article['title']}")
-    print(f"    {article['source']['name']} — {article['url']}\n")
+    print(f"    {article['source']['domain']} — {article['href']}\n")
 ```
 
 ### Entity Sentiment Analysis
@@ -127,9 +127,9 @@ while True:
                 "per_page": 3,
             })
             response.raise_for_status()
-            for article in response.json()["articles"]:
+            for article in response.json()["results"]:
                 print(f"    -> {article['title']}")
-                print(f"       {article['source']['name']}")
+                print(f"       {article['source']['domain']}")
 
     print()
     time.sleep(POLL_INTERVAL)
@@ -207,7 +207,7 @@ while True:
     })
     response.raise_for_status()
     data = response.json()
-    articles = data.get("articles", [])
+    articles = data.get("results", [])
 
     if not articles:
         break
@@ -258,10 +258,10 @@ async function trackEntity(name, type = "organization", perPage = 20) {
 const data = await trackEntity("Google");
 console.log(`Found ${data.total_results} articles mentioning Google\n`);
 
-data.articles.forEach((article) => {
+data.results.forEach((article) => {
   const date = article.published_at.slice(0, 10);
   console.log(`  [${date}] ${article.title}`);
-  console.log(`    ${article.source.name} — ${article.url}\n`);
+  console.log(`    ${article.source.domain} — ${article.href}\n`);
 });
 ```
 
@@ -391,10 +391,10 @@ function trackEntity(string $name, string $type = "organization", int $perPage =
 $data = trackEntity("Google");
 echo "Found {$data['total_results']} articles mentioning Google\n\n";
 
-foreach ($data["articles"] as $article) {
+foreach ($data["results"] as $article) {
     $date = substr($article["published_at"], 0, 10);
     echo "  [{$date}] {$article['title']}\n";
-    echo "    {$article['source']['name']} — {$article['url']}\n\n";
+    echo "    {$article['source']['domain']} — {$article['href']}\n\n";
 }
 ```
 

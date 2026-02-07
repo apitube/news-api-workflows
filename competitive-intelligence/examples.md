@@ -188,8 +188,8 @@ while True:
                 "per_page": 3,
             })
             response.raise_for_status()
-            for article in response.json()["articles"]:
-                print(f"    -> [{article['source']['name']}] {article['title']}")
+            for article in response.json()["results"]:
+                print(f"    -> [{article['source']['domain']}] {article['title']}")
 
     print()
     time.sleep(POLL_INTERVAL)

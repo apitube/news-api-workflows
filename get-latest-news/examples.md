@@ -13,8 +13,9 @@ Reference: [Response Structure](https://docs.apitube.io/platform/news-api/respon
 | Field | Type | Description |
 |-------|------|-------------|
 | `status` | string | Request status (e.g., `"ok"`). |
+| `limit` | integer | Number of results per page. |
 | `page` | integer | Current page number. |
-| `path` | string | The request URL path. |
+| `path` | string | The full request URL. |
 | `has_next_pages` | boolean | Whether more pages of results exist. |
 | `next_page` | string | URL for the next page of results. |
 | `has_previous_page` | boolean | Whether a previous page exists. |
@@ -32,180 +33,252 @@ Reference: [Response Structure](https://docs.apitube.io/platform/news-api/respon
 | `csv` | string | Export URL in CSV format. |
 | `tsv` | string | Export URL in TSV format. |
 | `xml` | string | Export URL in XML format. |
+| `rss` | string | Export URL in RSS format. |
 
 ### Article Object (each item in `results`)
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `id` | string | Unique article identifier. |
+| `id` | integer | Unique article identifier. |
+| `href` | string | URL of the original article. |
+| `published_at` | string | Publication date in ISO 8601 format. |
 | `title` | string | The title of the news article. |
 | `description` | string | A short description or summary of the article. |
-| `content` | string | The full content of the news article. |
-| `url` | string | The URL of the news article. |
+| `body` | string | The full article text without HTML tags. |
+| `body_html` | string | The full article text with HTML formatting. |
+| `language` | string | Article language in ISO 639-1 format (e.g., `"en"`). |
+| `author` | object | Information about the article author. |
 | `image` | string | URL of the article's main image. |
-| `published_at` | string | Publication date in ISO 8601 format. |
-| `source` | object | Information about the article's source. |
-| `language` | object | The language of the article. |
-| `category` | object | The category of the article (IPTC media topic). |
-| `topic` | object | The topic of the article. |
-| `industry` | object | The industry classification of the article. |
-| `sentiment` | object | Sentiment analysis results. |
+| `categories` | array | Array of categories with relevance scores. |
+| `topics` | array | Array of topics with relevance scores. |
+| `industries` | array | Array of industry classifications. |
 | `entities` | array | Named entities extracted from the article. |
-| `stories` | array | Story group identifiers (clusters related articles). |
+| `source` | object | Information about the article's source. |
+| `sentiment` | object | Sentiment analysis results (overall, title, body). |
+| `summary` | array | Key sentences from the article with sentiment. |
+| `keywords` | array | Keywords extracted from the article. |
 | `links` | array | Links extracted from the article body. |
 | `media` | array | Media items (images, videos) from the article. |
-| `hashtags` | array | Hashtags extracted from the article. |
-| `duplicate` | boolean | Whether the article is a detected duplicate. |
-| `paywall` | boolean | Whether the article is behind a paywall. |
-| `breaking_news` | boolean | Whether the article is flagged as breaking news. |
-| `sentences` | integer | Number of sentences in the article. |
-| `paragraphs` | integer | Number of paragraphs in the article. |
-| `words` | integer | Number of words in the article. |
-| `characters` | integer | Number of characters in the article. |
-| `reading_time` | number | Estimated reading time in minutes. |
+| `story` | object | Story group identifier (clusters related articles). |
+| `is_duplicate` | boolean | Whether the article is a detected duplicate. |
+| `is_free` | boolean | Whether the article is freely available (not behind paywall). |
+| `is_breaking` | boolean | Whether the article is flagged as breaking news. |
+| `read_time` | integer | Estimated reading time in minutes. |
+| `sentences_count` | integer | Number of sentences in the article. |
+| `paragraphs_count` | integer | Number of paragraphs in the article. |
+| `words_count` | integer | Number of words in the article. |
+| `characters_count` | integer | Number of characters in the article. |
+
+#### `author` Object
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | integer | Author identifier (may be `null`). |
+| `name` | string | Author name (may be empty). |
 
 #### `source` Object
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `name` | string | Name of the source (e.g., `"TechCrunch"`). |
+| `id` | integer | Unique source identifier. |
 | `domain` | string | Domain of the source (e.g., `"techcrunch.com"`). |
-| `url` | string | URL of the source. |
-| `country` | object | Country of the source. |
-| `country.code` | string | ISO country code (e.g., `"us"`). |
-| `country.name` | string | Country name (e.g., `"United States"`). |
-| `rank` | object | Source ranking information. |
-| `rank.opr` | number | OPR (Open Page Rank) score, from `0` to `1`. |
+| `home_page_url` | string | URL of the source homepage. |
+| `type` | string | Source type (e.g., `"news"`, `"blog"`). |
+| `bias` | string | Source bias (e.g., `"left"`, `"right"`, `"center"`). |
+| `rankings.opr` | integer | Open Page Rank score. |
+| `location.country_name` | string | Country name of the source. |
+| `location.country_code` | string | ISO 3166-1 alpha-2 country code. |
+| `favicon` | string | URL of the source favicon. |
 
-#### `language` Object
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `code` | string | ISO 639-1 language code (e.g., `"en"`). |
-| `name` | string | Language name (e.g., `"English"`). |
-
-#### `category` Object
+#### `categories` Array Items
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `id` | string | IPTC media topic ID (e.g., `"medtop:04000000"`). |
-| `name` | string | Category name (e.g., `"economy, business and finance"`). |
+| `id` | integer | Category identifier. |
+| `name` | string | Category name. |
+| `score` | float | Category relevance score (0 to 1). |
+| `taxonomy` | string | Taxonomy name (e.g., `"iptc_mediatopics"`). |
+| `links.self` | string | URL to get information about the category. |
 
-#### `topic` Object
+#### `topics` Array Items
 
 | Field | Type | Description |
 |-------|------|-------------|
 | `id` | string | Topic identifier (e.g., `"climate_change"`). |
 | `name` | string | Topic name (e.g., `"Climate Change"`). |
+| `score` | float | Topic relevance score (0 to 1). |
+| `links.self` | string | URL to get information about the topic. |
 
-#### `industry` Object
+#### `industries` Array Items
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `id` | string | Industry identifier. |
+| `id` | integer | Industry identifier. |
 | `name` | string | Industry name. |
+| `links.self` | string | URL to get information about the industry. |
 
 #### `sentiment` Object
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `overall` | object | Overall sentiment analysis. |
-| `overall.score` | number | Sentiment score (numeric value). |
-| `overall.polarity` | string | Sentiment polarity: `"positive"`, `"negative"`, or `"neutral"`. |
+| `overall.score` | float | Overall sentiment score (-1 to 1). |
+| `overall.polarity` | string | Overall polarity: `"positive"`, `"negative"`, or `"neutral"`. |
+| `title.score` | float | Title sentiment score (-1 to 1). |
+| `title.polarity` | string | Title sentiment polarity. |
+| `body.score` | float | Body sentiment score (-1 to 1). |
+| `body.polarity` | string | Body sentiment polarity. |
 
 #### `entities` Array Items
 
 | Field | Type | Description |
 |-------|------|-------------|
+| `id` | integer | Unique entity identifier. |
 | `name` | string | Entity name (e.g., `"Apple"`, `"Elon Musk"`). |
-| `type` | string | Entity type (e.g., `"organization"`, `"person"`, `"location"`). |
+| `type` | string | Entity type (e.g., `"organization"`, `"person"`, `"location"`, `"brand"`). |
+| `links.self` | string | URL to get information about the entity. |
+| `links.wikipedia` | string | Wikipedia article URL. |
+| `links.wikidata` | string | Wikidata entity URL. |
+| `frequency` | integer | Frequency of entity mentions in the article. |
+| `title.pos` | array | Array of entity mention positions in the title. |
+| `body.pos` | array | Array of entity mention positions in the body. |
+| `metadata` | object | Additional entity information (varies by entity type). |
+
+#### `story` Object
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | integer | Unique story identifier. |
+| `uri` | string | URL to get information about the story. |
+
+#### `summary` Array Items
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `sentence` | string | Key sentence from the article. |
+| `sentiment.score` | float | Sentence sentiment score. |
+| `sentiment.polarity` | string | Sentence sentiment polarity. |
 
 ### Example Response
 
 ```json
 {
   "status": "ok",
+  "limit": 1,
   "page": 1,
-  "path": "https://api.apitube.io/v1/news/everything?language=en&limit=1",
+  "path": "https://api.apitube.io/v1/news/everything?language=en&per_page=1",
   "has_next_pages": true,
-  "next_page": "https://api.apitube.io/v1/news/everything?language=en&limit=1&page=2",
+  "next_page": "https://api.apitube.io/v1/news/everything?language=en&per_page=1&page=2",
   "has_previous_page": false,
-  "previous_page": null,
+  "previous_page": "",
   "request_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
   "export": {
-    "json": "https://api.apitube.io/v1/news/everything?language=en&limit=1&format=json",
-    "xlsx": "https://api.apitube.io/v1/news/everything?language=en&limit=1&format=xlsx",
-    "csv": "https://api.apitube.io/v1/news/everything?language=en&limit=1&format=csv",
-    "tsv": "https://api.apitube.io/v1/news/everything?language=en&limit=1&format=tsv",
-    "xml": "https://api.apitube.io/v1/news/everything?language=en&limit=1&format=xml"
+    "json": "https://api.apitube.io/v1/news/everything?language=en&per_page=1&export=json",
+    "xlsx": "https://api.apitube.io/v1/news/everything?language=en&per_page=1&export=xlsx",
+    "csv": "https://api.apitube.io/v1/news/everything?language=en&per_page=1&export=csv",
+    "tsv": "https://api.apitube.io/v1/news/everything?language=en&per_page=1&export=tsv",
+    "xml": "https://api.apitube.io/v1/news/everything?language=en&per_page=1&export=xml",
+    "rss": "https://api.apitube.io/v1/news/everything?language=en&per_page=1&export=rss"
   },
   "results": [
     {
-      "id": "abc123def456",
+      "id": 12345678,
+      "href": "https://example.com/article/12345",
+      "published_at": "2026-02-07T10:30:00Z",
       "title": "Breaking: Major Tech Company Announces New Product",
       "description": "A leading technology company unveiled its latest innovation today...",
-      "content": "Full article content goes here...",
-      "url": "https://example.com/article/12345",
+      "body": "Full article content goes here...",
+      "body_html": "<p>Full article content goes here...</p>",
+      "language": "en",
+      "author": {
+        "id": 5678,
+        "name": "John Smith"
+      },
       "image": "https://example.com/images/article.jpg",
-      "published_at": "2026-02-07T10:30:00Z",
-      "source": {
-        "name": "Tech Daily",
-        "domain": "example.com",
-        "url": "https://example.com",
-        "country": {
-          "code": "us",
-          "name": "United States"
-        },
-        "rank": {
-          "opr": 0.82
+      "categories": [
+        {
+          "id": 199,
+          "name": "economy, business and finance",
+          "score": 0.8,
+          "taxonomy": "iptc_mediatopics",
+          "links": {
+            "self": "https://api.apitube.io/v1/news/category/iptc_mediatopics/medtop:04000000"
+          }
         }
-      },
-      "language": {
-        "code": "en",
-        "name": "English"
-      },
-      "category": {
-        "id": "medtop:04000000",
-        "name": "economy, business and finance"
-      },
-      "topic": {
-        "id": "technology",
-        "name": "Technology"
-      },
-      "industry": {
-        "id": "tech",
-        "name": "Technology"
-      },
-      "sentiment": {
-        "overall": {
-          "score": 0.75,
-          "polarity": "positive"
+      ],
+      "topics": [
+        {
+          "id": "technology",
+          "name": "Technology",
+          "score": 0.9,
+          "links": {
+            "self": "https://api.apitube.io/v1/news/topic/technology"
+          }
         }
-      },
+      ],
+      "industries": [
+        {
+          "id": 456,
+          "name": "Consumer Electronics",
+          "links": {
+            "self": "https://api.apitube.io/v1/news/industry/456"
+          }
+        }
+      ],
       "entities": [
         {
+          "id": 789,
           "name": "Apple",
-          "type": "organization"
-        },
-        {
-          "name": "Tim Cook",
-          "type": "person"
+          "type": "organization",
+          "links": {
+            "self": "https://api.apitube.io/v1/news/entity/789",
+            "wikipedia": "https://en.wikipedia.org/wiki/Apple_Inc.",
+            "wikidata": "https://www.wikidata.org/wiki/Q312"
+          },
+          "frequency": 3,
+          "title": { "pos": [{ "start": 4, "end": 9 }] },
+          "body": { "pos": [{ "start": 10, "end": 15 }] },
+          "metadata": {
+            "name": "Apple",
+            "type": "business"
+          }
         }
       ],
-      "stories": ["story_abc123"],
-      "links": [
-        "https://example.com/related-article"
+      "source": {
+        "id": 4232,
+        "domain": "example.com",
+        "home_page_url": "https://example.com",
+        "type": "news",
+        "bias": "center",
+        "rankings": { "opr": 5 },
+        "location": {
+          "country_name": "United States",
+          "country_code": "us"
+        },
+        "favicon": "https://www.google.com/s2/favicons?domain=https://example.com"
+      },
+      "sentiment": {
+        "overall": { "score": 0.75, "polarity": "positive" },
+        "title": { "score": 0.60, "polarity": "positive" },
+        "body": { "score": 0.80, "polarity": "positive" }
+      },
+      "summary": [
+        {
+          "sentence": "A leading technology company unveiled its latest innovation today.",
+          "sentiment": { "score": 0.6, "polarity": "positive" }
+        }
       ],
-      "media": [],
-      "hashtags": ["#tech", "#innovation"],
-      "duplicate": false,
-      "paywall": false,
-      "breaking_news": true,
-      "sentences": 24,
-      "paragraphs": 8,
-      "words": 520,
-      "characters": 3100,
-      "reading_time": 2.5
+      "keywords": ["technology", "innovation", "product launch"],
+      "links": [{ "url": "https://example.com/related-article", "type": "link" }],
+      "media": [{ "url": "https://example.com/images/article.jpg", "type": "image" }],
+      "story": { "id": 9876, "uri": "https://api.apitube.io/v1/news/story/9876" },
+      "is_duplicate": false,
+      "is_free": true,
+      "is_breaking": true,
+      "read_time": 2,
+      "sentences_count": 24,
+      "paragraphs_count": 8,
+      "words_count": 520,
+      "characters_count": 3100
     }
   ]
 }
@@ -234,8 +307,8 @@ data = response.json()
 
 for article in data["results"]:
     print(f"- {article['title']}")
-    print(f"  Source: {article['source']['name']}")
-    print(f"  URL: {article['url']}")
+    print(f"  Source: {article['source']['domain']}")
+    print(f"  URL: {article['href']}")
     print()
 ```
 
@@ -291,7 +364,7 @@ print(f"Found {len(data['results'])} articles about AI in the last 7 days\n")
 for i, article in enumerate(data["results"], 1):
     print(f"{i}. {article['title']}")
     print(f"   {article['description'][:120]}...")
-    print(f"   {article['url']}\n")
+    print(f"   {article['href']}\n")
 ```
 
 ### Pagination
@@ -403,8 +476,8 @@ async function getLatestNews() {
 
   data.results.forEach((article) => {
     console.log(`- ${article.title}`);
-    console.log(`  Source: ${article.source.name}`);
-    console.log(`  URL: ${article.url}\n`);
+    console.log(`  Source: ${article.source.domain}`);
+    console.log(`  URL: ${article.href}\n`);
   });
 }
 
@@ -468,7 +541,7 @@ async function searchNews(query, days = 7) {
   data.results.forEach((article, i) => {
     console.log(`${i + 1}. ${article.title}`);
     console.log(`   ${article.description?.slice(0, 120)}...`);
-    console.log(`   ${article.url}\n`);
+    console.log(`   ${article.href}\n`);
   });
 }
 
@@ -580,12 +653,12 @@ $query = http_build_query([
 $response = file_get_contents("{$baseUrl}?{$query}");
 $data     = json_decode($response, true);
 
-echo "Total results: {$len(data['results'])}\n\n";
+echo "Total results: " . count($data["results"]) . "\n\n";
 
 foreach ($data["results"] as $article) {
     echo "- {$article['title']}\n";
-    echo "  Source: {$article['source']['name']}\n";
-    echo "  URL: {$article['url']}\n\n";
+    echo "  Source: {$article['source']['domain']}\n";
+    echo "  URL: {$article['href']}\n\n";
 }
 ```
 
@@ -646,7 +719,7 @@ foreach ($data["results"] as $i => $article) {
     $desc = mb_substr($article["description"], 0, 120);
     echo "{$num}. {$article['title']}\n";
     echo "   {$desc}...\n";
-    echo "   {$article['url']}\n\n";
+    echo "   {$article['href']}\n\n";
 }
 ```
 

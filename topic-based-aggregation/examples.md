@@ -71,7 +71,7 @@ def build_digest(topics, articles_per_topic=5, days=1):
             "per_page": articles_per_topic,
         })
         response.raise_for_status()
-        digest[topic] = response.json().get("articles", [])
+        digest[topic] = response.json().get("results", [])
 
     return digest
 
@@ -85,7 +85,7 @@ for topic, articles in digest.items():
     print(f"\n## {topic.replace('_', ' ').title()} ({len(articles)} articles)\n")
     for article in articles:
         print(f"  • {article['title']}")
-        print(f"    {article['source']['name']} — {article['url']}")
+        print(f"    {article['source']['domain']} — {article['href']}")
     print()
 ```
 
@@ -220,7 +220,7 @@ response = requests.get(BASE_URL, params={
 })
 response.raise_for_status()
 
-articles = response.json().get("articles", [])
+articles = response.json().get("results", [])
 stop_words = {"the", "a", "an", "is", "are", "was", "were", "in", "on", "at",
               "to", "for", "of", "and", "or", "with", "by", "from", "as", "it",
               "its", "that", "this", "has", "have", "how", "new", "will", "can"}
@@ -311,7 +311,7 @@ async function buildDigest(topics, articlesPerTopic = 5, days = 1) {
 
     const response = await fetch(`${BASE_URL}?${params}`);
     const data = await response.json();
-    digest[topic] = data.articles || [];
+    digest[topic] = data.results || [];
   }
 
   return digest;
@@ -328,7 +328,7 @@ for (const [topic, articles] of Object.entries(digest)) {
   console.log(`\n## ${name} (${articles.length} articles)\n`);
   articles.forEach((a) => {
     console.log(`  • ${a.title}`);
-    console.log(`    ${a.source.name} — ${a.url}`);
+    console.log(`    ${a.source.domain} — ${a.href}`);
   });
   console.log();
 }
@@ -478,7 +478,7 @@ function buildDigest(array $topics, int $articlesPerTopic = 5, int $days = 1): a
         ]);
 
         $data = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
-        $digest[$topic] = $data["articles"] ?? [];
+        $digest[$topic] = $data["results"] ?? [];
     }
 
     return $digest;
@@ -495,7 +495,7 @@ foreach ($digest as $topic => $articles) {
     echo "\n## {$name} (" . count($articles) . " articles)\n\n";
     foreach ($articles as $article) {
         echo "  • {$article['title']}\n";
-        echo "    {$article['source']['name']} — {$article['url']}\n";
+        echo "    {$article['source']['domain']} — {$article['href']}\n";
     }
     echo "\n";
 }

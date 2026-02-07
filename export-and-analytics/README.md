@@ -62,14 +62,14 @@ response = requests.get(BASE_URL, params={
     "per_page": 50,
 })
 
-articles = response.json().get("articles", [])
+articles = response.json().get("results", [])
 
 with open("news.csv", "w", newline="") as f:
     writer = csv.writer(f)
     writer.writerow(["title", "source", "url", "published_at", "sentiment"])
     for a in articles:
         writer.writerow([
-            a["title"], a["source"]["name"], a["url"],
+            a["title"], a["source"]["domain"], a["href"],
             a["published_at"], a["sentiment"]["overall"]["polarity"],
         ])
 
@@ -94,8 +94,8 @@ const params = new URLSearchParams({
 const response = await fetch(`${BASE_URL}?${params}`);
 const data = await response.json();
 
-writeFileSync("news.json", JSON.stringify(data.articles, null, 2));
-console.log(`Exported ${data.articles.length} articles to news.json`);
+writeFileSync("news.json", JSON.stringify(data.results, null, 2));
+console.log(`Exported ${data.results.length} articles to news.json`);
 ```
 
 ### PHP
@@ -112,13 +112,13 @@ $query = http_build_query([
 ]);
 
 $data     = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
-$articles = $data["articles"] ?? [];
+$articles = $data["results"] ?? [];
 
 $fp = fopen("news.csv", "w");
 fputcsv($fp, ["title", "source", "url", "published_at", "sentiment"]);
 foreach ($articles as $a) {
     fputcsv($fp, [
-        $a["title"], $a["source"]["name"], $a["url"],
+        $a["title"], $a["source"]["domain"], $a["href"],
         $a["published_at"], $a["sentiment"]["overall"]["polarity"],
     ]);
 }

@@ -56,7 +56,7 @@ response = requests.get("https://api.apitube.io/v1/news/everything", params={
 })
 
 data = response.json()
-for article in data["articles"]:
+for article in data["results"]:
     print(f"[{article['sentiment']['overall']['polarity']}] {article['title']}")
 ```
 
@@ -76,7 +76,7 @@ const response = await fetch(
 );
 const data = await response.json();
 
-data.articles.forEach((article) => {
+data.results.forEach((article) => {
   console.log(`[${article.sentiment.overall.polarity}] ${article.title}`);
 });
 ```
@@ -96,7 +96,7 @@ $response = json_decode(file_get_contents(
     "https://api.apitube.io/v1/news/everything?{$query}"
 ), true);
 
-foreach ($response["articles"] as $article) {
+foreach ($response["results"] as $article) {
     $polarity = $article["sentiment"]["overall"]["polarity"];
     echo "[{$polarity}] {$article['title']}\n";
 }

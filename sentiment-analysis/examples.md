@@ -32,7 +32,7 @@ def get_news_by_sentiment(polarity, topic=None, language="en", per_page=20):
 data = get_news_by_sentiment("positive", topic="technology")
 print(f"Found {data['total_results']} positive tech articles\n")
 
-for article in data["articles"]:
+for article in data["results"]:
     score = article["sentiment"]["overall"]["score"]
     print(f"  [{score:+.2f}] {article['title']}")
 ```
@@ -58,11 +58,11 @@ response.raise_for_status()
 data = response.json()
 print("Crypto news sorted by sentiment (most positive first):\n")
 
-for article in data["articles"]:
+for article in data["results"]:
     score = article["sentiment"]["overall"]["score"]
     polarity = article["sentiment"]["overall"]["polarity"]
     print(f"  [{polarity:>8} {score:+.2f}] {article['title']}")
-    print(f"    Source: {article['source']['name']}")
+    print(f"    Source: {article['source']['domain']}")
     print()
 ```
 
@@ -199,7 +199,7 @@ while True:
                 "per_page": 5,
             })
             response.raise_for_status()
-            for article in response.json()["articles"]:
+            for article in response.json()["results"]:
                 print(f"    -> {article['title']}")
 
     print()
@@ -234,7 +234,7 @@ async function getNewsBySentiment(polarity, options = {}) {
 const data = await getNewsBySentiment("positive", { topic: "technology" });
 console.log(`Found ${data.total_results} positive tech articles\n`);
 
-data.articles.forEach((article) => {
+data.results.forEach((article) => {
   const score = article.sentiment.overall.score;
   console.log(`  [${score > 0 ? "+" : ""}${score.toFixed(2)}] ${article.title}`);
 });
@@ -261,11 +261,11 @@ async function getCryptoNewsBySentiment() {
 
   console.log("Crypto news sorted by sentiment (most positive first):\n");
 
-  data.articles.forEach((article) => {
+  data.results.forEach((article) => {
     const { polarity, score } = article.sentiment.overall;
     const sign = score > 0 ? "+" : "";
     console.log(`  [${polarity.padStart(8)} ${sign}${score.toFixed(2)}] ${article.title}`);
-    console.log(`    Source: ${article.source.name}\n`);
+    console.log(`    Source: ${article.source.domain}\n`);
   });
 }
 
@@ -405,7 +405,7 @@ function getNewsBySentiment(string $polarity, ?string $topic = null, string $lan
 $data = getNewsBySentiment("positive", "technology");
 echo "Found {$data['total_results']} positive tech articles\n\n";
 
-foreach ($data["articles"] as $article) {
+foreach ($data["results"] as $article) {
     $score = $article["sentiment"]["overall"]["score"];
     printf("  [%+.2f] %s\n", $score, $article["title"]);
 }
@@ -432,11 +432,11 @@ $response = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
 
 echo "Crypto news sorted by sentiment (most positive first):\n\n";
 
-foreach ($response["articles"] as $article) {
+foreach ($response["results"] as $article) {
     $score    = $article["sentiment"]["overall"]["score"];
     $polarity = $article["sentiment"]["overall"]["polarity"];
     printf("  [%8s %+.2f] %s\n", $polarity, $score, $article["title"]);
-    echo "    Source: {$article['source']['name']}\n\n";
+    echo "    Source: {$article['source']['domain']}\n\n";
 }
 ```
 

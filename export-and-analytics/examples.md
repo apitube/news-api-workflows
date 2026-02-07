@@ -27,7 +27,7 @@ def export_to_csv(filename, params, max_articles=500):
             "page": page,
         })
         response.raise_for_status()
-        articles = response.json().get("articles", [])
+        articles = response.json().get("results", [])
 
         if not articles:
             break
@@ -49,9 +49,9 @@ def export_to_csv(filename, params, max_articles=500):
             writer.writerow([
                 a.get("title", ""),
                 a.get("description", ""),
-                a.get("url", ""),
-                a.get("source", {}).get("name", ""),
-                a.get("source", {}).get("url", ""),
+                a.get("href", ""),
+                a.get("source", {}).get("domain", ""),
+                a.get("source", {}).get("home_page_url", ""),
                 a.get("author", ""),
                 a.get("language", ""),
                 a.get("published_at", ""),
@@ -92,7 +92,7 @@ def export_to_jsonl(filename, params, max_articles=1000):
                 "page": page,
             })
             response.raise_for_status()
-            articles = response.json().get("articles", [])
+            articles = response.json().get("results", [])
 
             if not articles:
                 break
@@ -159,7 +159,7 @@ with open(filename, "w", newline="", encoding="utf-8") as f:
                 "page": page,
             })
             response.raise_for_status()
-            articles = response.json().get("articles", [])
+            articles = response.json().get("results", [])
 
             if not articles:
                 break
@@ -170,8 +170,8 @@ with open(filename, "w", newline="", encoding="utf-8") as f:
                 writer.writerow([
                     topic,
                     a.get("title", ""),
-                    a.get("url", ""),
-                    a.get("source", {}).get("name", ""),
+                    a.get("href", ""),
+                    a.get("source", {}).get("domain", ""),
                     a.get("published_at", ""),
                     a.get("sentiment", {}).get("overall", {}).get("polarity", ""),
                     a.get("sentiment", {}).get("overall", {}).get("score", ""),
@@ -219,7 +219,7 @@ while len(all_articles) < 200:
         "page": page,
     })
     response.raise_for_status()
-    articles = response.json().get("articles", [])
+    articles = response.json().get("results", [])
 
     if not articles:
         break
@@ -242,7 +242,7 @@ for polarity, count in sentiments.most_common():
     print(f"  {polarity:<10} {count:>5} ({pct:5.1f}%) {bar}")
 
 # Top sources
-sources = Counter(a["source"]["name"] for a in all_articles)
+sources = Counter(a["source"]["domain"] for a in all_articles)
 print("\nTop 10 Sources:")
 for source, count in sources.most_common(10):
     print(f"  {source:<30} {count:>5}")
@@ -306,7 +306,7 @@ while True:
         "page": page,
     })
     response.raise_for_status()
-    articles = response.json().get("articles", [])
+    articles = response.json().get("results", [])
 
     if not articles:
         break
@@ -357,7 +357,7 @@ async function exportToCsv(filename, filterParams, maxArticles = 500) {
 
     const response = await fetch(`${BASE_URL}?${params}`);
     const data = await response.json();
-    const articles = data.articles || [];
+    const articles = data.results || [];
 
     if (articles.length === 0) break;
 
@@ -379,9 +379,9 @@ async function exportToCsv(filename, filterParams, maxArticles = 500) {
     return [
       escape(a.title),
       escape(a.description),
-      escape(a.url),
-      escape(a.source?.name),
-      escape(a.source?.url),
+      escape(a.href),
+      escape(a.source?.domain),
+      escape(a.source?.home_page_url),
       escape(a.author),
       escape(a.language),
       escape(a.published_at),
@@ -425,7 +425,7 @@ async function exportToJsonl(filename, filterParams, maxArticles = 1000) {
 
     const response = await fetch(`${BASE_URL}?${params}`);
     const data = await response.json();
-    const articles = data.articles || [];
+    const articles = data.results || [];
 
     if (articles.length === 0) break;
 
@@ -481,7 +481,7 @@ async function generateReport(topic, days = 7) {
 
     const response = await fetch(`${BASE_URL}?${params}`);
     const data = await response.json();
-    const articles = data.articles || [];
+    const articles = data.results || [];
 
     if (articles.length === 0) break;
     allArticles.push(...articles);
@@ -513,7 +513,7 @@ async function generateReport(topic, days = 7) {
   // Top sources
   const sources = {};
   allArticles.forEach((a) => {
-    const name = a.source?.name || "Unknown";
+    const name = a.source?.domain || "Unknown";
     sources[name] = (sources[name] || 0) + 1;
   });
 
@@ -582,7 +582,7 @@ function exportToCsv(string $filename, array $filterParams, int $maxArticles = 5
         ]));
 
         $data     = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
-        $articles = $data["articles"] ?? [];
+        $articles = $data["results"] ?? [];
 
         if (empty($articles)) {
             break;
@@ -606,9 +606,9 @@ function exportToCsv(string $filename, array $filterParams, int $maxArticles = 5
         fputcsv($fp, [
             $a["title"] ?? "",
             $a["description"] ?? "",
-            $a["url"] ?? "",
-            $a["source"]["name"] ?? "",
-            $a["source"]["url"] ?? "",
+            $a["href"] ?? "",
+            $a["source"]["domain"] ?? "",
+            $a["source"]["home_page_url"] ?? "",
             $a["author"] ?? "",
             $a["language"] ?? "",
             $a["published_at"] ?? "",
@@ -656,7 +656,7 @@ function exportToJsonl(string $filename, array $filterParams, int $maxArticles =
         ]));
 
         $data     = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
-        $articles = $data["articles"] ?? [];
+        $articles = $data["results"] ?? [];
 
         if (empty($articles)) {
             break;
@@ -719,7 +719,7 @@ while (count($allArticles) < 200) {
     ]);
 
     $data     = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
-    $articles = $data["articles"] ?? [];
+    $articles = $data["results"] ?? [];
 
     if (empty($articles)) {
         break;
@@ -754,7 +754,7 @@ foreach ($sentiments as $polarity => $c) {
 // Top sources
 $sources = [];
 foreach ($allArticles as $a) {
-    $name = $a["source"]["name"] ?? "Unknown";
+    $name = $a["source"]["domain"] ?? "Unknown";
     $sources[$name] = ($sources[$name] ?? 0) + 1;
 }
 arsort($sources);

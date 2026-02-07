@@ -73,7 +73,7 @@ response = requests.get("https://api.apitube.io/v1/news/everything", params={
 })
 
 data = response.json()
-for article in data["articles"]:
+for article in data["results"]:
     print(f"[{article['published_at'][:10]}] {article['title']}")
 ```
 
@@ -94,7 +94,7 @@ const response = await fetch(
 );
 const data = await response.json();
 
-data.articles.forEach((a) => {
+data.results.forEach((a) => {
   console.log(`[${a.published_at.slice(0, 10)}] ${a.title}`);
 });
 ```
@@ -115,7 +115,7 @@ $data = json_decode(file_get_contents(
     "https://api.apitube.io/v1/news/everything?{$query}"
 ), true);
 
-foreach ($data["articles"] as $article) {
+foreach ($data["results"] as $article) {
     $date = substr($article["published_at"], 0, 10);
     echo "[{$date}] {$article['title']}\n";
 }
