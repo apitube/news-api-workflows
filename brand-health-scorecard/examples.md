@@ -44,14 +44,13 @@ class BrandHealthAnalyzer:
 
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": self.brand,
-            "entity.type": "organization",
+            "organization.name": self.brand,
             "published_at.start": start,
-            "language": "en",
+            "language.code": "en",
             "per_page": 1,
         })
 
-        total = resp.json().get("total_results", 0)
+        total = len(resp.json().get("results", []))
 
         self.metrics["volume"] = {
             "total": total,
@@ -71,14 +70,13 @@ class BrandHealthAnalyzer:
         for polarity in ["positive", "negative", "neutral"]:
             resp = requests.get(BASE_URL, params={
                 "api_key": API_KEY,
-                "entity.name": self.brand,
-                "entity.type": "organization",
+                "organization.name": self.brand,
                 "sentiment.overall.polarity": polarity,
                 "published_at.start": start,
-                "language": "en",
+                "language.code": "en",
                 "per_page": 1,
             })
-            sentiments[polarity] = resp.json().get("total_results", 0)
+            sentiments[polarity] = len(resp.json().get("results", []))
 
         total = sum(sentiments.values()) or 1
         net_sentiment = (sentiments["positive"] - sentiments["negative"]) / total
@@ -100,32 +98,32 @@ class BrandHealthAnalyzer:
         # Tier 1
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": self.brand,
+            "organization.name": self.brand,
             "source.domain": self.TIER_1_SOURCES,
             "published_at.start": start,
             "per_page": 1,
         })
-        tier1 = resp.json().get("total_results", 0)
+        tier1 = len(resp.json().get("results", []))
 
         # Tier 2
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": self.brand,
+            "organization.name": self.brand,
             "source.domain": self.TIER_2_SOURCES,
             "published_at.start": start,
             "per_page": 1,
         })
-        tier2 = resp.json().get("total_results", 0)
+        tier2 = len(resp.json().get("results", []))
 
-        # High authority (OPR >= 0.7)
+        # High authority (OPR >= 5)
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": self.brand,
-            "source.rank.opr.min": 0.7,
+            "organization.name": self.brand,
+            "source.rank.opr.min": 5,
             "published_at.start": start,
             "per_page": 1,
         })
-        high_authority = resp.json().get("total_results", 0)
+        high_authority = len(resp.json().get("results", []))
 
         total = self.metrics.get("volume", {}).get("total", 1) or 1
 
@@ -155,25 +153,23 @@ class BrandHealthAnalyzer:
         # Current week
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": self.brand,
-            "entity.type": "organization",
+            "organization.name": self.brand,
             "published_at.start": current_week_start,
-            "language": "en",
+            "language.code": "en",
             "per_page": 1,
         })
-        current_week = resp.json().get("total_results", 0)
+        current_week = len(resp.json().get("results", []))
 
         # Previous week
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": self.brand,
-            "entity.type": "organization",
+            "organization.name": self.brand,
             "published_at.start": previous_week_start,
             "published_at.end": previous_week_end,
-            "language": "en",
+            "language.code": "en",
             "per_page": 1,
         })
-        previous_week = resp.json().get("total_results", 0)
+        previous_week = len(resp.json().get("results", []))
 
         if previous_week > 0:
             growth_rate = (current_week - previous_week) / previous_week
@@ -199,13 +195,12 @@ class BrandHealthAnalyzer:
         for brand in all_brands:
             resp = requests.get(BASE_URL, params={
                 "api_key": API_KEY,
-                "entity.name": brand,
-                "entity.type": "organization",
+                "organization.name": brand,
                 "published_at.start": start,
-                "language": "en",
+                "language.code": "en",
                 "per_page": 1,
             })
-            volumes[brand] = resp.json().get("total_results", 0)
+            volumes[brand] = len(resp.json().get("results", []))
 
         total = sum(volumes.values()) or 1
         share = volumes[self.brand] / total
@@ -355,37 +350,35 @@ def fetch_brand_metrics(brand, days=30):
     # Total coverage
     resp = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "entity.name": brand,
-        "entity.type": "organization",
+        "organization.name": brand,
         "published_at.start": start,
-        "language": "en",
+        "language.code": "en",
         "per_page": 1,
     })
-    total = resp.json().get("total_results", 0)
+    total = len(resp.json().get("results", []))
 
     # Sentiment
     sentiments = {}
     for polarity in ["positive", "negative", "neutral"]:
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": brand,
-            "entity.type": "organization",
+            "organization.name": brand,
             "sentiment.overall.polarity": polarity,
             "published_at.start": start,
-            "language": "en",
+            "language.code": "en",
             "per_page": 1,
         })
-        sentiments[polarity] = resp.json().get("total_results", 0)
+        sentiments[polarity] = len(resp.json().get("results", []))
 
     # Tier-1
     resp = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "entity.name": brand,
-        "source.rank.opr.min": 0.7,
+        "organization.name": brand,
+        "source.rank.opr.min": 5,
         "published_at.start": start,
         "per_page": 1,
     })
-    tier1 = resp.json().get("total_results", 0)
+    tier1 = len(resp.json().get("results", []))
 
     total_sentiment = sum(sentiments.values()) or 1
 
@@ -495,47 +488,45 @@ class BrandHealthDashboard {
     // Volume
     const volumeParams = new URLSearchParams({
       api_key: API_KEY,
-      "entity.name": brandName,
-      "entity.type": "organization",
+      "organization.name": brandName,
       "published_at.start": start,
-      language: "en",
+      "language.code": "en",
       per_page: "1",
     });
 
     let response = await fetch(`${BASE_URL}?${volumeParams}`);
     let data = await response.json();
-    const volume = data.total_results || 0;
+    const volume = data.results?.length || 0;
 
     // Sentiment
     const sentiment = {};
     for (const polarity of ["positive", "negative", "neutral"]) {
       const params = new URLSearchParams({
         api_key: API_KEY,
-        "entity.name": brandName,
-        "entity.type": "organization",
+        "organization.name": brandName,
         "sentiment.overall.polarity": polarity,
         "published_at.start": start,
-        language: "en",
+        "language.code": "en",
         per_page: "1",
       });
 
       response = await fetch(`${BASE_URL}?${params}`);
       data = await response.json();
-      sentiment[polarity] = data.total_results || 0;
+      sentiment[polarity] = data.results?.length || 0;
     }
 
     // Tier-1 reach
     const tier1Params = new URLSearchParams({
       api_key: API_KEY,
-      "entity.name": brandName,
-      "source.rank.opr.min": "0.7",
+      "organization.name": brandName,
+      "source.rank.opr.min": "5",
       "published_at.start": start,
       per_page: "1",
     });
 
     response = await fetch(`${BASE_URL}?${tier1Params}`);
     data = await response.json();
-    const tier1 = data.total_results || 0;
+    const tier1 = data.results?.length || 0;
 
     const totalSentiment = Object.values(sentiment).reduce((a, b) => a + b, 0) || 1;
 
@@ -634,41 +625,39 @@ function fetchBrandMetrics(string $brand, int $days = 30): array
     // Volume
     $query = http_build_query([
         "api_key"            => $apiKey,
-        "entity.name"        => $brand,
-        "entity.type"        => "organization",
+        "organization.name"  => $brand,
         "published_at.start" => $start,
-        "language"           => "en",
+        "language.code"      => "en",
         "per_page"           => 1,
     ]);
     $data = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
-    $volume = $data["total_results"] ?? 0;
+    $volume = count($data["results"] ?? []);
 
     // Sentiment
     $sentiment = [];
     foreach (["positive", "negative", "neutral"] as $polarity) {
         $query = http_build_query([
             "api_key"                    => $apiKey,
-            "entity.name"                => $brand,
-            "entity.type"                => "organization",
+            "organization.name"          => $brand,
             "sentiment.overall.polarity" => $polarity,
             "published_at.start"         => $start,
-            "language"                   => "en",
+            "language.code"              => "en",
             "per_page"                   => 1,
         ]);
         $data = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
-        $sentiment[$polarity] = $data["total_results"] ?? 0;
+        $sentiment[$polarity] = count($data["results"] ?? []);
     }
 
     // Tier-1
     $query = http_build_query([
         "api_key"             => $apiKey,
-        "entity.name"         => $brand,
-        "source.rank.opr.min" => 0.7,
+        "organization.name"   => $brand,
+        "source.rank.opr.min" => 5,
         "published_at.start"  => $start,
         "per_page"            => 1,
     ]);
     $data = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
-    $tier1 = $data["total_results"] ?? 0;
+    $tier1 = count($data["results"] ?? []);
 
     $totalSentiment = array_sum($sentiment) ?: 1;
 

@@ -395,7 +395,7 @@ class IntelligenceFusionSystem:
                 "api_key": API_KEY,
                 "title": query,
                 "published_at.start": start,
-                "language": "en",
+                "language.code": "en",
                 "sort.by": "published_at",
                 "sort.order": "desc",
                 "per_page": 50,

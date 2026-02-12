@@ -19,14 +19,17 @@ GET https://api.apitube.io/v1/news/trends
 |-------------------------------|---------|----------------------------------------------------------------------|
 | `api_key`                     | string  | **Required.** Your API key.                                          |
 | `title`                       | string  | Filter by narrative keywords.                                        |
-| `entity.name`                 | string  | Filter by entity involved in narrative.                             |
+| `organization.name`           | string  | Filter by organization involved in narrative.                       |
+| `person.name`                 | string  | Filter by person involved in narrative.                             |
+| `location.name`               | string  | Filter by location involved in narrative.                           |
+| `brand.name`                  | string  | Filter by brand involved in narrative.                              |
 | `sentiment.overall.polarity`  | string  | Filter by sentiment: `positive`, `negative`, `neutral`.             |
-| `source.rank.opr.min`         | number  | Minimum source authority (0.0–1.0).                                 |
+| `source.rank.opr.min`         | number  | Minimum source authority (0–7).                                     |
 | `source.domain`               | string  | Filter by specific domains.                                          |
 | `source.country`              | string  | Filter by source country.                                            |
 | `published_at.start`          | string  | Start date (ISO 8601 or `YYYY-MM-DD`).                             |
 | `published_at.end`            | string  | End date (ISO 8601 or `YYYY-MM-DD`).                               |
-| `language`                    | string  | Filter by language code.                                             |
+| `language.code`               | string  | Filter by language code.                                             |
 | `sort.by`                     | string  | Sort field: `published_at`.                                          |
 | `sort.order`                  | string  | Sort direction: `asc` or `desc`.                                    |
 | `per_page`                    | integer | Number of results per page.                                          |
@@ -37,13 +40,13 @@ GET https://api.apitube.io/v1/news/trends
 
 ```bash
 # Track narrative keywords over time
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&title=AI,job,replace,automate&language=en&per_page=30"
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&title=AI,job,replace,automate&language.code=en&per_page=30"
 
 # Monitor competing narratives
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&title=climate,crisis,emergency&source.rank.opr.min=0.7&language=en&per_page=30"
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&title=climate,crisis,emergency&source.rank.opr.min=5&language.code=en&per_page=30"
 
 # Detect narrative spread across sources
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&title=breakthrough,revolutionary&published_at.start=2024-01-01&language=en&per_page=50"
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&title=breakthrough,revolutionary&published_at.start=2024-01-01&language.code=en&per_page=50"
 ```
 
 ### Python
@@ -87,10 +90,10 @@ class NarrativeTracker:
                 "title": ",".join(narrative["keywords"]),
                 "published_at.start": date,
                 "published_at.end": next_date,
-                "language": "en",
-                "per_page": 1,
+                "language.code": "en",
+                "per_page": 100,
             })
-            main_count = resp.json().get("total_results", 0)
+            main_count = len(resp.json().get("results", []))
 
             # Counter narrative
             counter_count = 0
@@ -100,10 +103,10 @@ class NarrativeTracker:
                     "title": ",".join(narrative["counter_keywords"]),
                     "published_at.start": date,
                     "published_at.end": next_date,
-                    "language": "en",
-                    "per_page": 1,
+                    "language.code": "en",
+                    "per_page": 100,
                 })
-                counter_count = resp.json().get("total_results", 0)
+                counter_count = len(resp.json().get("results", []))
 
             # Sentiment
             pos_resp = requests.get(BASE_URL, params={
@@ -112,10 +115,10 @@ class NarrativeTracker:
                 "sentiment.overall.polarity": "positive",
                 "published_at.start": date,
                 "published_at.end": next_date,
-                "language": "en",
-                "per_page": 1,
+                "language.code": "en",
+                "per_page": 100,
             })
-            pos_count = pos_resp.json().get("total_results", 0)
+            pos_count = len(pos_resp.json().get("results", []))
 
             neg_resp = requests.get(BASE_URL, params={
                 "api_key": API_KEY,
@@ -123,10 +126,10 @@ class NarrativeTracker:
                 "sentiment.overall.polarity": "negative",
                 "published_at.start": date,
                 "published_at.end": next_date,
-                "language": "en",
-                "per_page": 1,
+                "language.code": "en",
+                "per_page": 100,
             })
-            neg_count = neg_resp.json().get("total_results", 0)
+            neg_count = len(neg_resp.json().get("results", []))
 
             narrative["timeline"].append({
                 "date": date,
@@ -203,10 +206,10 @@ class NarrativeTracker:
         start = (datetime.utcnow() - timedelta(days=days)).strftime("%Y-%m-%d")
 
         tiers = {
-            "tier1": {"min": 0.8, "count": 0},
-            "tier2": {"min": 0.6, "max": 0.8, "count": 0},
-            "tier3": {"min": 0.4, "max": 0.6, "count": 0},
-            "tier4": {"min": 0.0, "max": 0.4, "count": 0},
+            "tier1": {"min": 6, "count": 0},
+            "tier2": {"min": 4, "max": 6, "count": 0},
+            "tier3": {"min": 2, "max": 4, "count": 0},
+            "tier4": {"min": 0, "max": 2, "count": 0},
         }
 
         for tier_name, tier in tiers.items():
@@ -214,8 +217,8 @@ class NarrativeTracker:
                 "api_key": API_KEY,
                 "title": ",".join(narrative["keywords"]),
                 "published_at.start": start,
-                "language": "en",
-                "per_page": 1,
+                "language.code": "en",
+                "per_page": 100,
             }
 
             if "min" in tier:
@@ -224,7 +227,7 @@ class NarrativeTracker:
                 params["source.rank.opr.max"] = tier["max"]
 
             resp = requests.get(BASE_URL, params=params)
-            tier["count"] = resp.json().get("total_results", 0)
+            tier["count"] = len(resp.json().get("results", []))
 
         total = sum(t["count"] for t in tiers.values())
 
@@ -321,13 +324,13 @@ class NarrativeAnalyzer {
         title: keywords.join(","),
         "published_at.start": date,
         "published_at.end": nextDate,
-        language: "en",
-        per_page: "1",
+        "language.code": "en",
+        per_page: "100",
       });
 
       let response = await fetch(`${BASE_URL}?${mainParams}`);
       let data = await response.json();
-      const mainCount = data.total_results || 0;
+      const mainCount = (data.results || []).length;
 
       // Counter narrative
       let counterCount = 0;
@@ -337,13 +340,13 @@ class NarrativeAnalyzer {
           title: counterKeywords.join(","),
           "published_at.start": date,
           "published_at.end": nextDate,
-          language: "en",
-          per_page: "1",
+          "language.code": "en",
+          per_page: "100",
         });
 
         response = await fetch(`${BASE_URL}?${counterParams}`);
         data = await response.json();
-        counterCount = data.total_results || 0;
+        counterCount = (data.results || []).length;
       }
 
       timeline.push({ date, mainCount, counterCount });
@@ -501,11 +504,11 @@ class NarrativeTracker
                 "title" => implode(",", $keywords),
                 "published_at.start" => $date,
                 "published_at.end" => $nextDate,
-                "language" => "en",
-                "per_page" => 1,
+                "language.code" => "en",
+                "per_page" => 100,
             ]);
             $data = json_decode(file_get_contents("{$this->baseUrl}?{$query}"), true);
-            $mainCount = $data["total_results"] ?? 0;
+            $mainCount = count($data["results"] ?? []);
 
             // Counter
             $counterCount = 0;
@@ -515,11 +518,11 @@ class NarrativeTracker
                     "title" => implode(",", $counterKeywords),
                     "published_at.start" => $date,
                     "published_at.end" => $nextDate,
-                    "language" => "en",
-                    "per_page" => 1,
+                    "language.code" => "en",
+                    "per_page" => 100,
                 ]);
                 $data = json_decode(file_get_contents("{$this->baseUrl}?{$query}"), true);
-                $counterCount = $data["total_results"] ?? 0;
+                $counterCount = count($data["results"] ?? []);
             }
 
             $timeline[] = ["date" => $date, "main" => $mainCount, "counter" => $counterCount];

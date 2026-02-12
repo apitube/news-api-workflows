@@ -46,10 +46,10 @@ class AdvancedNetworkAnalyzer:
             while len(entity_articles) < max_per_entity:
                 resp = requests.get(BASE_URL, params={
                     "api_key": API_KEY,
-                    "entity.name": entity,
+                    "organization.name": entity,
                     "published_at.start": start,
-                    "source.rank.opr.min": 0.5,
-                    "language": "en",
+                    "source.rank.opr.min": 4,
+                    "language.code": "en",
                     "sort.by": "published_at",
                     "sort.order": "desc",
                     "per_page": 50,
@@ -561,10 +561,10 @@ class NetworkMonitor {
     for (const entity of entities) {
       const params = new URLSearchParams({
         api_key: API_KEY,
-        "entity.name": entity,
+        "organization.name": entity,
         "published_at.start": start,
-        "source.rank.opr.min": "0.5",
-        language: "en",
+        "source.rank.opr.min": "4",
+        "language.code": "en",
         "sort.by": "published_at",
         "sort.order": "desc",
         per_page: "50",
@@ -965,10 +965,10 @@ class EnterpriseNetworkAnalyzer
             while (count($entityArticles) < $maxPerEntity) {
                 $query = http_build_query([
                     "api_key" => $this->apiKey,
-                    "entity.name" => $entity,
+                    "organization.name" => $entity,
                     "published_at.start" => $start,
-                    "source.rank.opr.min" => 0.5,
-                    "language" => "en",
+                    "source.rank.opr.min" => 4,
+                    "language.code" => "en",
                     "per_page" => 50,
                     "page" => $page,
                 ]);

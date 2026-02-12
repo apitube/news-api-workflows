@@ -17,18 +17,20 @@ GET https://api.apitube.io/v1/news/everything
 | Parameter                      | Type    | Description                                                          |
 |-------------------------------|---------|----------------------------------------------------------------------|
 | `api_key`                     | string  | **Required.** Your API key.                                          |
-| `entity.name`                 | string  | Filter by entity name (company, person, product).                   |
-| `entity.type`                 | string  | Filter by entity type: `organization`, `person`, `location`.        |
+| `organization.name`           | string  | Filter by organization name (e.g., `Tesla`, `Google`).               |
+| `person.name`                 | string  | Filter by person name (e.g., `Elon Musk`).                           |
+| `brand.name`                  | string  | Filter by brand name (e.g., `Nike`, `Coca-Cola`).                    |
 | `title`                       | string  | Filter by keywords in article title (comma-separated).              |
 | `sentiment.overall.polarity`  | string  | Filter by sentiment: `positive`, `negative`, `neutral`.             |
-| `sentiment.overall.score`     | number  | Filter by numeric sentiment score.                                  |
+| `sentiment.overall.score.min` | float   | Minimum sentiment score (-1.0 to 1.0).                               |
+| `sentiment.overall.score.max` | float   | Maximum sentiment score (-1.0 to 1.0).                               |
 | `sort.by`                     | string  | Sort field: `published_at`, `sentiment.overall.score`.              |
 | `sort.order`                  | string  | Sort direction: `asc` or `desc`.                                    |
-| `topic.id`                    | string  | Filter by topic.                                                     |
+| `topic.id`                    | string  | Filter by topic ID.                                                  |
 | `source.domain`               | string  | Filter by source domain (comma-separated).                          |
 | `source.country.code`         | string  | Filter by source country.                                            |
-| `source.rank.opr.min`         | number  | Minimum source OPR rank (0.0–1.0).                                  |
-| `language`                    | string  | Filter by language code.                                             |
+| `source.rank.opr.min`         | integer | Minimum source OPR rank (0–7).                                       |
+| `language.code`               | string  | Filter by language code.                                             |
 | `published_at.start`          | string  | Start date (ISO 8601 or `YYYY-MM-DD`).                             |
 | `published_at.end`            | string  | End date (ISO 8601 or `YYYY-MM-DD`).                               |
 | `per_page`                    | integer | Number of results per page.                                          |
@@ -40,8 +42,8 @@ GET https://api.apitube.io/v1/news/everything
 
 ```bash
 # Compare coverage: Tesla vs Rivian
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&entity.name=Tesla&entity.type=organization&language=en&per_page=1" | jq '.total_results'
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&entity.name=Rivian&entity.type=organization&language=en&per_page=1" | jq '.total_results'
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&organization.name=Tesla&language.code=en&per_page=1" | jq '.results | length'
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&organization.name=Rivian&language.code=en&per_page=1" | jq '.results | length'
 ```
 
 ### Python
@@ -57,13 +59,12 @@ competitors = ["Tesla", "Rivian", "Lucid Motors"]
 for company in competitors:
     response = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "entity.name": company,
-        "entity.type": "organization",
-        "language": "en",
-        "per_page": 1,
+        "organization.name": company,
+        "language.code": "en",
+        "per_page": 100,
     })
-    total = response.json().get("total_results", 0)
-    print(f"{company}: {total} articles")
+    results = response.json().get("results", [])
+    print(f"{company}: {len(results)} articles (page 1)")
 ```
 
 ### JavaScript (Node.js)
@@ -77,15 +78,14 @@ const competitors = ["Tesla", "Rivian", "Lucid Motors"];
 for (const company of competitors) {
   const params = new URLSearchParams({
     api_key: API_KEY,
-    "entity.name": company,
-    "entity.type": "organization",
-    language: "en",
-    per_page: "1",
+    "organization.name": company,
+    "language.code": "en",
+    per_page: "100",
   });
 
   const response = await fetch(`${BASE_URL}?${params}`);
   const data = await response.json();
-  console.log(`${company}: ${data.total_results} articles`);
+  console.log(`${company}: ${data.results.length} articles (page 1)`);
 }
 ```
 
@@ -99,15 +99,14 @@ $competitors = ["Tesla", "Rivian", "Lucid Motors"];
 
 foreach ($competitors as $company) {
     $query = http_build_query([
-        "api_key"     => $apiKey,
-        "entity.name" => $company,
-        "entity.type" => "organization",
-        "language"    => "en",
-        "per_page"    => 1,
+        "api_key"           => $apiKey,
+        "organization.name" => $company,
+        "language.code"     => "en",
+        "per_page"          => 100,
     ]);
 
     $data = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
-    echo "{$company}: {$data['total_results']} articles\n";
+    echo "{$company}: " . count($data['results']) . " articles (page 1)\n";
 }
 ```
 

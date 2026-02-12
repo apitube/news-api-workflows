@@ -453,10 +453,10 @@ class EventCascadeSystem:
 
             resp = requests.get(BASE_URL, params={
                 "api_key": API_KEY,
-                "entity.name": entity,
+                "organization.name": entity,
                 "published_at.start": start,
-                "source.rank.opr.min": 0.5,
-                "language": "en",
+                "source.rank.opr.min": 4,
+                "language.code": "en",
                 "per_page": 100,
             })
 

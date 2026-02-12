@@ -19,18 +19,19 @@ GET https://api.apitube.io/v1/news/entity
 | Parameter                      | Type    | Description                                                          |
 |-------------------------------|---------|----------------------------------------------------------------------|
 | `api_key`                     | string  | **Required.** Your API key.                                          |
-| `entity.name`                 | string  | Filter by country, region, or political figure.                     |
-| `entity.type`                 | string  | Filter by type: `location`, `person`, `organization`.               |
+| `location.name`               | string  | Filter by country or region.                                        |
+| `person.name`                 | string  | Filter by political figure.                                         |
+| `organization.name`           | string  | Filter by organization.                                             |
 | `topic.id`                    | string  | Filter by topic (e.g., `war`, `sanctions`, `trade`).               |
 | `category.id`                 | string  | Filter by IPTC category (e.g., `medtop:11000000` for politics).    |
 | `source.country.code`         | string  | Filter by source country (ISO 3166-1).                              |
 | `sentiment.overall.polarity`  | string  | Filter by sentiment: `positive`, `negative`, `neutral`.             |
 | `title`                       | string  | Filter by keywords (sanctions, conflict, military, etc.).           |
-| `language`                    | string  | Filter by language code (comma-separated for multi-lang).           |
+| `language.code`               | string  | Filter by language code (comma-separated for multi-lang).           |
 | `published_at.start`          | string  | Start date (ISO 8601 or `YYYY-MM-DD`).                             |
 | `published_at.end`            | string  | End date (ISO 8601 or `YYYY-MM-DD`).                               |
-| `is_breaking`                 | boolean | Filter for breaking news.                                            |
-| `source.rank.opr.min`         | number  | Minimum source authority (0.0–1.0).                                 |
+| `is_breaking`                 | integer | Filter for breaking news (1 or 0).                                   |
+| `source.rank.opr.min`         | number  | Minimum source authority (0–7).                                     |
 | `sort.by`                     | string  | Sort field: `published_at`, `sentiment.overall.score`.              |
 | `sort.order`                  | string  | Sort direction: `asc` or `desc`.                                    |
 | `per_page`                    | integer | Number of results per page.                                          |
@@ -41,13 +42,13 @@ GET https://api.apitube.io/v1/news/entity
 
 ```bash
 # Monitor conflict-related news for a region
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&entity.name=Ukraine&entity.type=location&title=war,conflict,military,missile&language=en&per_page=20"
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&location.name=Ukraine&title=war,conflict,military,missile&language.code=en&per_page=20"
 
 # Track sanctions news
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&title=sanctions,embargo,tariff&source.rank.opr.min=0.6&language=en&per_page=20"
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&title=sanctions,embargo,tariff&source.rank.opr.min=4&language.code=en&per_page=20"
 
 # Monitor political instability across multiple countries
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&entity.name=Russia,China,Iran,North Korea&entity.type=location&category.id=medtop:11000000&per_page=30"
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&location.name=Russia,China,Iran,North Korea&category.id=medtop:11000000&per_page=30"
 ```
 
 ### Python
@@ -87,47 +88,44 @@ def assess_regional_risk(region_name, countries, hours=24):
         # Total coverage
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": country,
-            "entity.type": "location",
+            "location.name": country,
             "published_at.start": start,
-            "language": "en",
+            "language.code": "en",
             "per_page": 1,
         })
-        risk_metrics["total_coverage"] += resp.json().get("total_results", 0)
+        risk_metrics["total_coverage"] += len(resp.json().get("results", []))
 
         # Negative coverage
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": country,
-            "entity.type": "location",
+            "location.name": country,
             "sentiment.overall.polarity": "negative",
             "published_at.start": start,
-            "language": "en",
+            "language.code": "en",
             "per_page": 1,
         })
-        risk_metrics["negative_coverage"] += resp.json().get("total_results", 0)
+        risk_metrics["negative_coverage"] += len(resp.json().get("results", []))
 
         # Conflict-related mentions
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": country,
+            "location.name": country,
             "title": ",".join(RISK_KEYWORDS),
             "published_at.start": start,
-            "language": "en",
+            "language.code": "en",
             "per_page": 1,
         })
-        risk_metrics["conflict_mentions"] += resp.json().get("total_results", 0)
+        risk_metrics["conflict_mentions"] += len(resp.json().get("results", []))
 
         # Breaking news
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": country,
-            "entity.type": "location",
-            "is_breaking": "true",
+            "location.name": country,
+            "is_breaking": 1,
             "published_at.start": start,
             "per_page": 1,
         })
-        risk_metrics["breaking_news"] += resp.json().get("total_results", 0)
+        risk_metrics["breaking_news"] += len(resp.json().get("results", []))
 
     # Calculate risk score
     total = risk_metrics["total_coverage"] or 1
@@ -195,32 +193,30 @@ async function monitorCountryRisk(country, hours = 24) {
   const requests = [
     fetch(`${BASE_URL}?${new URLSearchParams({
       api_key: API_KEY,
-      "entity.name": country,
-      "entity.type": "location",
+      "location.name": country,
       "published_at.start": start,
-      language: "en",
+      "language.code": "en",
       per_page: "1",
     })}`),
     fetch(`${BASE_URL}?${new URLSearchParams({
       api_key: API_KEY,
-      "entity.name": country,
-      "entity.type": "location",
+      "location.name": country,
       "sentiment.overall.polarity": "negative",
       "published_at.start": start,
-      language: "en",
+      "language.code": "en",
       per_page: "1",
     })}`),
     fetch(`${BASE_URL}?${new URLSearchParams({
       api_key: API_KEY,
-      "entity.name": country,
+      "location.name": country,
       title: RISK_KEYWORDS.join(","),
       "published_at.start": start,
       per_page: "1",
     })}`),
     fetch(`${BASE_URL}?${new URLSearchParams({
       api_key: API_KEY,
-      "entity.name": country,
-      is_breaking: "true",
+      "location.name": country,
+      is_breaking: "1",
       "published_at.start": start,
       per_page: "1",
     })}`),
@@ -229,10 +225,10 @@ async function monitorCountryRisk(country, hours = 24) {
   const responses = await Promise.all(requests);
   const data = await Promise.all(responses.map(r => r.json()));
 
-  metrics.totalCoverage = data[0].total_results || 0;
-  metrics.negativeCoverage = data[1].total_results || 0;
-  metrics.conflictMentions = data[2].total_results || 0;
-  metrics.breakingNews = data[3].total_results || 0;
+  metrics.totalCoverage = (data[0].results || []).length;
+  metrics.negativeCoverage = (data[1].results || []).length;
+  metrics.conflictMentions = (data[2].results || []).length;
+  metrics.breakingNews = (data[3].results || []).length;
 
   const total = metrics.totalCoverage || 1;
   const riskScore = Math.min(100,
@@ -299,49 +295,47 @@ function assessCountryRisk(string $country, int $hours = 24): array
     // Total coverage
     $query = http_build_query([
         "api_key"            => $apiKey,
-        "entity.name"        => $country,
-        "entity.type"        => "location",
+        "location.name"      => $country,
         "published_at.start" => $start,
-        "language"           => "en",
+        "language.code"      => "en",
         "per_page"           => 1,
     ]);
     $data = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
-    $metrics["total"] = $data["total_results"] ?? 0;
+    $metrics["total"] = count($data["results"] ?? []);
 
     // Negative coverage
     $query = http_build_query([
         "api_key"                    => $apiKey,
-        "entity.name"                => $country,
-        "entity.type"                => "location",
+        "location.name"              => $country,
         "sentiment.overall.polarity" => "negative",
         "published_at.start"         => $start,
-        "language"                   => "en",
+        "language.code"              => "en",
         "per_page"                   => 1,
     ]);
     $data = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
-    $metrics["negative"] = $data["total_results"] ?? 0;
+    $metrics["negative"] = count($data["results"] ?? []);
 
     // Conflict keywords
     $query = http_build_query([
         "api_key"            => $apiKey,
-        "entity.name"        => $country,
+        "location.name"      => $country,
         "title"              => implode(",", $riskKeywords),
         "published_at.start" => $start,
         "per_page"           => 1,
     ]);
     $data = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
-    $metrics["conflict"] = $data["total_results"] ?? 0;
+    $metrics["conflict"] = count($data["results"] ?? []);
 
     // Breaking news
     $query = http_build_query([
         "api_key"            => $apiKey,
-        "entity.name"        => $country,
-        "is_breaking"        => "true",
+        "location.name"      => $country,
+        "is_breaking"        => 1,
         "published_at.start" => $start,
         "per_page"           => 1,
     ]);
     $data = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
-    $metrics["breaking"] = $data["total_results"] ?? 0;
+    $metrics["breaking"] = count($data["results"] ?? []);
 
     $total = $metrics["total"] ?: 1;
     $riskScore = min(100,

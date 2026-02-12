@@ -165,19 +165,19 @@ Reference: [Response Structure](https://docs.apitube.io/platform/news-api/respon
   "status": "ok",
   "limit": 1,
   "page": 1,
-  "path": "https://api.apitube.io/v1/news/everything?language=en&per_page=1",
+  "path": "https://api.apitube.io/v1/news/everything?language.code=en&per_page=1",
   "has_next_pages": true,
-  "next_page": "https://api.apitube.io/v1/news/everything?language=en&per_page=1&page=2",
+  "next_page": "https://api.apitube.io/v1/news/everything?language.code=en&per_page=1&page=2",
   "has_previous_page": false,
   "previous_page": "",
   "request_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
   "export": {
-    "json": "https://api.apitube.io/v1/news/everything?language=en&per_page=1&export=json",
-    "xlsx": "https://api.apitube.io/v1/news/everything?language=en&per_page=1&export=xlsx",
-    "csv": "https://api.apitube.io/v1/news/everything?language=en&per_page=1&export=csv",
-    "tsv": "https://api.apitube.io/v1/news/everything?language=en&per_page=1&export=tsv",
-    "xml": "https://api.apitube.io/v1/news/everything?language=en&per_page=1&export=xml",
-    "rss": "https://api.apitube.io/v1/news/everything?language=en&per_page=1&export=rss"
+    "json": "https://api.apitube.io/v1/news/everything?language.code=en&per_page=1&export=json",
+    "xlsx": "https://api.apitube.io/v1/news/everything?language.code=en&per_page=1&export=xlsx",
+    "csv": "https://api.apitube.io/v1/news/everything?language.code=en&per_page=1&export=csv",
+    "tsv": "https://api.apitube.io/v1/news/everything?language.code=en&per_page=1&export=tsv",
+    "xml": "https://api.apitube.io/v1/news/everything?language.code=en&per_page=1&export=xml",
+    "rss": "https://api.apitube.io/v1/news/everything?language.code=en&per_page=1&export=rss"
   },
   "results": [
     {
@@ -298,7 +298,7 @@ BASE_URL = "https://api.apitube.io/v1/news/everything"
 
 response = requests.get(BASE_URL, params={
     "api_key": API_KEY,
-    "language": "en",
+    "language.code": "en",
     "limit": 10,
 })
 response.raise_for_status()
@@ -324,7 +324,7 @@ response = requests.get(BASE_URL, params={
     "api_key": API_KEY,
     "category": "technology",
     "country": "us",
-    "language": "en",
+    "language.code": "en",
     "limit": 20,
     "sort_by": "published_at",
 })
@@ -350,7 +350,7 @@ week_ago = today - timedelta(days=7)
 response = requests.get(BASE_URL, params={
     "api_key": API_KEY,
     "query": "artificial intelligence",
-    "language": "en",
+    "language.code": "en",
     "from": week_ago.strftime("%Y-%m-%dT%H:%M:%SZ"),
     "to": today.strftime("%Y-%m-%dT%H:%M:%SZ"),
     "sort_by": "relevance",
@@ -382,7 +382,7 @@ all_articles = []
 while True:
     response = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "language": "en",
+        "language.code": "en",
         "limit": limit,
         "page": page,
     })
@@ -443,7 +443,7 @@ def fetch_news(params, retries=MAX_RETRIES):
     raise Exception("Failed to fetch news after multiple retries")
 
 
-data = fetch_news({"language": "en", "limit": 10})
+data = fetch_news({"language.code": "en", "limit": 10})
 for article in data["results"]:
     print(article["title"])
 ```
@@ -461,7 +461,7 @@ const BASE_URL = "https://api.apitube.io/v1/news/everything";
 async function getLatestNews() {
   const params = new URLSearchParams({
     api_key: API_KEY,
-    language: "en",
+    "language.code": "en",
     limit: "10",
   });
 
@@ -495,7 +495,7 @@ async function getTechNews() {
     api_key: API_KEY,
     category: "technology",
     country: "us",
-    language: "en",
+    "language.code": "en",
     limit: "20",
     sort_by: "published_at",
   });
@@ -524,7 +524,7 @@ async function searchNews(query, days = 7) {
   const params = new URLSearchParams({
     api_key: API_KEY,
     query,
-    language: "en",
+    "language.code": "en",
     from: from.toISOString(),
     to: now.toISOString(),
     sort_by: "relevance",
@@ -562,7 +562,7 @@ async function fetchAllNews(maxArticles = 200) {
   while (allArticles.length < maxArticles) {
     const params = new URLSearchParams({
       api_key: API_KEY,
-      language: "en",
+      "language.code": "en",
       limit: String(limit),
       page: String(page),
     });
@@ -628,7 +628,7 @@ async function fetchNews(params, retries = 3) {
   throw new Error("Failed to fetch news after multiple retries");
 }
 
-const data = await fetchNews({ language: "en", limit: "10" });
+const data = await fetchNews({ "language.code": "en", limit: "10" });
 data.results.forEach((a) => console.log(a.title));
 ```
 
@@ -645,9 +645,9 @@ $apiKey  = "YOUR_API_KEY";
 $baseUrl = "https://api.apitube.io/v1/news/everything";
 
 $query = http_build_query([
-    "api_key"  => $apiKey,
-    "language" => "en",
-    "limit"    => 10,
+    "api_key"       => $apiKey,
+    "language.code" => "en",
+    "limit"         => 10,
 ]);
 
 $response = file_get_contents("{$baseUrl}?{$query}");
@@ -671,12 +671,12 @@ $apiKey  = "YOUR_API_KEY";
 $baseUrl = "https://api.apitube.io/v1/news/everything";
 
 $query = http_build_query([
-    "api_key"  => $apiKey,
-    "category" => "technology",
-    "country"  => "us",
-    "language" => "en",
-    "limit"    => 20,
-    "sort_by"  => "published_at",
+    "api_key"       => $apiKey,
+    "category"      => "technology",
+    "country"       => "us",
+    "language.code" => "en",
+    "limit"         => 20,
+    "sort_by"       => "published_at",
 ]);
 
 $response = file_get_contents("{$baseUrl}?{$query}");
@@ -699,13 +699,13 @@ $now     = new DateTimeImmutable("now", new DateTimeZone("UTC"));
 $weekAgo = $now->modify("-7 days");
 
 $query = http_build_query([
-    "api_key"  => $apiKey,
-    "query"    => "artificial intelligence",
-    "language" => "en",
-    "from"     => $weekAgo->format("c"),
-    "to"       => $now->format("c"),
-    "sort_by"  => "relevance",
-    "limit"    => 25,
+    "api_key"       => $apiKey,
+    "query"         => "artificial intelligence",
+    "language.code" => "en",
+    "from"          => $weekAgo->format("c"),
+    "to"            => $now->format("c"),
+    "sort_by"       => "relevance",
+    "limit"         => 25,
 ]);
 
 $response = file_get_contents("{$baseUrl}?{$query}");
@@ -738,10 +738,10 @@ $allArticles = [];
 
 while (count($allArticles) < $maxArticles) {
     $query = http_build_query([
-        "api_key"  => $apiKey,
-        "language" => "en",
-        "limit"    => $limit,
-        "page"     => $page,
+        "api_key"       => $apiKey,
+        "language.code" => "en",
+        "limit"         => $limit,
+        "page"          => $page,
     ]);
 
     $response = file_get_contents("{$baseUrl}?{$query}");
@@ -809,7 +809,7 @@ function fetchNews(array $params, int $retries = 3): array
     throw new RuntimeException("Failed to fetch news after {$retries} retries");
 }
 
-$data = fetchNews(["language" => "en", "limit" => 10]);
+$data = fetchNews(["language.code" => "en", "limit" => 10]);
 
 foreach ($data["results"] as $article) {
     echo $article["title"] . "\n";

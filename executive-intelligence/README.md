@@ -19,17 +19,16 @@ GET https://api.apitube.io/v1/suggest/entities
 | Parameter                      | Type    | Description                                                          |
 |-------------------------------|---------|----------------------------------------------------------------------|
 | `api_key`                     | string  | **Required.** Your API key.                                          |
-| `entity.name`                 | string  | Filter by executive name.                                            |
-| `entity.type`                 | string  | Use `person` for executive tracking.                                |
+| `person.name`                 | string  | Filter by executive name.                                            |
 | `sentiment.overall.polarity`  | string  | Filter by sentiment: `positive`, `negative`, `neutral`.             |
 | `sentiment.overall.score.min` | number  | Minimum sentiment score (0.0–1.0).                                  |
 | `title`                       | string  | Filter by executive-related keywords.                                |
 | `topic.id`                    | string  | Filter by topic (leadership, compensation, etc.).                   |
-| `source.rank.opr.min`         | number  | Minimum source authority (0.0–1.0).                                 |
+| `source.rank.opr.min`         | number  | Minimum source authority (0–7).                                     |
 | `source.domain`               | string  | Filter by business news sources.                                     |
 | `published_at.start`          | string  | Start date (ISO 8601 or `YYYY-MM-DD`).                             |
 | `published_at.end`            | string  | End date (ISO 8601 or `YYYY-MM-DD`).                               |
-| `language`                    | string  | Filter by language code.                                             |
+| `language.code`               | string  | Filter by language code.                                             |
 | `sort.by`                     | string  | Sort field: `published_at`.                                          |
 | `sort.order`                  | string  | Sort direction: `asc` or `desc`.                                    |
 | `per_page`                    | integer | Number of results per page.                                          |
@@ -40,13 +39,13 @@ GET https://api.apitube.io/v1/suggest/entities
 
 ```bash
 # Track CEO media coverage
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&entity.name=Tim Cook&entity.type=person&language=en&per_page=20"
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&person.name=Tim Cook&language.code=en&per_page=20"
 
 # Monitor executive changes and departures
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&title=CEO,CFO,CTO resigns,steps down,departure,appointed,named&source.rank.opr.min=0.6&per_page=20"
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&title=CEO,CFO,CTO resigns,steps down,departure,appointed,named&source.rank.opr.min=5&per_page=20"
 
 # Track executive sentiment
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&entity.name=Elon Musk&entity.type=person&sentiment.overall.polarity=negative&per_page=20"
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&person.name=Elon Musk&sentiment.overall.polarity=negative&per_page=20"
 ```
 
 ### Python
@@ -73,49 +72,46 @@ def analyze_executive(name, days=30):
     # Total coverage
     resp = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "entity.name": name,
-        "entity.type": "person",
+        "person.name": name,
         "published_at.start": start,
-        "language": "en",
-        "per_page": 1,
+        "language.code": "en",
+        "per_page": 100,
     })
-    total_coverage = resp.json().get("total_results", 0)
+    total_coverage = len(resp.json().get("results", []))
 
     # Sentiment breakdown
     sentiments = {}
     for polarity in ["positive", "negative", "neutral"]:
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": name,
-            "entity.type": "person",
+            "person.name": name,
             "sentiment.overall.polarity": polarity,
             "published_at.start": start,
-            "language": "en",
-            "per_page": 1,
+            "language.code": "en",
+            "per_page": 100,
         })
-        sentiments[polarity] = resp.json().get("total_results", 0)
+        sentiments[polarity] = len(resp.json().get("results", []))
 
     # Topic breakdown
     topics = {}
     for topic, keywords in EXECUTIVE_KEYWORDS.items():
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": name,
+            "person.name": name,
             "title": ",".join(keywords),
             "published_at.start": start,
-            "language": "en",
-            "per_page": 1,
+            "language.code": "en",
+            "per_page": 100,
         })
-        topics[topic] = resp.json().get("total_results", 0)
+        topics[topic] = len(resp.json().get("results", []))
 
     # Get recent high-authority coverage
     resp = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "entity.name": name,
-        "entity.type": "person",
-        "source.rank.opr.min": 0.6,
+        "person.name": name,
+        "source.rank.opr.min": 5,
         "published_at.start": start,
-        "language": "en",
+        "language.code": "en",
         "sort.by": "published_at",
         "sort.order": "desc",
         "per_page": 10,
@@ -186,47 +182,45 @@ async function analyzeExecutive(name, days = 30) {
   // Get total coverage
   const totalParams = new URLSearchParams({
     api_key: API_KEY,
-    "entity.name": name,
-    "entity.type": "person",
+    "person.name": name,
     "published_at.start": start,
-    language: "en",
-    per_page: "1",
+    "language.code": "en",
+    per_page: "100",
   });
 
   const totalResp = await fetch(`${BASE_URL}?${totalParams}`);
   const totalData = await totalResp.json();
-  const totalCoverage = totalData.total_results || 0;
+  const totalCoverage = (totalData.results || []).length;
 
   // Get sentiment breakdown
   const sentiments = {};
   for (const polarity of ["positive", "negative", "neutral"]) {
     const params = new URLSearchParams({
       api_key: API_KEY,
-      "entity.name": name,
-      "entity.type": "person",
+      "person.name": name,
       "sentiment.overall.polarity": polarity,
       "published_at.start": start,
-      language: "en",
-      per_page: "1",
+      "language.code": "en",
+      per_page: "100",
     });
 
     const resp = await fetch(`${BASE_URL}?${params}`);
     const data = await resp.json();
-    sentiments[polarity] = data.total_results || 0;
+    sentiments[polarity] = (data.results || []).length;
   }
 
   // Check for controversies
   const controversyParams = new URLSearchParams({
     api_key: API_KEY,
-    "entity.name": name,
+    "person.name": name,
     title: CONTROVERSY_KEYWORDS.join(","),
     "published_at.start": start,
-    per_page: "1",
+    per_page: "100",
   });
 
   const controversyResp = await fetch(`${BASE_URL}?${controversyParams}`);
   const controversyData = await controversyResp.json();
-  const controversies = controversyData.total_results || 0;
+  const controversies = (controversyData.results || []).length;
 
   // Calculate reputation
   const total = sentiments.positive + sentiments.negative + sentiments.neutral || 1;
@@ -285,41 +279,39 @@ function analyzeExecutive(string $name, int $days = 30): array
     // Total coverage
     $query = http_build_query([
         "api_key"            => $apiKey,
-        "entity.name"        => $name,
-        "entity.type"        => "person",
+        "person.name"        => $name,
         "published_at.start" => $start,
-        "language"           => "en",
-        "per_page"           => 1,
+        "language.code"      => "en",
+        "per_page"           => 100,
     ]);
     $data = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
-    $totalCoverage = $data["total_results"] ?? 0;
+    $totalCoverage = count($data["results"] ?? []);
 
     // Sentiment breakdown
     $sentiments = [];
     foreach (["positive", "negative", "neutral"] as $polarity) {
         $query = http_build_query([
             "api_key"                    => $apiKey,
-            "entity.name"                => $name,
-            "entity.type"                => "person",
+            "person.name"                => $name,
             "sentiment.overall.polarity" => $polarity,
             "published_at.start"         => $start,
-            "language"                   => "en",
-            "per_page"                   => 1,
+            "language.code"              => "en",
+            "per_page"                   => 100,
         ]);
         $data = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
-        $sentiments[$polarity] = $data["total_results"] ?? 0;
+        $sentiments[$polarity] = count($data["results"] ?? []);
     }
 
     // Controversies
     $query = http_build_query([
         "api_key"            => $apiKey,
-        "entity.name"        => $name,
+        "person.name"        => $name,
         "title"              => implode(",", $controversyKeywords),
         "published_at.start" => $start,
-        "per_page"           => 1,
+        "per_page"           => 100,
     ]);
     $data = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
-    $controversies = $data["total_results"] ?? 0;
+    $controversies = count($data["results"] ?? []);
 
     $total = array_sum($sentiments) ?: 1;
     $reputationScore = ($sentiments["positive"] - $sentiments["negative"]) / $total;

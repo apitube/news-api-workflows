@@ -308,12 +308,12 @@ class RootCauseAnalyzer:
         for category, keywords in self.EVENT_KEYWORDS.items():
             resp = requests.get(BASE_URL, params={
                 "api_key": API_KEY,
-                "entity.name": entity,
+                "organization.name": entity,
                 "title": ",".join(keywords),
                 "published_at.start": date,
                 "published_at.end": next_date,
-                "source.rank.opr.min": 0.6,
-                "language": "en",
+                "source.rank.opr.min": 4,
+                "language.code": "en",
                 "per_page": 5,
             })
 
@@ -359,14 +359,14 @@ class RealTimeAnomalyMonitor:
 
             resp = requests.get(BASE_URL, params={
                 "api_key": API_KEY,
-                "entity.name": entity,
+                "organization.name": entity,
                 "published_at.start": date,
                 "published_at.end": next_date,
-                "language": "en",
+                "language.code": "en",
                 "per_page": 1,
             })
 
-            count = resp.json().get("total_results", 0)
+            count = len(resp.json().get("results", []))
             self.history[entity].append(count)
 
     def initialize(self):
@@ -384,14 +384,14 @@ class RealTimeAnomalyMonitor:
 
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": entity,
+            "organization.name": entity,
             "published_at.start": today,
             "published_at.end": tomorrow,
-            "language": "en",
+            "language.code": "en",
             "per_page": 1,
         })
 
-        current_count = resp.json().get("total_results", 0)
+        current_count = len(resp.json().get("results", []))
         history_list = list(self.history[entity])
 
         # Run detection

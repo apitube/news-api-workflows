@@ -23,13 +23,13 @@ GET https://api.apitube.io/v1/news/everything
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `entity.name` | string | Subject to analyze across sources |
+| `organization.name` | string | Subject to analyze across sources |
 | `title` | string | Specific story/headline to track |
 | `source.domain` | string | Filter to specific sources |
-| `source.rank.opr.min` | number | Minimum source authority (0.0-1.0) |
+| `source.rank.opr.min` | number | Minimum source authority (0-7) |
 | `source.rank.opr.max` | number | Maximum source authority |
 | `sentiment.overall.polarity` | string | Sentiment filter |
-| `language` | string | Language filter |
+| `language.code` | string | Language filter |
 | `published_at.start` | string | Time range start |
 | `published_at.end` | string | Time range end |
 

@@ -334,7 +334,7 @@ class TrendBreakoutDetector:
 
         # Extract metrics
         high_authority = sum(1 for a in articles
-                           if a.get('source', {}).get('rankings', {}).get('opr', 0) >= 0.7)
+                           if a.get('source', {}).get('rankings', {}).get('opr', 0) >= 5)
 
         languages = set(a.get('language', 'unknown') for a in articles)
         countries = set(a.get('source', {}).get('location', {}).get('country_code', 'unknown')
@@ -390,7 +390,7 @@ class TrendBreakoutDetector:
             if articles:
                 daily_volumes.append(len(articles))
                 high_auth = sum(1 for a in articles
-                               if a.get('source', {}).get('rankings', {}).get('opr', 0) >= 0.7)
+                               if a.get('source', {}).get('rankings', {}).get('opr', 0) >= 5)
                 daily_authority_ratios.append(high_auth / len(articles))
 
                 for a in articles:

@@ -17,15 +17,15 @@ GET https://api.apitube.io/v1/news/everything
 | Parameter                      | Type    | Description                                                          |
 |-------------------------------|---------|----------------------------------------------------------------------|
 | `api_key`                     | string  | **Required.** Your API key.                                          |
-| `entity.name`                 | string  | Filter by entity name.                                               |
+| `organization.name`           | string  | Filter by organization name.                                         |
 | `topic.id`                    | string  | Filter by topic ID.                                                  |
 | `title`                       | string  | Filter by keywords in title.                                         |
 | `sentiment.overall.polarity`  | string  | Filter by sentiment: `positive`, `negative`, `neutral`.             |
 | `sentiment.overall.score.min` | number  | Minimum sentiment score (-1.0 to 1.0).                              |
-| `source.rank.opr.min`         | number  | Minimum source authority (0.0–1.0).                                 |
+| `source.rank.opr.min`         | number  | Minimum source authority (0–7).                                     |
 | `published_at.start`          | string  | Start date (ISO 8601 or `YYYY-MM-DD`).                             |
 | `published_at.end`            | string  | End date (ISO 8601 or `YYYY-MM-DD`).                               |
-| `language`                    | string  | Filter by language code.                                             |
+| `language.code`               | string  | Filter by language code.                                             |
 | `per_page`                    | integer | Number of results per page.                                          |
 
 ## Quick Start
@@ -116,10 +116,10 @@ class NewsParticleFilter:
 
             params = {
                 "api_key": API_KEY,
-                "entity.name": self.entity,
+                "organization.name": self.entity,
                 "published_at.start": start,
                 "published_at.end": end,
-                "language": "en",
+                "language.code.eq": "en",
                 "per_page": 100,
             }
 
@@ -155,9 +155,9 @@ class NewsParticleFilter:
 
         params = {
             "api_key": API_KEY,
-            "entity.name": self.entity,
+            "organization.name": self.entity,
             "published_at.start": start,
-            "language": "en",
+            "language.code.eq": "en",
             "per_page": 100,
             "sort.by": "published_at",
             "sort.order": "desc",
@@ -182,7 +182,7 @@ class NewsParticleFilter:
 
         high_auth = sum(
             1 for a in articles
-            if a.get("source", {}).get("rankings", {}).get("opr", 0) >= 0.7
+            if a.get("source", {}).get("rankings", {}).get("opr", 0) >= 5
         )
 
         return {

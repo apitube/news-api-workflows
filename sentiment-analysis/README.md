@@ -18,13 +18,15 @@ GET https://api.apitube.io/v1/news/everything
 |-------------------------------|--------|--------------------------------------------------------------------|
 | `api_key`                     | string | **Required.** Your API key.                                        |
 | `sentiment.overall.polarity`  | string | Filter by polarity: `positive`, `negative`, or `neutral`.          |
-| `sentiment.overall.score`     | number | Filter by numeric sentiment score (range roughly -1.0 to 1.0).    |
+| `sentiment.overall.score`     | float  | Filter by exact sentiment score (range -1.0 to 1.0).               |
+| `sentiment.overall.score.min` | float  | Filter by minimum sentiment score.                                 |
+| `sentiment.overall.score.max` | float  | Filter by maximum sentiment score.                                 |
 | `sort.by`                     | string | Sort field. Use `sentiment.overall.score` to sort by sentiment.    |
 | `sort.order`                  | string | Sort direction: `asc` or `desc`.                                   |
 | `title`                       | string | Filter by keywords in article title (comma-separated).             |
-| `topic.id`                    | string | Filter by topic (e.g., `cryptocurrency`, `climate_change`).       |
+| `topic.id`                    | string | Filter by topic (e.g., `crypto_news`, `climate_change`).           |
 | `source.domain`               | string | Filter by source domain (comma-separated).                         |
-| `language`                    | string | Filter by language code (e.g., `en`, `fr`, `de`).                 |
+| `language.code`               | string | Filter by language code (e.g., `en`, `fr`, `de`).                  |
 | `published_at.start`          | string | Start date for filtering (ISO 8601 or `YYYY-MM-DD`).              |
 | `published_at.end`            | string | End date for filtering (ISO 8601 or `YYYY-MM-DD`).                |
 | `per_page`                    | integer| Number of results per page (default: 50).                          |
@@ -36,10 +38,10 @@ GET https://api.apitube.io/v1/news/everything
 
 ```bash
 # Get positive news about technology
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&sentiment.overall.polarity=positive&topic.id=technology&language=en&per_page=10"
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&sentiment.overall.polarity=positive&topic.id=technology&language.code=en&per_page=10"
 
 # Get negative news sorted by sentiment score (most negative first)
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&sentiment.overall.polarity=negative&sort.by=sentiment.overall.score&sort.order=asc&language=en&per_page=10"
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&sentiment.overall.polarity=negative&sort.by=sentiment.overall.score&sort.order=asc&language.code=en&per_page=10"
 ```
 
 ### Python
@@ -51,7 +53,7 @@ response = requests.get("https://api.apitube.io/v1/news/everything", params={
     "api_key": "YOUR_API_KEY",
     "sentiment.overall.polarity": "positive",
     "topic.id": "technology",
-    "language": "en",
+    "language.code": "en",
     "per_page": 10,
 })
 
@@ -67,7 +69,7 @@ const params = new URLSearchParams({
   api_key: "YOUR_API_KEY",
   "sentiment.overall.polarity": "positive",
   "topic.id": "technology",
-  language: "en",
+  "language.code": "en",
   per_page: "10",
 });
 

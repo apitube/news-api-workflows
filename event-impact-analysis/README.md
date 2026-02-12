@@ -18,15 +18,15 @@ GET https://api.apitube.io/v1/news/trends
 | Parameter                      | Type    | Description                                                          |
 |-------------------------------|---------|----------------------------------------------------------------------|
 | `api_key`                     | string  | **Required.** Your API key.                                          |
-| `entity.name`                 | string  | Filter by affected entity.                                           |
-| `entity.type`                 | string  | Filter by type: `organization`, `person`, `product`.                |
+| `organization.name`           | string  | Filter by affected organization.                                     |
+| `person.name`                 | string  | Filter by affected person.                                           |
 | `title`                       | string  | Filter by event-related keywords.                                    |
 | `sentiment.overall.polarity`  | string  | Filter by sentiment: `positive`, `negative`, `neutral`.             |
-| `source.rank.opr.min`         | number  | Minimum source authority (0.0–1.0).                                 |
+| `source.rank.opr.min`         | number  | Minimum source authority (0–7).                                     |
 | `source.domain`               | string  | Filter by specific media outlets.                                    |
 | `published_at.start`          | string  | Start date (ISO 8601 or `YYYY-MM-DD`).                             |
 | `published_at.end`            | string  | End date (ISO 8601 or `YYYY-MM-DD`).                               |
-| `language`                    | string  | Filter by language code.                                             |
+| `language.code`               | string  | Filter by language code.                                             |
 | `sort.by`                     | string  | Sort field: `published_at`.                                          |
 | `sort.order`                  | string  | Sort direction: `asc` or `desc`.                                    |
 | `per_page`                    | integer | Number of results per page.                                          |
@@ -37,13 +37,13 @@ GET https://api.apitube.io/v1/news/trends
 
 ```bash
 # Get coverage before event
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&entity.name=Boeing&published_at.start=2024-01-01&published_at.end=2024-01-05&language=en&per_page=1" | jq '.total_results'
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&organization.name=Boeing&published_at.start=2024-01-01&published_at.end=2024-01-05&language.code=en&per_page=100" | jq '.results | length'
 
 # Get coverage after event
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&entity.name=Boeing&published_at.start=2024-01-05&published_at.end=2024-01-15&language=en&per_page=1" | jq '.total_results'
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&organization.name=Boeing&published_at.start=2024-01-05&published_at.end=2024-01-15&language.code=en&per_page=100" | jq '.results | length'
 
 # Track event-specific keywords
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&entity.name=Boeing&title=door,plug,incident,grounded&published_at.start=2024-01-05&per_page=20"
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&organization.name=Boeing&title=door,plug,incident,grounded&published_at.start=2024-01-05&per_page=20"
 ```
 
 ### Python
@@ -75,62 +75,60 @@ def analyze_event_impact(entity, event_date, event_keywords, before_days=7, afte
     # Before period
     resp = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "entity.name": entity,
-        "entity.type": "organization",
+        "organization.name": entity,
         "published_at.start": before_start,
         "published_at.end": before_end,
-        "language": "en",
-        "per_page": 1,
+        "language.code": "en",
+        "per_page": 100,
     })
-    results["before"]["total"] = resp.json().get("total_results", 0)
+    results["before"]["total"] = len(resp.json().get("results", []))
 
     for polarity in ["positive", "negative"]:
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": entity,
+            "organization.name": entity,
             "sentiment.overall.polarity": polarity,
             "published_at.start": before_start,
             "published_at.end": before_end,
-            "language": "en",
-            "per_page": 1,
+            "language.code": "en",
+            "per_page": 100,
         })
-        results["before"][polarity] = resp.json().get("total_results", 0)
+        results["before"][polarity] = len(resp.json().get("results", []))
 
     # After period
     resp = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "entity.name": entity,
-        "entity.type": "organization",
+        "organization.name": entity,
         "published_at.start": after_start,
         "published_at.end": after_end,
-        "language": "en",
-        "per_page": 1,
+        "language.code": "en",
+        "per_page": 100,
     })
-    results["after"]["total"] = resp.json().get("total_results", 0)
+    results["after"]["total"] = len(resp.json().get("results", []))
 
     for polarity in ["positive", "negative"]:
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": entity,
+            "organization.name": entity,
             "sentiment.overall.polarity": polarity,
             "published_at.start": after_start,
             "published_at.end": after_end,
-            "language": "en",
-            "per_page": 1,
+            "language.code": "en",
+            "per_page": 100,
         })
-        results["after"][polarity] = resp.json().get("total_results", 0)
+        results["after"][polarity] = len(resp.json().get("results", []))
 
     # Event-specific coverage
     resp = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "entity.name": entity,
+        "organization.name": entity,
         "title": ",".join(event_keywords),
         "published_at.start": after_start,
         "published_at.end": after_end,
-        "language": "en",
-        "per_page": 1,
+        "language.code": "en",
+        "per_page": 100,
     })
-    results["after"]["event_specific"] = resp.json().get("total_results", 0)
+    results["after"]["event_specific"] = len(resp.json().get("results", []))
 
     # Calculate impact metrics
     before_daily = results["before"]["total"] / before_days
@@ -189,30 +187,30 @@ async function analyzeEventImpact(entity, eventDate, keywords, beforeDays = 7, a
   // Before period - total
   let params = new URLSearchParams({
     api_key: API_KEY,
-    "entity.name": entity,
+    "organization.name": entity,
     "published_at.start": beforeStart,
     "published_at.end": eventDate,
-    language: "en",
-    per_page: "1",
+    "language.code": "en",
+    per_page: "100",
   });
 
   let response = await fetch(`${BASE_URL}?${params}`);
   let data = await response.json();
-  results.before.total = data.total_results || 0;
+  results.before.total = (data.results || []).length;
 
   // After period - total
   params = new URLSearchParams({
     api_key: API_KEY,
-    "entity.name": entity,
+    "organization.name": entity,
     "published_at.start": eventDate,
     "published_at.end": afterEnd,
-    language: "en",
-    per_page: "1",
+    "language.code": "en",
+    per_page: "100",
   });
 
   response = await fetch(`${BASE_URL}?${params}`);
   data = await response.json();
-  results.after.total = data.total_results || 0;
+  results.after.total = (data.results || []).length;
 
   // Calculate multiplier
   const beforeDaily = results.before.total / beforeDays;
@@ -254,26 +252,26 @@ function analyzeEventImpact(string $entity, string $eventDate, int $beforeDays =
     // Before
     $query = http_build_query([
         "api_key"            => $apiKey,
-        "entity.name"        => $entity,
+        "organization.name"  => $entity,
         "published_at.start" => $beforeStart,
         "published_at.end"   => $eventDate,
-        "language"           => "en",
-        "per_page"           => 1,
+        "language.code"      => "en",
+        "per_page"           => 100,
     ]);
     $data = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
-    $beforeTotal = $data["total_results"] ?? 0;
+    $beforeTotal = count($data["results"] ?? []);
 
     // After
     $query = http_build_query([
         "api_key"            => $apiKey,
-        "entity.name"        => $entity,
+        "organization.name"  => $entity,
         "published_at.start" => $eventDate,
         "published_at.end"   => $afterEnd,
-        "language"           => "en",
-        "per_page"           => 1,
+        "language.code"      => "en",
+        "per_page"           => 100,
     ]);
     $data = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
-    $afterTotal = $data["total_results"] ?? 0;
+    $afterTotal = count($data["results"] ?? []);
 
     $beforeDaily = $beforeTotal / $beforeDays;
     $afterDaily = $afterTotal / $afterDays;

@@ -32,22 +32,23 @@ https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY
 | Parameter | Type | Description |
 |-----------|------|-------------|
 | `api_key` | string | **Required.** Your API key. |
-| `topic.id` | string | Filter by topic ID (e.g., `technology`, `climate_change`). |
-| `category.id` | string | Filter by category ID. |
-| `language` | string | Filter by language code (e.g., `en`, `fr`, `de`). |
-| `source.rankings.opr.min` | integer | Minimum source authority rank (1-10). |
+| `topic.id` | string | Filter by topic ID (e.g., `crypto_news`, `climate_change`). |
+| `category.id` | string | Filter by IPTC category ID (e.g., `medtop:04000000`). |
+| `language.code` | string | Filter by language code (e.g., `en`, `fr`, `de`). |
+| `source.rank.opr.min` | integer | Minimum source authority rank (0–7). |
 | `source.domain` | string | Filter by source domain (e.g., `techcrunch.com`). |
-| `is_duplicate` | boolean | Filter duplicates (`false` = exclude duplicates). |
-| `is_free` | boolean | Filter paywall content (`true` = free articles only). |
-| `is_breaking` | boolean | Filter breaking news (`true` = breaking only). |
-| `sort.by` | string | Sort field: `published_at`, `relevance`. |
+| `is_duplicate` | integer | Filter duplicates (`0` = exclude duplicates). |
+| `is_free` | integer | Filter paywall content (`1` = free articles only). |
+| `is_breaking` | integer | Filter breaking news (`1` = breaking only). |
+| `sort.by` | string | Sort field: `published_at`, `sentiment.overall.score`. |
 | `sort.order` | string | Sort order: `asc`, `desc`. |
 | `per_page` | integer | Results per page (max 100). |
 | `page` | integer | Page number for pagination. |
 | `published_at.start` | string | Start date in ISO 8601 format. |
 | `published_at.end` | string | End date in ISO 8601 format. |
 | `sentiment.overall.polarity` | string | Filter by sentiment: `positive`, `negative`, `neutral`. |
-| `entity.name` | string | Filter by entity name (e.g., `Apple`, `Elon Musk`). |
+| `organization.name` | string | Filter by organization name (e.g., `Apple`, `Tesla`). |
+| `person.name` | string | Filter by person name (e.g., `Elon Musk`). |
 | `title` | string | Search query for article title. |
 
 ## Quick Start
@@ -55,7 +56,7 @@ https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY
 ### cURL
 
 ```bash
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&topic.id=technology&source.rankings.opr.min=5&is_duplicate=false&is_free=true&per_page=20"
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&topic.id=artificial_intelligence&source.rank.opr.min=5&is_duplicate=0&is_free=1&per_page=20"
 ```
 
 ### Python
@@ -65,10 +66,10 @@ import requests
 
 response = requests.get("https://api.apitube.io/v1/news/everything", params={
     "api_key": "YOUR_API_KEY",
-    "topic.id": "technology",
-    "source.rankings.opr.min": 5,
-    "is_duplicate": False,
-    "is_free": True,
+    "topic.id": "artificial_intelligence",
+    "source.rank.opr.min": 5,
+    "is_duplicate": 0,
+    "is_free": 1,
     "per_page": 20
 })
 
@@ -83,10 +84,10 @@ for article in results:
 ```javascript
 const params = new URLSearchParams({
     api_key: "YOUR_API_KEY",
-    "topic.id": "technology",
-    "source.rankings.opr.min": "5",
-    is_duplicate: "false",
-    is_free: "true",
+    "topic.id": "artificial_intelligence",
+    "source.rank.opr.min": "5",
+    is_duplicate: "0",
+    is_free: "1",
     per_page: "20"
 });
 
@@ -104,10 +105,10 @@ data.results.forEach(article => {
 ```php
 $url = "https://api.apitube.io/v1/news/everything?" . http_build_query([
     "api_key" => "YOUR_API_KEY",
-    "topic.id" => "technology",
-    "source.rankings.opr.min" => 5,
-    "is_duplicate" => false,
-    "is_free" => true,
+    "topic.id" => "artificial_intelligence",
+    "source.rank.opr.min" => 5,
+    "is_duplicate" => 0,
+    "is_free" => 1,
     "per_page" => 20
 ]);
 

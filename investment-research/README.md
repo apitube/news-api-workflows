@@ -19,8 +19,8 @@ GET https://api.apitube.io/v1/news/entity
 | Parameter                      | Type    | Description                                                          |
 |-------------------------------|---------|----------------------------------------------------------------------|
 | `api_key`                     | string  | **Required.** Your API key.                                          |
-| `entity.name`                 | string  | Filter by company/stock name (e.g., `Apple`, `NVIDIA`).             |
-| `entity.type`                 | string  | Filter by entity type: `organization`, `person`.                    |
+| `organization.name`           | string  | Filter by company/stock name (e.g., `Apple`, `NVIDIA`).             |
+| `person.name`                 | string  | Filter by person name.                                               |
 | `topic.id`                    | string  | Filter by topic (e.g., `earnings`, `ipo`, `mergers_acquisitions`). |
 | `industry.id`                 | string  | Filter by industry ID.                                               |
 | `sentiment.overall.polarity`  | string  | Filter by sentiment: `positive`, `negative`, `neutral`.             |
@@ -28,10 +28,10 @@ GET https://api.apitube.io/v1/news/entity
 | `sentiment.overall.score.max` | number  | Maximum sentiment score (0.0–1.0).                                  |
 | `title`                       | string  | Filter by keywords (e.g., `earnings,revenue,guidance,forecast`).    |
 | `source.domain`               | string  | Filter by financial news sources.                                    |
-| `source.rank.opr.min`         | number  | Minimum source authority (0.0–1.0).                                 |
+| `source.rank.opr.min`         | number  | Minimum source authority (0–7).                                     |
 | `published_at.start`          | string  | Start date (ISO 8601 or `YYYY-MM-DD`).                             |
 | `published_at.end`            | string  | End date (ISO 8601 or `YYYY-MM-DD`).                               |
-| `language`                    | string  | Filter by language code.                                             |
+| `language.code`               | string  | Filter by language code.                                             |
 | `sort.by`                     | string  | Sort field: `published_at`, `sentiment.overall.score`.              |
 | `sort.order`                  | string  | Sort direction: `asc` or `desc`.                                    |
 | `per_page`                    | integer | Number of results per page.                                          |
@@ -43,10 +43,10 @@ GET https://api.apitube.io/v1/news/entity
 
 ```bash
 # Get earnings-related news for a stock
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&entity.name=Apple&title=earnings,revenue,guidance,forecast&language=en&per_page=20"
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&organization.name=Apple&title=earnings,revenue,guidance,forecast&language.code=en&per_page=20"
 
 # Monitor M&A rumors
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&topic.id=mergers_acquisitions&language=en&source.rank.opr.min=0.6&per_page=20"
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&topic.id=mergers_acquisitions&language.code=en&source.rank.opr.min=4&per_page=20"
 
 # Track sentiment for a sector (AI/semiconductors)
 curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&topic.id=artificial_intelligence&industry.id=semiconductors&sentiment.overall.polarity=positive&per_page=20"
@@ -73,12 +73,11 @@ end = earnings_date
 
 response = requests.get(BASE_URL, params={
     "api_key": API_KEY,
-    "entity.name": stock,
-    "entity.type": "organization",
+    "organization.name": stock,
     "source.domain": FINANCIAL_SOURCES,
     "published_at.start": start,
     "published_at.end": end,
-    "language": "en",
+    "language.code": "en",
     "per_page": 50,
 })
 
@@ -118,12 +117,11 @@ async function analyzePreEarningsSentiment(stock, earningsDate, daysBefore = 7) 
 
   const params = new URLSearchParams({
     api_key: API_KEY,
-    "entity.name": stock,
-    "entity.type": "organization",
+    "organization.name": stock,
     "source.domain": FINANCIAL_SOURCES,
     "published_at.start": start.toISOString().split("T")[0],
     "published_at.end": end.toISOString().split("T")[0],
-    language: "en",
+    "language.code": "en",
     per_page: "50",
   });
 
@@ -170,12 +168,11 @@ $start = (clone $end)->modify("-{$daysBefore} days");
 
 $query = http_build_query([
     "api_key"            => $apiKey,
-    "entity.name"        => $stock,
-    "entity.type"        => "organization",
+    "organization.name"  => $stock,
     "source.domain"      => $financialSources,
     "published_at.start" => $start->format("Y-m-d"),
     "published_at.end"   => $end->format("Y-m-d"),
-    "language"           => "en",
+    "language.code"      => "en",
     "per_page"           => 50,
 ]);
 

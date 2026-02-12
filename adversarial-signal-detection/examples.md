@@ -56,7 +56,7 @@ class RealTimeManipulationMonitor:
             "api_key": self.api_key,
             "title": topic,
             "published_at.start": start,
-            "language": "en",
+            "language.code": "en",
             "per_page": 100,
             "sort.by": "published_at",
             "sort.order": "desc"
@@ -88,13 +88,13 @@ class RealTimeManipulationMonitor:
                     "title": topic,
                     "published_at.start": start,
                     "published_at.end": end,
-                    "language": "en",
+                    "language.code": "en",
                     "per_page": 1
                 }
 
                 async with session.get(self.base_url, params=params) as response:
                     data = await response.json()
-                    daily_volumes.append(data.get("total_results", 0))
+                    daily_volumes.append(len(data.get("results", [])))
 
             import numpy as np
             self.baseline_metrics[topic] = {
@@ -131,7 +131,7 @@ class RealTimeManipulationMonitor:
 
         for article in articles:
             opr = article.get("source", {}).get("rankings", {}).get("opr", 0)
-            if opr < 0.3:
+            if opr < 2:
                 low_authority += 1
             elif opr == 0:
                 unknown += 1
@@ -459,7 +459,7 @@ class BotNetworkDetector:
                 "title": topic,
                 "published_at.start": start,
                 "published_at.end": end,
-                "language": "en",
+                "language.code": "en",
                 "per_page": 100
             }
 
@@ -766,10 +766,10 @@ class CrossPlatformTracker:
     """
 
     SOURCE_TIERS = {
-        "tier1": {"min_opr": 0.7, "max_opr": 1.0},
-        "tier2": {"min_opr": 0.4, "max_opr": 0.7},
-        "tier3": {"min_opr": 0.1, "max_opr": 0.4},
-        "unknown": {"min_opr": 0, "max_opr": 0.1}
+        "tier1": {"min_opr": 5, "max_opr": 7},
+        "tier2": {"min_opr": 3, "max_opr": 5},
+        "tier3": {"min_opr": 1, "max_opr": 3},
+        "unknown": {"min_opr": 0, "max_opr": 1}
     }
 
     REGIONS = ["us", "gb", "de", "fr", "ru", "cn", "in", "br"]

@@ -25,7 +25,7 @@ SOURCES = [
 response = requests.get(BASE_URL, params={
     "api_key": API_KEY,
     "source.domain": ",".join(SOURCES),
-    "language": "en",
+    "language.code": "en",
     "sort.by": "published_at",
     "sort.order": "desc",
     "per_page": 30,
@@ -52,9 +52,9 @@ BASE_URL = "https://api.apitube.io/v1/news/everything"
 
 response = requests.get(BASE_URL, params={
     "api_key": API_KEY,
-    "source.rank.opr.min": 0.8,
+    "source.rank.opr.min": 6,
     "topic.id": "finance",
-    "language": "en",
+    "language.code": "en",
     "sort.by": "published_at",
     "sort.order": "desc",
     "per_page": 20,
@@ -62,7 +62,7 @@ response = requests.get(BASE_URL, params={
 response.raise_for_status()
 
 data = response.json()
-print(f"Top-ranked finance news ({data['total_results']} total):\n")
+print(f"Top-ranked finance news ({len(data['results'])} total):\n")
 
 for article in data["results"]:
     print(f"  {article['title']}")
@@ -85,11 +85,11 @@ def coverage_by_source(title_keyword, domains):
             "api_key": API_KEY,
             "title": title_keyword,
             "source.domain": domain,
-            "language": "en",
+            "language.code": "en",
             "per_page": 1,
         })
         response.raise_for_status()
-        results[domain] = response.json().get("total_results", 0)
+        results[domain] = len(response.json().get("results", []))
     return results
 
 keyword = "AI"
@@ -137,7 +137,7 @@ for code, name in countries.items():
         "per_page": 1,
     })
     response.raise_for_status()
-    count = response.json().get("total_results", 0)
+    count = len(response.json().get("results", []))
     bar = "█" * (count // 100)
     print(f"  {name:<20} ({code}) {count:>6} articles {bar}")
 ```
@@ -152,11 +152,11 @@ BASE_URL = "https://api.apitube.io/v1/news/everything"
 
 topic = "technology"
 ranges = [
-    (0.0, 0.2, "Very Low"),
-    (0.2, 0.4, "Low"),
-    (0.4, 0.6, "Medium"),
-    (0.6, 0.8, "High"),
-    (0.8, 1.0, "Very High"),
+    (0, 1, "Very Low"),
+    (2, 3, "Low"),
+    (3, 4, "Medium"),
+    (5, 6, "High"),
+    (6, 7, "Very High"),
 ]
 
 print(f"Source rank distribution for '{topic}' news:\n")
@@ -167,13 +167,13 @@ for min_rank, max_rank, label in ranges:
         "topic.id": topic,
         "source.rank.opr.min": min_rank,
         "source.rank.opr.max": max_rank,
-        "language": "en",
+        "language.code": "en",
         "per_page": 1,
     })
     response.raise_for_status()
-    count = response.json().get("total_results", 0)
-    bar = "█" * (count // 50)
-    print(f"  {label:<12} ({min_rank:.1f}-{max_rank:.1f}): {count:>6} {bar}")
+    count = len(response.json().get("results", []))
+    bar = "#" * (count // 50)
+    print(f"  {label:<12} ({min_rank}-{max_rank}): {count:>6} {bar}")
 ```
 
 ### Multi-Country Source Feed with Pagination
@@ -246,7 +246,7 @@ const SOURCES = [
 const params = new URLSearchParams({
   api_key: API_KEY,
   "source.domain": SOURCES.join(","),
-  language: "en",
+  "language.code": "en",
   "sort.by": "published_at",
   "sort.order": "desc",
   per_page: "30",
@@ -279,13 +279,13 @@ async function coverageBySource(titleKeyword, domains) {
       api_key: API_KEY,
       title: titleKeyword,
       "source.domain": domain,
-      language: "en",
+      "language.code": "en",
       per_page: "1",
     });
 
     const response = await fetch(`${BASE_URL}?${params}`);
     const data = await response.json();
-    results[domain] = data.total_results || 0;
+    results[domain] = data.results?.length || 0;
   }
 
   return results;
@@ -339,7 +339,7 @@ for (const [code, name] of Object.entries(countries)) {
 
   const response = await fetch(`${BASE_URL}?${params}`);
   const data = await response.json();
-  const count = data.total_results || 0;
+  const count = data.results?.length || 0;
   const bar = "#".repeat(Math.floor(count / 100));
   console.log(
     `  ${name.padEnd(20)} (${code}) ${String(count).padStart(6)} articles ${bar}`
@@ -353,12 +353,12 @@ for (const [code, name] of Object.entries(countries)) {
 const API_KEY = "YOUR_API_KEY";
 const BASE_URL = "https://api.apitube.io/v1/news/everything";
 
-async function getHighRankNews(topic, minRank = 0.8, perPage = 20) {
+async function getHighRankNews(topic, minRank = 6, perPage = 20) {
   const params = new URLSearchParams({
     api_key: API_KEY,
     "source.rank.opr.min": String(minRank),
     "topic.id": topic,
-    language: "en",
+    "language.code": "en",
     "sort.by": "published_at",
     "sort.order": "desc",
     per_page: String(perPage),
@@ -370,7 +370,7 @@ async function getHighRankNews(topic, minRank = 0.8, perPage = 20) {
 }
 
 const data = await getHighRankNews("finance");
-console.log(`Top-ranked finance news (${data.total_results} total):\n`);
+console.log(`Top-ranked finance news (${data.results.length} total):\n`);
 
 data.results.forEach((article) => {
   console.log(`  ${article.title}`);
@@ -401,7 +401,7 @@ $sources = [
 $query = http_build_query([
     "api_key"       => $apiKey,
     "source.domain" => implode(",", $sources),
-    "language"      => "en",
+    "language.code" => "en",
     "sort.by"       => "published_at",
     "sort.order"    => "desc",
     "per_page"      => 30,
@@ -437,12 +437,12 @@ function coverageBySource(string $titleKeyword, array $domains): array
             "api_key"       => $apiKey,
             "title"         => $titleKeyword,
             "source.domain" => $domain,
-            "language"      => "en",
+            "language.code" => "en",
             "per_page"      => 1,
         ]);
 
         $data = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
-        $results[$domain] = $data["total_results"] ?? 0;
+        $results[$domain] = count($data["results"] ?? []);
     }
 
     return $results;
@@ -496,7 +496,7 @@ foreach ($countries as $code => $name) {
     ]);
 
     $data  = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
-    $count = $data["total_results"] ?? 0;
+    $count = count($data["results"] ?? []);
     $bar   = str_repeat("#", intdiv($count, 100));
     printf("  %-20s (%s) %6d articles %s\n", $name, $code, $count, $bar);
 }
@@ -512,9 +512,9 @@ $baseUrl = "https://api.apitube.io/v1/news/everything";
 
 $query = http_build_query([
     "api_key"              => $apiKey,
-    "source.rank.opr.min"  => 0.8,
+    "source.rank.opr.min"  => 6,
     "topic.id"             => "finance",
-    "language"             => "en",
+    "language.code"        => "en",
     "sort.by"              => "published_at",
     "sort.order"           => "desc",
     "per_page"             => 20,
@@ -536,7 +536,7 @@ if ($code !== 200) {
 }
 
 $data = json_decode($body, true);
-echo "Top-ranked finance news ({$data['total_results']} total):\n\n";
+echo "Top-ranked finance news (" . count($data["results"]) . " total):\n\n";
 
 foreach ($data["results"] as $article) {
     echo "  {$article['title']}\n";

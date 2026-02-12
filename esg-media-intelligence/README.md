@@ -17,13 +17,13 @@ GET https://api.apitube.io/v1/news/everything
 | Parameter                      | Type    | Description                                                          |
 |-------------------------------|---------|----------------------------------------------------------------------|
 | `api_key`                     | string  | **Required.** Your API key.                                          |
-| `entity.name`                 | string  | Filter by company name.                                              |
+| `organization.name`           | string  | Filter by company/organization name.                                 |
 | `title`                       | string  | Filter by ESG-related keywords.                                      |
 | `sentiment.overall.polarity`  | string  | Filter by sentiment: `positive`, `negative`, `neutral`.             |
-| `source.rank.opr.min`         | number  | Minimum source authority (0.0–1.0).                                 |
+| `source.rank.opr.min`         | number  | Minimum source authority (0–7).                                     |
 | `published_at.start`          | string  | Start date (ISO 8601 or `YYYY-MM-DD`).                             |
 | `published_at.end`            | string  | End date (ISO 8601 or `YYYY-MM-DD`).                               |
-| `language`                    | string  | Filter by language code.                                             |
+| `language.code`               | string  | Filter by language code.                                             |
 | `sort.by`                     | string  | Sort field: `published_at`.                                          |
 | `sort.order`                  | string  | Sort direction: `asc` or `desc`.                                    |
 | `per_page`                    | integer | Number of results per page.                                          |
@@ -34,13 +34,13 @@ GET https://api.apitube.io/v1/news/everything
 
 ```bash
 # Track environmental coverage
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&entity.name=ExxonMobil&title=climate,carbon,emissions,environment&language=en&per_page=30"
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&organization.name=ExxonMobil&title=climate,carbon,emissions,environment&language.code=en&per_page=30"
 
 # Monitor social issues
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&entity.name=Amazon&title=workers,labor,diversity,safety&language=en&per_page=30"
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&organization.name=Amazon&title=workers,labor,diversity,safety&language.code=en&per_page=30"
 
 # Track governance controversies
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&entity.name=Meta&title=board,executive,ethics,compliance,scandal&sentiment.overall.polarity=negative&language=en&per_page=30"
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&organization.name=Meta&title=board,executive,ethics,compliance,scandal&sentiment.overall.polarity=negative&language.code=en&per_page=30"
 ```
 
 ### Python
@@ -99,49 +99,49 @@ class ESGAnalyzer:
             # Total coverage
             resp = requests.get(BASE_URL, params={
                 "api_key": API_KEY,
-                "entity.name": self.company,
+                "organization.name": self.company,
                 "title": ",".join(keywords),
                 "published_at.start": start,
-                "language": "en",
-                "per_page": 1,
+                "language.code": "en",
+                "per_page": 100,
             })
-            total = resp.json().get("total_results", 0)
+            total = len(resp.json().get("results", []))
 
             # Positive coverage
             resp = requests.get(BASE_URL, params={
                 "api_key": API_KEY,
-                "entity.name": self.company,
+                "organization.name": self.company,
                 "title": ",".join(keywords),
                 "sentiment.overall.polarity": "positive",
                 "published_at.start": start,
-                "language": "en",
-                "per_page": 1,
+                "language.code": "en",
+                "per_page": 100,
             })
-            positive = resp.json().get("total_results", 0)
+            positive = len(resp.json().get("results", []))
 
             # Negative coverage
             resp = requests.get(BASE_URL, params={
                 "api_key": API_KEY,
-                "entity.name": self.company,
+                "organization.name": self.company,
                 "title": ",".join(keywords),
                 "sentiment.overall.polarity": "negative",
                 "published_at.start": start,
-                "language": "en",
-                "per_page": 1,
+                "language.code": "en",
+                "per_page": 100,
             })
-            negative = resp.json().get("total_results", 0)
+            negative = len(resp.json().get("results", []))
 
             # Tier-1 coverage
             resp = requests.get(BASE_URL, params={
                 "api_key": API_KEY,
-                "entity.name": self.company,
+                "organization.name": self.company,
                 "title": ",".join(keywords),
-                "source.rank.opr.min": 0.7,
+                "source.rank.opr.min": 5,
                 "published_at.start": start,
-                "language": "en",
-                "per_page": 1,
+                "language.code": "en",
+                "per_page": 100,
             })
-            tier1 = resp.json().get("total_results", 0)
+            tier1 = len(resp.json().get("results", []))
 
             results[category] = {
                 "total": total,
@@ -206,12 +206,12 @@ class ESGAnalyzer:
 
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": self.company,
+            "organization.name": self.company,
             "title": ",".join(CONTROVERSY_SIGNALS),
             "sentiment.overall.polarity": "negative",
             "published_at.start": start,
-            "source.rank.opr.min": 0.6,
-            "language": "en",
+            "source.rank.opr.min": 4,
+            "language.code": "en",
             "sort.by": "published_at",
             "sort.order": "desc",
             "per_page": 50,
@@ -249,37 +249,37 @@ class ESGAnalyzer:
         # Positive environmental claims
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": self.company,
+            "organization.name": self.company,
             "title": "sustainable,green,eco-friendly,carbon neutral,net zero,renewable",
             "sentiment.overall.polarity": "positive",
             "published_at.start": start,
-            "language": "en",
-            "per_page": 1,
+            "language.code": "en",
+            "per_page": 100,
         })
-        green_claims = resp.json().get("total_results", 0)
+        green_claims = len(resp.json().get("results", []))
 
         # Environmental criticism
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": self.company,
+            "organization.name": self.company,
             "title": "pollution,emissions,environmental damage,greenwashing,misleading",
             "sentiment.overall.polarity": "negative",
             "published_at.start": start,
-            "language": "en",
-            "per_page": 1,
+            "language.code": "en",
+            "per_page": 100,
         })
-        green_criticism = resp.json().get("total_results", 0)
+        green_criticism = len(resp.json().get("results", []))
 
         # Greenwashing mentions
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": self.company,
+            "organization.name": self.company,
             "title": "greenwashing,misleading,false claims,exaggerated",
             "published_at.start": start,
-            "language": "en",
-            "per_page": 1,
+            "language.code": "en",
+            "per_page": 100,
         })
-        greenwashing_mentions = resp.json().get("total_results", 0)
+        greenwashing_mentions = len(resp.json().get("results", []))
 
         ratio = green_claims / max(green_criticism, 1)
 
@@ -380,28 +380,28 @@ class ESGAnalyzer {
       // Total
       let params = new URLSearchParams({
         api_key: API_KEY,
-        "entity.name": this.company,
+        "organization.name": this.company,
         title: keywords.join(","),
         "published_at.start": start,
-        language: "en",
-        per_page: "1",
+        "language.code": "en",
+        per_page: "100",
       });
 
       let response = await fetch(`${BASE_URL}?${params}`);
       let data = await response.json();
-      const total = data.total_results || 0;
+      const total = (data.results || []).length;
 
       // Positive
       params.set("sentiment.overall.polarity", "positive");
       response = await fetch(`${BASE_URL}?${params}`);
       data = await response.json();
-      const positive = data.total_results || 0;
+      const positive = (data.results || []).length;
 
       // Negative
       params.set("sentiment.overall.polarity", "negative");
       response = await fetch(`${BASE_URL}?${params}`);
       data = await response.json();
-      const negative = data.total_results || 0;
+      const negative = (data.results || []).length;
 
       this.scores[dim][category] = {
         total,
@@ -453,11 +453,11 @@ class ESGAnalyzer {
 
     const params = new URLSearchParams({
       api_key: API_KEY,
-      "entity.name": this.company,
+      "organization.name": this.company,
       title: "scandal,controversy,investigation,lawsuit,fine,violation",
       "sentiment.overall.polarity": "negative",
       "published_at.start": start,
-      language: "en",
+      "language.code": "en",
       per_page: "30",
     });
 
@@ -560,40 +560,40 @@ class ESGAnalyzer
             // Total
             $query = http_build_query([
                 "api_key" => $this->apiKey,
-                "entity.name" => $this->company,
+                "organization.name" => $this->company,
                 "title" => implode(",", $keywords),
                 "published_at.start" => $start,
-                "language" => "en",
-                "per_page" => 1,
+                "language.code" => "en",
+                "per_page" => 100,
             ]);
             $data = json_decode(file_get_contents("{$this->baseUrl}?{$query}"), true);
-            $total = $data["total_results"] ?? 0;
+            $total = count($data["results"] ?? []);
 
             // Positive
             $query = http_build_query([
                 "api_key" => $this->apiKey,
-                "entity.name" => $this->company,
+                "organization.name" => $this->company,
                 "title" => implode(",", $keywords),
                 "sentiment.overall.polarity" => "positive",
                 "published_at.start" => $start,
-                "language" => "en",
-                "per_page" => 1,
+                "language.code" => "en",
+                "per_page" => 100,
             ]);
             $data = json_decode(file_get_contents("{$this->baseUrl}?{$query}"), true);
-            $positive = $data["total_results"] ?? 0;
+            $positive = count($data["results"] ?? []);
 
             // Negative
             $query = http_build_query([
                 "api_key" => $this->apiKey,
-                "entity.name" => $this->company,
+                "organization.name" => $this->company,
                 "title" => implode(",", $keywords),
                 "sentiment.overall.polarity" => "negative",
                 "published_at.start" => $start,
-                "language" => "en",
-                "per_page" => 1,
+                "language.code" => "en",
+                "per_page" => 100,
             ]);
             $data = json_decode(file_get_contents("{$this->baseUrl}?{$query}"), true);
-            $negative = $data["total_results"] ?? 0;
+            $negative = count($data["results"] ?? []);
 
             $this->scores[$dim][$category] = [
                 "total" => $total,

@@ -19,17 +19,16 @@ GET https://api.apitube.io/v1/news/entity
 | Parameter                      | Type    | Description                                                          |
 |-------------------------------|---------|----------------------------------------------------------------------|
 | `api_key`                     | string  | **Required.** Your API key.                                          |
-| `entity.name`                 | string  | Filter by brand name.                                                |
-| `entity.type`                 | string  | Use `organization` or `brand` for brand tracking.                   |
+| `organization.name`           | string  | Filter by brand/organization name.                                   |
 | `sentiment.overall.polarity`  | string  | Filter by sentiment: `positive`, `negative`, `neutral`.             |
 | `sentiment.overall.score.min` | number  | Minimum sentiment score (0.0–1.0).                                  |
-| `source.rank.opr.min`         | number  | Minimum source authority (0.0–1.0).                                 |
+| `source.rank.opr.min`         | number  | Minimum source authority (0–7).                                     |
 | `source.domain`               | string  | Filter by specific media outlets.                                    |
 | `topic.id`                    | string  | Filter by topic for message tracking.                               |
 | `category.id`                 | string  | Filter by IPTC category.                                             |
 | `published_at.start`          | string  | Start date (ISO 8601 or `YYYY-MM-DD`).                             |
 | `published_at.end`            | string  | End date (ISO 8601 or `YYYY-MM-DD`).                               |
-| `language`                    | string  | Filter by language code.                                             |
+| `language.code`               | string  | Filter by language code.                                             |
 | `sort.by`                     | string  | Sort field: `published_at`.                                          |
 | `sort.order`                  | string  | Sort direction: `asc` or `desc`.                                    |
 | `per_page`                    | integer | Number of results per page.                                          |
@@ -40,13 +39,13 @@ GET https://api.apitube.io/v1/news/entity
 
 ```bash
 # Get brand coverage volume
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&entity.name=Nike&entity.type=organization&language=en&per_page=1" | jq '.total_results'
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&organization.name=Nike&language.code=en&per_page=100" | jq '.results | length'
 
 # Get sentiment distribution
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&entity.name=Nike&sentiment.overall.polarity=positive&language=en&per_page=1" | jq '.total_results'
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&organization.name=Nike&sentiment.overall.polarity=positive&language.code=en&per_page=100" | jq '.results | length'
 
 # Get tier-1 media coverage
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&entity.name=Nike&source.rank.opr.min=0.7&language=en&per_page=20"
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&organization.name=Nike&source.rank.opr.min=6&language.code=en&per_page=20"
 ```
 
 ### Python
@@ -79,46 +78,44 @@ def calculate_brand_health(brand, days=30):
     # Volume metrics
     resp = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "entity.name": brand,
-        "entity.type": "organization",
+        "organization.name": brand,
         "published_at.start": start,
-        "language": "en",
-        "per_page": 1,
+        "language.code": "en",
+        "per_page": 100,
     })
-    metrics["volume"]["total"] = resp.json().get("total_results", 0)
+    metrics["volume"]["total"] = len(resp.json().get("results", []))
     metrics["volume"]["daily_avg"] = metrics["volume"]["total"] / days
 
     # Sentiment distribution
     for polarity in ["positive", "negative", "neutral"]:
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": brand,
-            "entity.type": "organization",
+            "organization.name": brand,
             "sentiment.overall.polarity": polarity,
             "published_at.start": start,
-            "language": "en",
-            "per_page": 1,
+            "language.code": "en",
+            "per_page": 100,
         })
-        metrics["sentiment"][polarity] = resp.json().get("total_results", 0)
+        metrics["sentiment"][polarity] = len(resp.json().get("results", []))
 
     # Media reach (by tier)
     resp_tier1 = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "entity.name": brand,
+        "organization.name": brand,
         "source.domain": TIER_1_SOURCES,
         "published_at.start": start,
-        "per_page": 1,
+        "per_page": 100,
     })
-    metrics["reach"]["tier1"] = resp_tier1.json().get("total_results", 0)
+    metrics["reach"]["tier1"] = len(resp_tier1.json().get("results", []))
 
     resp_tier2 = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "entity.name": brand,
+        "organization.name": brand,
         "source.domain": TIER_2_SOURCES,
         "published_at.start": start,
-        "per_page": 1,
+        "per_page": 100,
     })
-    metrics["reach"]["tier2"] = resp_tier2.json().get("total_results", 0)
+    metrics["reach"]["tier2"] = len(resp_tier2.json().get("results", []))
 
     # Calculate scores
     total_sentiment = sum(metrics["sentiment"].values()) or 1
@@ -161,13 +158,12 @@ def calculate_share_of_voice(brand, competitors, days=30):
     for b in all_brands:
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": b,
-            "entity.type": "organization",
+            "organization.name": b,
             "published_at.start": start,
-            "language": "en",
-            "per_page": 1,
+            "language.code": "en",
+            "per_page": 100,
         })
-        volumes[b] = resp.json().get("total_results", 0)
+        volumes[b] = len(resp.json().get("results", []))
 
     total_volume = sum(volumes.values()) or 1
 
@@ -227,46 +223,44 @@ async function calculateBrandHealth(brand, days = 30) {
   // Total volume
   const volumeParams = new URLSearchParams({
     api_key: API_KEY,
-    "entity.name": brand,
-    "entity.type": "organization",
+    "organization.name": brand,
     "published_at.start": start,
-    language: "en",
-    per_page: "1",
+    "language.code": "en",
+    per_page: "100",
   });
 
   let response = await fetch(`${BASE_URL}?${volumeParams}`);
   let data = await response.json();
-  metrics.volume = data.total_results || 0;
+  metrics.volume = (data.results || []).length;
 
   // Sentiment
   for (const polarity of ["positive", "negative", "neutral"]) {
     const params = new URLSearchParams({
       api_key: API_KEY,
-      "entity.name": brand,
-      "entity.type": "organization",
+      "organization.name": brand,
       "sentiment.overall.polarity": polarity,
       "published_at.start": start,
-      language: "en",
-      per_page: "1",
+      "language.code": "en",
+      per_page: "100",
     });
 
     response = await fetch(`${BASE_URL}?${params}`);
     data = await response.json();
-    metrics.sentiment[polarity] = data.total_results || 0;
+    metrics.sentiment[polarity] = (data.results || []).length;
   }
 
   // Tier-1 reach
   const tier1Params = new URLSearchParams({
     api_key: API_KEY,
-    "entity.name": brand,
-    "source.rank.opr.min": "0.7",
+    "organization.name": brand,
+    "source.rank.opr.min": "6",
     "published_at.start": start,
-    per_page: "1",
+    per_page: "100",
   });
 
   response = await fetch(`${BASE_URL}?${tier1Params}`);
   data = await response.json();
-  metrics.tier1Reach = data.total_results || 0;
+  metrics.tier1Reach = (data.results || []).length;
 
   // Calculate scores
   const sentimentTotal = Object.values(metrics.sentiment).reduce((a, b) => a + b, 0) || 1;
@@ -337,41 +331,39 @@ function calculateBrandHealth(string $brand, int $days = 30): array
     // Volume
     $query = http_build_query([
         "api_key"            => $apiKey,
-        "entity.name"        => $brand,
-        "entity.type"        => "organization",
+        "organization.name"  => $brand,
         "published_at.start" => $start,
-        "language"           => "en",
-        "per_page"           => 1,
+        "language.code"      => "en",
+        "per_page"           => 100,
     ]);
     $data = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
-    $volume = $data["total_results"] ?? 0;
+    $volume = count($data["results"] ?? []);
 
     // Sentiment
     $sentiment = [];
     foreach (["positive", "negative", "neutral"] as $polarity) {
         $query = http_build_query([
             "api_key"                    => $apiKey,
-            "entity.name"                => $brand,
-            "entity.type"                => "organization",
+            "organization.name"          => $brand,
             "sentiment.overall.polarity" => $polarity,
             "published_at.start"         => $start,
-            "language"                   => "en",
-            "per_page"                   => 1,
+            "language.code"              => "en",
+            "per_page"                   => 100,
         ]);
         $data = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
-        $sentiment[$polarity] = $data["total_results"] ?? 0;
+        $sentiment[$polarity] = count($data["results"] ?? []);
     }
 
     // Tier-1 reach
     $query = http_build_query([
         "api_key"             => $apiKey,
-        "entity.name"         => $brand,
-        "source.rank.opr.min" => 0.7,
+        "organization.name"   => $brand,
+        "source.rank.opr.min" => 6,
         "published_at.start"  => $start,
-        "per_page"            => 1,
+        "per_page"            => 100,
     ]);
     $data = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
-    $tier1Reach = $data["total_results"] ?? 0;
+    $tier1Reach = count($data["results"] ?? []);
 
     // Calculate scores
     $sentimentTotal = array_sum($sentiment) ?: 1;

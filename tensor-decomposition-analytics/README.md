@@ -17,14 +17,14 @@ GET https://api.apitube.io/v1/news/everything
 | Parameter                      | Type    | Description                                                          |
 |-------------------------------|---------|----------------------------------------------------------------------|
 | `api_key`                     | string  | **Required.** Your API key.                                          |
-| `entity.name`                 | string  | Filter by entity name.                                               |
+| `organization.name`           | string  | Filter by organization name.                                         |
 | `topic.id`                    | string  | Filter by topic ID.                                                  |
 | `category.id`                 | string  | Filter by category ID.                                               |
 | `sentiment.overall.polarity`  | string  | Filter by sentiment: `positive`, `negative`, `neutral`.             |
-| `source.rank.opr.min`         | number  | Minimum source authority (0.0–1.0).                                 |
+| `source.rank.opr.min`         | number  | Minimum source authority (0–7).                                     |
 | `published_at.start`          | string  | Start date (ISO 8601 or `YYYY-MM-DD`).                             |
 | `published_at.end`            | string  | End date (ISO 8601 or `YYYY-MM-DD`).                               |
-| `language`                    | string  | Filter by language code.                                             |
+| `language.code`               | string  | Filter by language code.                                             |
 | `per_page`                    | integer | Number of results per page.                                          |
 
 ## Quick Start
@@ -91,17 +91,17 @@ class NewsTensorAnalyzer:
 
                     params = {
                         "api_key": API_KEY,
-                        "entity.name": entity,
+                        "organization.name": entity,
                         "topic.id": topic,
                         "published_at.start": start,
                         "published_at.end": end,
-                        "language": "en",
+                        "language.code.eq": "en",
                         "per_page": 1,
                     }
 
                     try:
                         response = requests.get(BASE_URL, params=params)
-                        count = response.json().get("total_results", 0)
+                        count = len(response.json().get("results", []))
                         tensor[e_idx, t_idx, d] = count
                     except:
                         tensor[e_idx, t_idx, d] = 0

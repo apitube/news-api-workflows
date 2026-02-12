@@ -18,7 +18,7 @@ def get_news_by_sentiment(polarity, topic=None, language="en", per_page=20):
     params = {
         "api_key": API_KEY,
         "sentiment.overall.polarity": polarity,
-        "language": language,
+        "language.code": language,
         "per_page": per_page,
     }
     if topic:
@@ -30,7 +30,7 @@ def get_news_by_sentiment(polarity, topic=None, language="en", per_page=20):
 
 # Fetch positive tech news
 data = get_news_by_sentiment("positive", topic="technology")
-print(f"Found {data['total_results']} positive tech articles\n")
+print(f"Found {len(data['results'])} positive tech articles\n")
 
 for article in data["results"]:
     score = article["sentiment"]["overall"]["score"]
@@ -50,7 +50,7 @@ response = requests.get(BASE_URL, params={
     "topic.id": "cryptocurrency",
     "sort.by": "sentiment.overall.score",
     "sort.order": "desc",
-    "language": "en",
+    "language.code": "en",
     "per_page": 20,
 })
 response.raise_for_status()
@@ -85,11 +85,11 @@ for topic in topics:
             "api_key": API_KEY,
             "topic.id": topic,
             "sentiment.overall.polarity": polarity,
-            "language": "en",
+            "language.code": "en",
             "per_page": 1,
         })
         response.raise_for_status()
-        results[polarity] = response.json().get("total_results", 0)
+        results[polarity] = len(response.json().get("results", []))
 
     total = sum(results.values()) or 1
     print(f"  {topic}:")
@@ -125,11 +125,11 @@ def get_daily_sentiment(topic, days=14, language="en"):
                 "sentiment.overall.polarity": polarity,
                 "published_at.start": day_start.strftime("%Y-%m-%d"),
                 "published_at.end": day_end.strftime("%Y-%m-%d"),
-                "language": language,
+                "language.code": language,
                 "per_page": 1,
             })
             response.raise_for_status()
-            counts[polarity] = response.json().get("total_results", 0)
+            counts[polarity] = len(response.json().get("results", []))
 
         daily_data.append({
             "date": day_start.strftime("%Y-%m-%d"),
@@ -170,12 +170,12 @@ def check_negative_spike(topic, language="en"):
         "topic.id": topic,
         "sentiment.overall.polarity": "negative",
         "published_at.start": datetime.utcnow().strftime("%Y-%m-%dT00:00:00Z"),
-        "language": language,
+        "language.code": language,
         "per_page": 1,
     })
     response.raise_for_status()
     data = response.json()
-    return data.get("total_results", 0)
+    return len(data.get("results", []))
 
 from datetime import datetime
 
@@ -195,7 +195,7 @@ while True:
                 "sentiment.overall.polarity": "negative",
                 "sort.by": "sentiment.overall.score",
                 "sort.order": "asc",
-                "language": "en",
+                "language.code": "en",
                 "per_page": 5,
             })
             response.raise_for_status()
@@ -220,7 +220,7 @@ async function getNewsBySentiment(polarity, options = {}) {
   const params = new URLSearchParams({
     api_key: API_KEY,
     "sentiment.overall.polarity": polarity,
-    language: options.language || "en",
+    "language.code": options.language || "en",
     per_page: String(options.perPage || 20),
   });
 
@@ -232,7 +232,7 @@ async function getNewsBySentiment(polarity, options = {}) {
 }
 
 const data = await getNewsBySentiment("positive", { topic: "technology" });
-console.log(`Found ${data.total_results} positive tech articles\n`);
+console.log(`Found ${data.results.length} positive tech articles\n`);
 
 data.results.forEach((article) => {
   const score = article.sentiment.overall.score;
@@ -252,7 +252,7 @@ async function getCryptoNewsBySentiment() {
     "topic.id": "cryptocurrency",
     "sort.by": "sentiment.overall.score",
     "sort.order": "desc",
-    language: "en",
+    "language.code": "en",
     per_page: "20",
   });
 
@@ -289,13 +289,13 @@ async function compareSentiment(topics) {
         api_key: API_KEY,
         "topic.id": topic,
         "sentiment.overall.polarity": polarity,
-        language: "en",
+        "language.code": "en",
         per_page: "1",
       });
 
       const response = await fetch(`${BASE_URL}?${params}`);
       const data = await response.json();
-      results[polarity] = data.total_results || 0;
+      results[polarity] = data.results?.length || 0;
     }
 
     const total = Object.values(results).reduce((a, b) => a + b, 0) || 1;
@@ -336,13 +336,13 @@ async function getDailySentiment(topic, days = 14) {
         "sentiment.overall.polarity": polarity,
         "published_at.start": dayStart.toISOString().split("T")[0],
         "published_at.end": dayEnd.toISOString().split("T")[0],
-        language: "en",
+        "language.code": "en",
         per_page: "1",
       });
 
       const response = await fetch(`${BASE_URL}?${params}`);
       const data = await response.json();
-      counts[polarity] = data.total_results || 0;
+      counts[polarity] = data.results?.length || 0;
     }
 
     dailyData.push({
@@ -390,7 +390,7 @@ function getNewsBySentiment(string $polarity, ?string $topic = null, string $lan
     $params = [
         "api_key"                    => $apiKey,
         "sentiment.overall.polarity" => $polarity,
-        "language"                   => $language,
+        "language.code"              => $language,
         "per_page"                   => $perPage,
     ];
     if ($topic !== null) {
@@ -403,7 +403,7 @@ function getNewsBySentiment(string $polarity, ?string $topic = null, string $lan
 }
 
 $data = getNewsBySentiment("positive", "technology");
-echo "Found {$data['total_results']} positive tech articles\n\n";
+echo "Found " . count($data["results"]) . " positive tech articles\n\n";
 
 foreach ($data["results"] as $article) {
     $score = $article["sentiment"]["overall"]["score"];
@@ -420,12 +420,12 @@ $apiKey  = "YOUR_API_KEY";
 $baseUrl = "https://api.apitube.io/v1/news/everything";
 
 $query = http_build_query([
-    "api_key"    => $apiKey,
-    "topic.id"   => "cryptocurrency",
-    "sort.by"    => "sentiment.overall.score",
-    "sort.order" => "desc",
-    "language"   => "en",
-    "per_page"   => 20,
+    "api_key"       => $apiKey,
+    "topic.id"      => "cryptocurrency",
+    "sort.by"       => "sentiment.overall.score",
+    "sort.order"    => "desc",
+    "language.code" => "en",
+    "per_page"      => 20,
 ]);
 
 $response = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
@@ -459,12 +459,12 @@ foreach ($topics as $topic) {
             "api_key"                    => $apiKey,
             "topic.id"                   => $topic,
             "sentiment.overall.polarity" => $polarity,
-            "language"                   => "en",
+            "language.code"              => "en",
             "per_page"                   => 1,
         ]);
 
         $data = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
-        $results[$polarity] = $data["total_results"] ?? 0;
+        $results[$polarity] = count($data["results"] ?? []);
     }
 
     $total = array_sum($results) ?: 1;
@@ -506,12 +506,12 @@ function getDailySentiment(string $topic, int $days = 14, string $language = "en
                 "sentiment.overall.polarity" => $polarity,
                 "published_at.start"         => $dayStart->format("Y-m-d"),
                 "published_at.end"           => $dayEnd->format("Y-m-d"),
-                "language"                   => $language,
+                "language.code"              => $language,
                 "per_page"                   => 1,
             ]);
 
             $data = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
-            $counts[$polarity] = $data["total_results"] ?? 0;
+            $counts[$polarity] = count($data["results"] ?? []);
         }
 
         $dailyData[] = [

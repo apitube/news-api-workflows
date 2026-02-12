@@ -21,14 +21,13 @@ GET https://api.apitube.io/v1/news/topic
 | `api_key`                     | string  | **Required.** Your API key.                                          |
 | `topic.id`                    | string  | Filter by technology/industry topic.                                |
 | `industry.id`                 | string  | Filter by industry.                                                  |
-| `entity.name`                 | string  | Filter by company or technology name.                               |
-| `entity.type`                 | string  | Filter by type: `organization`, `product`, `technology`.            |
+| `organization.name`           | string  | Filter by company name.                                             |
 | `title`                       | string  | Filter by disruption-related keywords.                               |
 | `sentiment.overall.polarity`  | string  | Filter by sentiment: `positive`, `negative`, `neutral`.             |
-| `source.rank.opr.min`         | number  | Minimum source authority (0.0–1.0).                                 |
+| `source.rank.opr.min`         | number  | Minimum source authority (0–7).                                     |
 | `published_at.start`          | string  | Start date (ISO 8601 or `YYYY-MM-DD`).                             |
 | `published_at.end`            | string  | End date (ISO 8601 or `YYYY-MM-DD`).                               |
-| `language`                    | string  | Filter by language code.                                             |
+| `language.code`               | string  | Filter by language code.                                             |
 | `sort.by`                     | string  | Sort field: `published_at`.                                          |
 | `sort.order`                  | string  | Sort direction: `asc` or `desc`.                                    |
 | `per_page`                    | integer | Number of results per page.                                          |
@@ -39,13 +38,13 @@ GET https://api.apitube.io/v1/news/topic
 
 ```bash
 # Track AI disruption news
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&topic.id=artificial_intelligence&title=disrupt,transform,replace,automate&source.rank.opr.min=0.6&per_page=20"
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&topic.id=artificial_intelligence&title=disrupt,transform,replace,automate&source.rank.opr.min=5&per_page=20"
 
 # Monitor startup funding news
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&title=startup,funding,Series A,Series B,raised,valuation&language=en&per_page=30"
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&title=startup,funding,Series A,Series B,raised,valuation&language.code=en&per_page=30"
 
 # Track emerging technology coverage
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&topic.id=quantum_computing,blockchain,autonomous_vehicles&language=en&per_page=30"
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&topic.id=quantum_computing,blockchain,autonomous_vehicles&language.code=en&per_page=30"
 ```
 
 ### Python
@@ -105,20 +104,20 @@ def analyze_disruption_theme(theme_name, config, days=30):
         "api_key": API_KEY,
         "title": ",".join(config["keywords"]),
         "published_at.start": start,
-        "language": "en",
-        "per_page": 1,
+        "language.code": "en",
+        "per_page": 100,
     })
-    metrics["total_coverage"] = resp.json().get("total_results", 0)
+    metrics["total_coverage"] = len(resp.json().get("results", []))
 
     # Disruption signal coverage
     resp = requests.get(BASE_URL, params={
         "api_key": API_KEY,
         "title": ",".join(config["keywords"] + DISRUPTION_SIGNALS),
         "published_at.start": start,
-        "language": "en",
-        "per_page": 1,
+        "language.code": "en",
+        "per_page": 100,
     })
-    metrics["disruption_signals"] = resp.json().get("total_results", 0)
+    metrics["disruption_signals"] = len(resp.json().get("results", []))
 
     # Positive coverage
     resp = requests.get(BASE_URL, params={
@@ -126,28 +125,28 @@ def analyze_disruption_theme(theme_name, config, days=30):
         "title": ",".join(config["keywords"]),
         "sentiment.overall.polarity": "positive",
         "published_at.start": start,
-        "language": "en",
-        "per_page": 1,
+        "language.code": "en",
+        "per_page": 100,
     })
-    metrics["positive_coverage"] = resp.json().get("total_results", 0)
+    metrics["positive_coverage"] = len(resp.json().get("results", []))
 
     # Tier-1 coverage
     resp = requests.get(BASE_URL, params={
         "api_key": API_KEY,
         "title": ",".join(config["keywords"]),
-        "source.rank.opr.min": 0.7,
+        "source.rank.opr.min": 6,
         "published_at.start": start,
-        "per_page": 1,
+        "per_page": 100,
     })
-    metrics["tier1_coverage"] = resp.json().get("total_results", 0)
+    metrics["tier1_coverage"] = len(resp.json().get("results", []))
 
     # Extract trending entities
     resp = requests.get(BASE_URL, params={
         "api_key": API_KEY,
         "title": ",".join(config["keywords"]),
-        "source.rank.opr.min": 0.6,
+        "source.rank.opr.min": 5,
         "published_at.start": start,
-        "language": "en",
+        "language.code": "en",
         "sort.by": "published_at",
         "sort.order": "desc",
         "per_page": 20,
@@ -239,26 +238,26 @@ async function analyzeDisruptionTheme(themeName, keywords, days = 30) {
     api_key: API_KEY,
     title: keywords.join(","),
     "published_at.start": start,
-    language: "en",
-    per_page: "1",
+    "language.code": "en",
+    per_page: "100",
   });
 
   let response = await fetch(`${BASE_URL}?${totalParams}`);
   let data = await response.json();
-  const totalCoverage = data.total_results || 0;
+  const totalCoverage = (data.results || []).length;
 
   // Disruption signals
   const signalParams = new URLSearchParams({
     api_key: API_KEY,
     title: [...keywords, ...DISRUPTION_SIGNALS].join(","),
     "published_at.start": start,
-    language: "en",
-    per_page: "1",
+    "language.code": "en",
+    per_page: "100",
   });
 
   response = await fetch(`${BASE_URL}?${signalParams}`);
   data = await response.json();
-  const disruptionSignals = data.total_results || 0;
+  const disruptionSignals = (data.results || []).length;
 
   const disruptionIntensity = disruptionSignals / Math.max(totalCoverage, 1);
   const disruptionScore = disruptionIntensity * 100;
@@ -327,22 +326,22 @@ function analyzeTheme(string $theme, array $keywords, int $days = 30): array
         "api_key"            => $apiKey,
         "title"              => implode(",", $keywords),
         "published_at.start" => $start,
-        "language"           => "en",
-        "per_page"           => 1,
+        "language.code"      => "en",
+        "per_page"           => 100,
     ]);
     $data = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
-    $totalCoverage = $data["total_results"] ?? 0;
+    $totalCoverage = count($data["results"] ?? []);
 
     // Disruption signals
     $query = http_build_query([
         "api_key"            => $apiKey,
         "title"              => implode(",", array_merge($keywords, $disruptionSignals)),
         "published_at.start" => $start,
-        "language"           => "en",
-        "per_page"           => 1,
+        "language.code"      => "en",
+        "per_page"           => 100,
     ]);
     $data = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
-    $signals = $data["total_results"] ?? 0;
+    $signals = count($data["results"] ?? []);
 
     $intensity = $signals / max($totalCoverage, 1);
 

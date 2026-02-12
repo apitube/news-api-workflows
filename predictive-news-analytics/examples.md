@@ -38,13 +38,13 @@ class AdvancedTimeSeriesForecaster:
 
             resp = requests.get(BASE_URL, params={
                 "api_key": API_KEY,
-                "entity.name": entity,
+                "organization.name": entity,
                 "published_at.start": date,
                 "published_at.end": next_date,
-                "language": "en",
+                "language.code": "en",
                 "per_page": 1,
             })
-            count = resp.json().get("total_results", 0)
+            count = len(resp.json().get("results", []))
             series.append({"date": date, "count": count, "day_of_week": datetime.fromisoformat(date).weekday()})
 
         self.series_cache[entity] = series
@@ -525,16 +525,16 @@ class AnomalyDetectionEngine {
 
     const params = new URLSearchParams({
       api_key: API_KEY,
-      "entity.name": entity,
+      "organization.name": entity,
       "published_at.start": date,
       "published_at.end": nextDate,
-      language: "en",
+      "language.code": "en",
       per_page: "1",
     });
 
     const response = await fetch(`${BASE_URL}?${params}`);
     const data = await response.json();
-    return data.total_results || 0;
+    return data.results?.length || 0;
   }
 
   async buildBaseline(entity) {
@@ -849,17 +849,17 @@ class ForecastingService
 
             $query = http_build_query([
                 "api_key" => $this->apiKey,
-                "entity.name" => $entity,
+                "organization.name" => $entity,
                 "published_at.start" => $date,
                 "published_at.end" => $nextDate,
-                "language" => "en",
+                "language.code" => "en",
                 "per_page" => 1,
             ]);
 
             $data = json_decode(file_get_contents("{$this->baseUrl}?{$query}"), true);
             $series[] = [
                 "date" => $date,
-                "count" => $data["total_results"] ?? 0,
+                "count" => count($data["results"] ?? []),
                 "dow" => (int)(new DateTime($date))->format("w"),
             ];
         }

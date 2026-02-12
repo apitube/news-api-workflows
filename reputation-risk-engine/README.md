@@ -17,13 +17,16 @@ GET https://api.apitube.io/v1/news/everything
 | Parameter                      | Type    | Description                                                          |
 |-------------------------------|---------|----------------------------------------------------------------------|
 | `api_key`                     | string  | **Required.** Your API key.                                          |
-| `entity.name`                 | string  | Filter by entity name.                                               |
+| `organization.name`           | string  | Filter by organization entity.                                       |
+| `person.name`                 | string  | Filter by person entity.                                             |
+| `location.name`               | string  | Filter by location entity.                                           |
+| `brand.name`                  | string  | Filter by brand entity.                                              |
 | `title`                       | string  | Filter by keywords.                                                  |
 | `sentiment.overall.polarity`  | string  | Filter by sentiment.                                                 |
-| `source.rank.opr.min`         | number  | Minimum source authority.                                            |
+| `source.rank.opr.min`         | number  | Minimum source authority (0-7).                                      |
 | `published_at.start`          | string  | Start date.                                                          |
 | `published_at.end`            | string  | End date.                                                            |
-| `language`                    | string  | Filter by language code.                                             |
+| `language.code`               | string  | Filter by language code.                                             |
 | `per_page`                    | integer | Number of results per page.                                          |
 
 ## Quick Start
@@ -175,39 +178,39 @@ class ReputationRiskEngine:
             # Total coverage
             resp = requests.get(BASE_URL, params={
                 "api_key": API_KEY,
-                "entity.name": self.entity,
+                "organization.name": self.entity,
                 "published_at.start": date,
                 "published_at.end": next_date,
-                "language": "en",
+                "language.code": "en",
                 "per_page": 1,
             })
-            day_data["total"] = resp.json().get("total_results", 0)
+            day_data["total"] = len(resp.json().get("results", []))
 
             # Dimension scores
             for dim_name, dim_config in self.REPUTATION_DIMENSIONS.items():
                 # Positive mentions
                 resp = requests.get(BASE_URL, params={
                     "api_key": API_KEY,
-                    "entity.name": self.entity,
+                    "organization.name": self.entity,
                     "title": ",".join(dim_config["positive"]),
                     "published_at.start": date,
                     "published_at.end": next_date,
-                    "language": "en",
+                    "language.code": "en",
                     "per_page": 1,
                 })
-                positive = resp.json().get("total_results", 0)
+                positive = len(resp.json().get("results", []))
 
                 # Negative mentions
                 resp = requests.get(BASE_URL, params={
                     "api_key": API_KEY,
-                    "entity.name": self.entity,
+                    "organization.name": self.entity,
                     "title": ",".join(dim_config["negative"]),
                     "published_at.start": date,
                     "published_at.end": next_date,
-                    "language": "en",
+                    "language.code": "en",
                     "per_page": 1,
                 })
-                negative = resp.json().get("total_results", 0)
+                negative = len(resp.json().get("results", []))
 
                 # Score: 0 (all negative) to 1 (all positive), 0.5 = neutral
                 total = positive + negative
@@ -223,13 +226,13 @@ class ReputationRiskEngine:
             for category, keywords in self.CONTROVERSY_KEYWORDS.items():
                 resp = requests.get(BASE_URL, params={
                     "api_key": API_KEY,
-                    "entity.name": self.entity,
+                    "organization.name": self.entity,
                     "title": ",".join(keywords),
                     "sentiment.overall.polarity": "negative",
-                    "source.rank.opr.min": 0.6,
+                    "source.rank.opr.min": 4,
                     "published_at.start": date,
                     "published_at.end": next_date,
-                    "language": "en",
+                    "language.code": "en",
                     "per_page": 10,
                 })
 

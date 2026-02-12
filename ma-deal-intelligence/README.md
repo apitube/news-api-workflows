@@ -17,13 +17,13 @@ GET https://api.apitube.io/v1/news/everything
 | Parameter                      | Type    | Description                                                          |
 |-------------------------------|---------|----------------------------------------------------------------------|
 | `api_key`                     | string  | **Required.** Your API key.                                          |
-| `entity.name`                 | string  | Filter by company involved in M&A.                                   |
+| `organization.name`           | string  | Filter by company involved in M&A.                                   |
 | `title`                       | string  | Filter by M&A-related keywords.                                      |
 | `sentiment.overall.polarity`  | string  | Filter by sentiment: `positive`, `negative`, `neutral`.             |
-| `source.rank.opr.min`         | number  | Minimum source authority (0.0–1.0).                                 |
+| `source.rank.opr.min`         | number  | Minimum source authority (0–7).                                     |
 | `published_at.start`          | string  | Start date (ISO 8601 or `YYYY-MM-DD`).                             |
 | `published_at.end`            | string  | End date (ISO 8601 or `YYYY-MM-DD`).                               |
-| `language`                    | string  | Filter by language code.                                             |
+| `language.code`               | string  | Filter by language code.                                             |
 | `sort.by`                     | string  | Sort field: `published_at`.                                          |
 | `sort.order`                  | string  | Sort direction: `asc` or `desc`.                                    |
 | `per_page`                    | integer | Number of results per page.                                          |
@@ -34,13 +34,13 @@ GET https://api.apitube.io/v1/news/everything
 
 ```bash
 # Track M&A rumors
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&title=acquisition,merger,takeover,buyout,deal&source.rank.opr.min=0.7&language=en&per_page=30"
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&title=acquisition,merger,takeover,buyout,deal&source.rank.opr.min=5&language.code=en&per_page=30"
 
 # Monitor specific company M&A activity
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&entity.name=Microsoft&title=acquire,acquisition,merger,buy&language=en&per_page=30"
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&organization.name=Microsoft&title=acquire,acquisition,merger,buy&language.code=en&per_page=30"
 
 # Track regulatory approvals
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&title=antitrust,FTC,DOJ,regulatory approval,merger approval&language=en&per_page=30"
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&title=antitrust,FTC,DOJ,regulatory approval,merger approval&language.code=en&per_page=30"
 ```
 
 ### Python
@@ -92,9 +92,9 @@ class MADealTracker:
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
             "title": ",".join(MA_TAXONOMY["rumor_signals"]),
-            "source.rank.opr.min": 0.6,
+            "source.rank.opr.min": 4,
             "published_at.start": start,
-            "language": "en",
+            "language.code": "en",
             "sort.by": "published_at",
             "sort.order": "desc",
             "per_page": 100,
@@ -154,10 +154,10 @@ class MADealTracker:
             resp = requests.get(BASE_URL, params={
                 "api_key": API_KEY,
                 "title": f"{search_terms},{','.join(keywords[:5])}",
-                "language": "en",
-                "per_page": 1,
+                "language.code": "en",
+                "per_page": 100,
             })
-            deal["coverage"][phase] = resp.json().get("total_results", 0)
+            deal["coverage"][phase] = len(resp.json().get("results", []))
 
         # Determine status
         if deal["coverage"]["completion_signals"] > 0:
@@ -187,9 +187,9 @@ class MADealTracker:
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
             "title": f"{acquirer},{target}",
-            "source.rank.opr.min": 0.7,
+            "source.rank.opr.min": 5,
             "published_at.start": start,
-            "language": "en",
+            "language.code": "en",
             "sort.by": "published_at",
             "sort.order": "asc",
             "per_page": 50,
@@ -230,10 +230,10 @@ class MADealTracker:
                 "sentiment.overall.polarity": "positive",
                 "published_at.start": start,
                 "published_at.end": end,
-                "language": "en",
-                "per_page": 1,
+                "language.code": "en",
+                "per_page": 100,
             })
-            positive = resp.json().get("total_results", 0)
+            positive = len(resp.json().get("results", []))
 
             # Negative
             resp = requests.get(BASE_URL, params={
@@ -242,10 +242,10 @@ class MADealTracker:
                 "sentiment.overall.polarity": "negative",
                 "published_at.start": start,
                 "published_at.end": end,
-                "language": "en",
-                "per_page": 1,
+                "language.code": "en",
+                "per_page": 100,
             })
-            negative = resp.json().get("total_results", 0)
+            negative = len(resp.json().get("results", []))
 
             total = positive + negative
             history.append({
@@ -263,7 +263,7 @@ class MADealTracker:
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
             "title": f"{acquirer},{target},{','.join(MA_TAXONOMY['regulatory_signals'])}",
-            "language": "en",
+            "language.code": "en",
             "per_page": 50,
         })
         articles = resp.json().get("results", [])
@@ -439,9 +439,9 @@ class MADealTracker {
     const params = new URLSearchParams({
       api_key: API_KEY,
       title: MA_KEYWORDS.rumors.join(","),
-      "source.rank.opr.min": "0.6",
+      "source.rank.opr.min": "4",
       "published_at.start": start,
-      language: "en",
+      "language.code": "en",
       per_page: "50",
     });
 
@@ -489,13 +489,13 @@ class MADealTracker {
       const params = new URLSearchParams({
         api_key: API_KEY,
         title: `${acquirer},${target},${keywords.slice(0, 3).join(",")}`,
-        language: "en",
-        per_page: "1",
+        "language.code": "en",
+        per_page: "100",
       });
 
       const response = await fetch(`${BASE_URL}?${params}`);
       const data = await response.json();
-      deal.coverage[phase] = data.total_results || 0;
+      deal.coverage[phase] = (data.results || []).length;
     }
 
     // Determine status
@@ -509,8 +509,8 @@ class MADealTracker {
     const params = new URLSearchParams({
       api_key: API_KEY,
       title: `${acquirer},${target}`,
-      "source.rank.opr.min": "0.7",
-      language: "en",
+      "source.rank.opr.min": "5",
+      "language.code": "en",
       "sort.by": "published_at",
       "sort.order": "desc",
       per_page: "20",
@@ -533,7 +533,7 @@ class MADealTracker {
     const params = new URLSearchParams({
       api_key: API_KEY,
       title: `${acquirer},${target},${MA_KEYWORDS.regulatory.join(",")}`,
-      language: "en",
+      "language.code": "en",
       per_page: "30",
     });
 
@@ -639,9 +639,9 @@ class MADealTracker
         $query = http_build_query([
             "api_key" => $this->apiKey,
             "title" => implode(",", $maKeywords["rumors"]),
-            "source.rank.opr.min" => 0.6,
+            "source.rank.opr.min" => 4,
             "published_at.start" => $start,
-            "language" => "en",
+            "language.code" => "en",
             "per_page" => 50,
         ]);
 
@@ -692,12 +692,12 @@ class MADealTracker
             $query = http_build_query([
                 "api_key" => $this->apiKey,
                 "title" => "{$acquirer},{$target}," . implode(",", array_slice($keywords, 0, 3)),
-                "language" => "en",
-                "per_page" => 1,
+                "language.code" => "en",
+                "per_page" => 100,
             ]);
 
             $data = json_decode(file_get_contents("{$this->baseUrl}?{$query}"), true);
-            $deal["coverage"][$phase] = $data["total_results"] ?? 0;
+            $deal["coverage"][$phase] = count($data["results"] ?? []);
         }
 
         // Determine status
@@ -718,7 +718,7 @@ class MADealTracker
         $query = http_build_query([
             "api_key" => $this->apiKey,
             "title" => "{$acquirer},{$target}," . implode(",", $maKeywords["regulatory"]),
-            "language" => "en",
+            "language.code" => "en",
             "per_page" => 30,
         ]);
 

@@ -17,11 +17,12 @@ GET https://api.apitube.io/v1/news/everything
 | Parameter                      | Type   | Description                                                        |
 |-------------------------------|--------|--------------------------------------------------------------------|
 | `api_key`                     | string | **Required.** Your API key.                                        |
-| `language`                    | string | Filter by language code (e.g., `en`, `fr`, `de`, `es`, `zh`).     |
+| `language.code`               | string | Filter by language code (e.g., `en`, `fr`, `de`, `es`, `zh`).      |
 | `source.country.code`         | string | Filter by source country (ISO 3166-1 alpha-2).                    |
-| `entity.name`                 | string | Filter by entity name (person, organization, location, etc.).     |
-| `entity.type`                 | string | Filter by entity type: `person`, `organization`, `location`.      |
-| `topic.id`                    | string | Filter by topic (e.g., `cryptocurrency`, `climate_change`).       |
+| `organization.name`           | string | Filter by organization name (e.g., `Tesla`, `Apple`).              |
+| `person.name`                 | string | Filter by person name (e.g., `Elon Musk`).                         |
+| `location.name`               | string | Filter by location name (e.g., `Tokyo`, `Berlin`).                 |
+| `topic.id`                    | string | Filter by topic (e.g., `crypto_news`, `climate_change`).           |
 | `sentiment.overall.polarity`  | string | Filter by polarity: `positive`, `negative`, or `neutral`.         |
 | `title`                       | string | Filter by keywords in article title (comma-separated).            |
 | `sort.by`                     | string | Sort field (e.g., `published_at`, `sentiment.overall.score`).     |
@@ -37,10 +38,10 @@ GET https://api.apitube.io/v1/news/everything
 
 ```bash
 # Get Tesla coverage across multiple languages
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&entity.name=Tesla&language=en&per_page=10"
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&organization.name=Tesla&language.code=en&per_page=10"
 
 # Compare climate change coverage in German vs French sources
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&topic.id=climate_change&language=de&per_page=10"
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&topic.id=climate_change&language.code=de&per_page=10"
 ```
 
 ### Python
@@ -50,8 +51,8 @@ import requests
 
 response = requests.get("https://api.apitube.io/v1/news/everything", params={
     "api_key": "YOUR_API_KEY",
-    "entity.name": "Tesla",
-    "language": "en",
+    "organization.name": "Tesla",
+    "language.code": "en",
     "per_page": 10,
 })
 
@@ -66,8 +67,8 @@ for article in data["results"]:
 ```javascript
 const params = new URLSearchParams({
   api_key: "YOUR_API_KEY",
-  "entity.name": "Tesla",
-  language: "en",
+  "organization.name": "Tesla",
+  "language.code": "en",
   per_page: "10",
 });
 
@@ -86,10 +87,10 @@ data.results.forEach((article) => {
 
 ```php
 $query = http_build_query([
-    "api_key"     => "YOUR_API_KEY",
-    "entity.name" => "Tesla",
-    "language"    => "en",
-    "per_page"    => 10,
+    "api_key"           => "YOUR_API_KEY",
+    "organization.name" => "Tesla",
+    "language.code"     => "en",
+    "per_page"          => 10,
 ]);
 
 $response = json_decode(file_get_contents(

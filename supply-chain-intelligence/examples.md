@@ -48,37 +48,35 @@ def assess_supplier_risk(supplier, days=7):
     # Total coverage
     resp = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "entity.name": supplier["name"],
-        "entity.type": supplier["type"],
+        "organization.name": supplier["name"],
         "published_at.start": start,
-        "language": "en",
+        "language.code": "en",
         "per_page": 1,
     })
-    total = resp.json().get("total_results", 0)
+    total = len(resp.json().get("results", []))
 
     # Negative coverage
     resp = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "entity.name": supplier["name"],
-        "entity.type": supplier["type"],
+        "organization.name": supplier["name"],
         "sentiment.overall.polarity": "negative",
         "published_at.start": start,
-        "language": "en",
+        "language.code": "en",
         "per_page": 1,
     })
-    negative = resp.json().get("total_results", 0)
+    negative = len(resp.json().get("results", []))
 
     # Risk keywords
     resp = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "entity.name": supplier["name"],
+        "organization.name": supplier["name"],
         "title": ",".join(RISK_KEYWORDS),
         "published_at.start": start,
-        "language": "en",
+        "language.code": "en",
         "per_page": 5,
     })
     risk_data = resp.json()
-    risk_hits = risk_data.get("total_results", 0)
+    risk_hits = risk_len(data.get("results", []))
     risk_headlines = [a["title"] for a in risk_data.get("results", [])[:3]]
 
     # Calculate risk score
@@ -203,25 +201,24 @@ def monitor_port(port, days=3):
     # Get port news
     resp = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "entity.name": port["name"],
-        "entity.type": "location",
+        "location.name": port["name"],
         "published_at.start": start,
-        "language": "en",
+        "language.code": "en",
         "per_page": 1,
     })
-    total = resp.json().get("total_results", 0)
+    total = len(resp.json().get("results", []))
 
     # Get disruption news
     resp = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "entity.name": port["name"],
+        "location.name": port["name"],
         "title": ",".join(DISRUPTION_KEYWORDS),
         "published_at.start": start,
-        "language": "en",
+        "language.code": "en",
         "per_page": 5,
     })
     disruption_data = resp.json()
-    disruptions = disruption_data.get("total_results", 0)
+    disruptions = disruption_len(data.get("results", []))
     recent_issues = [a["title"] for a in disruption_data.get("results", [])[:2]]
 
     # Calculate congestion score
@@ -249,27 +246,26 @@ def monitor_shipping_lane(lane, days=3):
     # Get lane news
     resp = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "entity.name": lane["name"],
-        "entity.type": "location",
+        "location.name": lane["name"],
         "published_at.start": start,
-        "language": "en",
+        "language.code": "en",
         "per_page": 1,
     })
-    total = resp.json().get("total_results", 0)
+    total = len(resp.json().get("results", []))
 
     # Get disruption news
     resp = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "entity.name": lane["name"],
+        "location.name": lane["name"],
         "title": ",".join(DISRUPTION_KEYWORDS),
         "published_at.start": start,
-        "language": "en",
+        "language.code": "en",
         "sort.by": "published_at",
         "sort.order": "desc",
         "per_page": 3,
     })
     disruption_data = resp.json()
-    disruptions = disruption_data.get("total_results", 0)
+    disruptions = disruption_len(data.get("results", []))
     recent_alerts = [
         {"title": a["title"], "source": a["source"]["domain"]}
         for a in disruption_data.get("results", [])
@@ -373,12 +369,12 @@ def analyze_commodity(commodity, keywords, days=7):
         "api_key": API_KEY,
         "title": f"{commodity},{','.join(keywords)}",
         "published_at.start": start,
-        "language": "en",
+        "language.code": "en",
         "per_page": 30,
     })
     data = resp.json()
     articles = data.get("results", [])
-    total = data.get("total_results", 0)
+    total = len(data.get("results", []))
 
     # Analyze sentiment
     sentiments = {"positive": 0, "negative": 0, "neutral": 0}
@@ -493,8 +489,7 @@ class SupplyChainAlertSystem {
 
     const params = new URLSearchParams({
       api_key: API_KEY,
-      "entity.name": entity,
-      "entity.type": type,
+      "organization.name": entity,
       title: DISRUPTION_KEYWORDS.join(","),
       "published_at.start": oneHourAgo,
       "sentiment.overall.polarity": "negative",
@@ -597,7 +592,7 @@ async function analyzeItemRisk(item, days = 14) {
     api_key: API_KEY,
     title: item.searchTerms.join(","),
     "published_at.start": start,
-    language: "en",
+    "language.code": "en",
     per_page: "50",
   });
 
@@ -627,7 +622,7 @@ async function analyzeItemRisk(item, days = 14) {
   return {
     sku: item.sku,
     description: item.description,
-    totalArticles: data.total_results || 0,
+    totalArticles: data.results?.length || 0,
     sentiments,
     supplyRisk,
     recommendation,
@@ -707,10 +702,9 @@ function getSupplierNews(array $supplier, int $days = 7): array
     // Get all news
     $query = http_build_query([
         "api_key"            => $apiKey,
-        "entity.name"        => $supplier["name"],
-        "entity.type"        => "organization",
+        "organization.name"  => $supplier["name"],
         "published_at.start" => $start,
-        "language"           => "en",
+        "language.code"      => "en",
         "sort.by"            => "published_at",
         "sort.order"         => "desc",
         "per_page"           => 20,
@@ -722,10 +716,10 @@ function getSupplierNews(array $supplier, int $days = 7): array
     // Get risk news
     $query = http_build_query([
         "api_key"            => $apiKey,
-        "entity.name"        => $supplier["name"],
+        "organization.name"  => $supplier["name"],
         "title"              => implode(",", $riskKeywords),
         "published_at.start" => $start,
-        "language"           => "en",
+        "language.code"      => "en",
         "per_page"           => 5,
     ]);
 
@@ -740,14 +734,14 @@ function getSupplierNews(array $supplier, int $days = 7): array
 
     $total = array_sum($sentiments) ?: 1;
     $riskScore = ($sentiments["negative"] / $total) * 50 +
-                 (($riskData["total_results"] ?? 0) / max($total, 1)) * 50;
+                 ((count($riskData["results"] ?? [])) / max($total, 1)) * 50;
 
     return [
         "supplier"    => $supplier["name"],
         "category"    => $supplier["category"],
-        "total_news"  => $data["total_results"] ?? 0,
+        "total_news"  => count($data["results"] ?? []),
         "sentiments"  => $sentiments,
-        "risk_alerts" => $riskData["total_results"] ?? 0,
+        "risk_alerts" => count($riskData["results"] ?? []),
         "risk_score"  => min(100, $riskScore),
         "risk_level"  => $riskScore >= 50 ? "HIGH" : ($riskScore >= 25 ? "MEDIUM" : "LOW"),
         "recent"      => array_map(fn($a) => [

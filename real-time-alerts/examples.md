@@ -22,8 +22,8 @@ seen_ids = set()
 def poll_breaking_news():
     response = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "is_breaking": "true",
-        "language": "en",
+        "is_breaking": "1",
+        "language.code": "en",
         "sort.by": "published_at",
         "sort.order": "desc",
         "per_page": 20,
@@ -68,7 +68,6 @@ API_KEY = "YOUR_API_KEY"
 BASE_URL = "https://api.apitube.io/v1/news/everything"
 
 ENTITY_NAME = "Tesla"
-ENTITY_TYPE = "organization"
 POLL_INTERVAL = 300
 WINDOW_SIZE = 12
 
@@ -82,35 +81,32 @@ def fetch_metrics():
 
     volume_response = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "entity.name": ENTITY_NAME,
-        "entity.type": ENTITY_TYPE,
+        "organization.name": ENTITY_NAME,
         "published_at.start": start,
-        "language": "en",
+        "language.code": "en",
         "per_page": 1,
     })
-    volume = volume_response.json().get("total_results", 0)
+    volume = len(volume_response.json().get("results", []))
 
     neg_response = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "entity.name": ENTITY_NAME,
-        "entity.type": ENTITY_TYPE,
+        "organization.name": ENTITY_NAME,
         "sentiment.overall.polarity": "negative",
         "published_at.start": start,
-        "language": "en",
+        "language.code": "en",
         "per_page": 1,
     })
-    negative_count = neg_response.json().get("total_results", 0)
+    negative_count = len(neg_response.json().get("results", []))
 
     breaking_response = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "entity.name": ENTITY_NAME,
-        "entity.type": ENTITY_TYPE,
-        "is_breaking": "true",
+        "organization.name": ENTITY_NAME,
+        "is_breaking": "1",
         "published_at.start": start,
-        "language": "en",
+        "language.code": "en",
         "per_page": 1,
     })
-    breaking_count = breaking_response.json().get("total_results", 0)
+    breaking_count = len(breaking_response.json().get("results", []))
 
     sentiment_ratio = negative_count / volume if volume > 0 else 0
 
@@ -169,7 +165,6 @@ API_KEY = "YOUR_API_KEY"
 BASE_URL = "https://api.apitube.io/v1/news/everything"
 
 ENTITY_NAME = "Apple"
-ENTITY_TYPE = "organization"
 POLL_INTERVAL = 300
 WINDOW_HOURS = 6
 
@@ -181,14 +176,13 @@ def get_mentions_last_hour():
 
     response = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "entity.name": ENTITY_NAME,
-        "entity.type": ENTITY_TYPE,
+        "organization.name": ENTITY_NAME,
         "published_at.start": start,
-        "language": "en",
+        "language.code": "en",
         "per_page": 1,
     })
     response.raise_for_status()
-    return response.json().get("total_results", 0)
+    return len(response.json().get("results", []))
 
 print(f"Entity mention velocity tracker for {ENTITY_NAME} started...\n")
 
@@ -211,12 +205,11 @@ while True:
 
             response = requests.get(BASE_URL, params={
                 "api_key": API_KEY,
-                "entity.name": ENTITY_NAME,
-                "entity.type": ENTITY_TYPE,
+                "organization.name": ENTITY_NAME,
                 "published_at.start": (datetime.utcnow() - timedelta(hours=1)).strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "sort.by": "published_at",
                 "sort.order": "desc",
-                "language": "en",
+                "language.code": "en",
                 "per_page": 5,
             })
 
@@ -254,7 +247,7 @@ def get_hourly_sentiment():
         "api_key": API_KEY,
         "topic.id": TOPIC_ID,
         "published_at.start": start,
-        "language": "en",
+        "language.code": "en",
         "sort.by": "published_at",
         "sort.order": "desc",
         "per_page": 100,
@@ -312,57 +305,53 @@ API_KEY = "YOUR_API_KEY"
 BASE_URL = "https://api.apitube.io/v1/news/everything"
 
 ENTITIES = [
-    {"name": "Tesla", "type": "organization"},
-    {"name": "Apple", "type": "organization"},
-    {"name": "Microsoft", "type": "organization"},
+    {"name": "Tesla"},
+    {"name": "Apple"},
+    {"name": "Microsoft"},
 ]
 POLL_INTERVAL = 600
 
-def calculate_crisis_score(entity_name, entity_type):
+def calculate_crisis_score(entity_name):
     now = datetime.utcnow()
     start = (now - timedelta(hours=6)).strftime("%Y-%m-%dT%H:%M:%SZ")
 
     total_response = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "entity.name": entity_name,
-        "entity.type": entity_type,
+        "organization.name": entity_name,
         "published_at.start": start,
-        "language": "en",
+        "language.code": "en",
         "per_page": 1,
     })
-    total = total_response.json().get("total_results", 0)
+    total = len(total_response.json().get("results", []))
 
     if total == 0:
         return 0.0, {}
 
     neg_response = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "entity.name": entity_name,
-        "entity.type": entity_type,
+        "organization.name": entity_name,
         "sentiment.overall.polarity": "negative",
         "published_at.start": start,
-        "language": "en",
+        "language.code": "en",
         "per_page": 1,
     })
-    negative = neg_response.json().get("total_results", 0)
+    negative = len(neg_response.json().get("results", []))
 
     breaking_response = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "entity.name": entity_name,
-        "entity.type": entity_type,
-        "is_breaking": "true",
+        "organization.name": entity_name,
+        "is_breaking": "1",
         "published_at.start": start,
-        "language": "en",
+        "language.code": "en",
         "per_page": 1,
     })
-    breaking = breaking_response.json().get("total_results", 0)
+    breaking = len(breaking_response.json().get("results", []))
 
     articles_response = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "entity.name": entity_name,
-        "entity.type": entity_type,
+        "organization.name": entity_name,
         "published_at.start": start,
-        "language": "en",
+        "language.code": "en",
         "per_page": 100,
     })
     articles = articles_response.json()["results"]
@@ -400,7 +389,7 @@ while True:
 
     scores = []
     for entity in ENTITIES:
-        score, metrics = calculate_crisis_score(entity["name"], entity["type"])
+        score, metrics = calculate_crisis_score(entity["name"])
         scores.append((entity["name"], score, metrics))
 
     scores.sort(key=lambda x: -x[1])
@@ -432,8 +421,8 @@ const seenIds = new Set();
 async function pollBreakingNews() {
   const params = new URLSearchParams({
     api_key: API_KEY,
-    is_breaking: "true",
-    language: "en",
+    is_breaking: "1",
+    "language.code": "en",
     "sort.by": "published_at",
     "sort.order": "desc",
     per_page: "20",
@@ -479,7 +468,6 @@ const API_KEY = "YOUR_API_KEY";
 const BASE_URL = "https://api.apitube.io/v1/news/everything";
 
 const ENTITY_NAME = "Tesla";
-const ENTITY_TYPE = "organization";
 const POLL_INTERVAL = 300000;
 const WINDOW_SIZE = 12;
 
@@ -495,40 +483,37 @@ async function fetchMetrics() {
     fetch(
       `${BASE_URL}?${new URLSearchParams({
         api_key: API_KEY,
-        "entity.name": ENTITY_NAME,
-        "entity.type": ENTITY_TYPE,
+        "organization.name": ENTITY_NAME,
         "published_at.start": start,
-        language: "en",
+        "language.code": "en",
         per_page: "1",
       })}`
     ),
     fetch(
       `${BASE_URL}?${new URLSearchParams({
         api_key: API_KEY,
-        "entity.name": ENTITY_NAME,
-        "entity.type": ENTITY_TYPE,
+        "organization.name": ENTITY_NAME,
         "sentiment.overall.polarity": "negative",
         "published_at.start": start,
-        language: "en",
+        "language.code": "en",
         per_page: "1",
       })}`
     ),
     fetch(
       `${BASE_URL}?${new URLSearchParams({
         api_key: API_KEY,
-        "entity.name": ENTITY_NAME,
-        "entity.type": ENTITY_TYPE,
-        is_breaking: "true",
+        "organization.name": ENTITY_NAME,
+        is_breaking: "1",
         "published_at.start": start,
-        language: "en",
+        "language.code": "en",
         per_page: "1",
       })}`
     ),
   ]);
 
-  const volume = (await volumeRes.json()).total_results || 0;
-  const negativeCount = (await negRes.json()).total_results || 0;
-  const breakingCount = (await breakingRes.json()).total_results || 0;
+  const volume = (await volumeRes.json()).results?.length || 0;
+  const negativeCount = (await negRes.json()).results?.length || 0;
+  const breakingCount = (await breakingRes.json()).results?.length || 0;
 
   const sentimentRatio = volume > 0 ? negativeCount / volume : 0;
 
@@ -599,7 +584,7 @@ async function getHourlySentiment() {
     api_key: API_KEY,
     "topic.id": TOPIC_ID,
     "published_at.start": start,
-    language: "en",
+    "language.code": "en",
     "sort.by": "published_at",
     "sort.order": "desc",
     per_page: "100",
@@ -680,12 +665,12 @@ function pollBreakingNews(): array
     global $apiKey, $baseUrl;
 
     $query = http_build_query([
-        "api_key"    => $apiKey,
-        "is_breaking" => "true",
-        "language"   => "en",
-        "sort.by"    => "published_at",
-        "sort.order" => "desc",
-        "per_page"   => 20,
+        "api_key"       => $apiKey,
+        "is_breaking"   => "1",
+        "language.code" => "en",
+        "sort.by"       => "published_at",
+        "sort.order"    => "desc",
+        "per_page"      => 20,
     ]);
 
     return json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
@@ -730,7 +715,6 @@ $apiKey = "YOUR_API_KEY";
 $baseUrl = "https://api.apitube.io/v1/news/everything";
 
 $entityName = "Apple";
-$entityType = "organization";
 $pollInterval = 300;
 $windowHours = 6;
 
@@ -738,21 +722,20 @@ $hourlyCounts = [];
 
 function getMentionsLastHour(): int
 {
-    global $apiKey, $baseUrl, $entityName, $entityType;
+    global $apiKey, $baseUrl, $entityName;
 
     $start = gmdate("Y-m-d\TH:i:s\Z", time() - 3600);
 
     $query = http_build_query([
         "api_key"            => $apiKey,
-        "entity.name"        => $entityName,
-        "entity.type"        => $entityType,
+        "organization.name"  => $entityName,
         "published_at.start" => $start,
-        "language"           => "en",
+        "language.code"      => "en",
         "per_page"           => 1,
     ]);
 
     $data = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
-    return $data["total_results"] ?? 0;
+    return count($data["results"] ?? []);
 }
 
 echo "Entity mention velocity tracker for {$entityName} started...\n\n";
@@ -781,12 +764,11 @@ while (true) {
             $start = gmdate("Y-m-d\TH:i:s\Z", time() - 3600);
             $query = http_build_query([
                 "api_key"            => $apiKey,
-                "entity.name"        => $entityName,
-                "entity.type"        => $entityType,
+                "organization.name"  => $entityName,
                 "published_at.start" => $start,
                 "sort.by"            => "published_at",
                 "sort.order"         => "desc",
-                "language"           => "en",
+                "language.code"      => "en",
                 "per_page"           => 5,
             ]);
 
@@ -812,13 +794,13 @@ $apiKey = "YOUR_API_KEY";
 $baseUrl = "https://api.apitube.io/v1/news/everything";
 
 $entities = [
-    ["name" => "Tesla", "type" => "organization"],
-    ["name" => "Apple", "type" => "organization"],
-    ["name" => "Microsoft", "type" => "organization"],
+    ["name" => "Tesla"],
+    ["name" => "Apple"],
+    ["name" => "Microsoft"],
 ];
 $pollInterval = 600;
 
-function calculateCrisisScore(string $entityName, string $entityType): array
+function calculateCrisisScore(string $entityName): array
 {
     global $apiKey, $baseUrl;
 
@@ -826,14 +808,13 @@ function calculateCrisisScore(string $entityName, string $entityType): array
 
     $totalQuery = http_build_query([
         "api_key"            => $apiKey,
-        "entity.name"        => $entityName,
-        "entity.type"        => $entityType,
+        "organization.name"  => $entityName,
         "published_at.start" => $start,
-        "language"           => "en",
+        "language.code"      => "en",
         "per_page"           => 1,
     ]);
     $totalData = json_decode(file_get_contents("{$baseUrl}?{$totalQuery}"), true);
-    $total = $totalData["total_results"] ?? 0;
+    $total = count($totalData["results"] ?? []);
 
     if ($total === 0) {
         return [0.0, []];
@@ -841,34 +822,31 @@ function calculateCrisisScore(string $entityName, string $entityType): array
 
     $negQuery = http_build_query([
         "api_key"                    => $apiKey,
-        "entity.name"                => $entityName,
-        "entity.type"                => $entityType,
+        "organization.name"          => $entityName,
         "sentiment.overall.polarity" => "negative",
         "published_at.start"         => $start,
-        "language"                   => "en",
+        "language.code"              => "en",
         "per_page"                   => 1,
     ]);
     $negData = json_decode(file_get_contents("{$baseUrl}?{$negQuery}"), true);
-    $negative = $negData["total_results"] ?? 0;
+    $negative = count($negData["results"] ?? []);
 
     $breakingQuery = http_build_query([
         "api_key"            => $apiKey,
-        "entity.name"        => $entityName,
-        "entity.type"        => $entityType,
-        "is_breaking"        => "true",
+        "organization.name"  => $entityName,
+        "is_breaking"        => "1",
         "published_at.start" => $start,
-        "language"           => "en",
+        "language.code"      => "en",
         "per_page"           => 1,
     ]);
     $breakingData = json_decode(file_get_contents("{$baseUrl}?{$breakingQuery}"), true);
-    $breaking = $breakingData["total_results"] ?? 0;
+    $breaking = count($breakingData["results"] ?? []);
 
     $articlesQuery = http_build_query([
         "api_key"            => $apiKey,
-        "entity.name"        => $entityName,
-        "entity.type"        => $entityType,
+        "organization.name"  => $entityName,
         "published_at.start" => $start,
-        "language"           => "en",
+        "language.code"      => "en",
         "per_page"           => 100,
     ]);
     $articlesData = json_decode(file_get_contents("{$baseUrl}?{$articlesQuery}"), true);
@@ -907,7 +885,7 @@ while (true) {
 
     $scores = [];
     foreach ($entities as $entity) {
-        [$score, $metrics] = calculateCrisisScore($entity["name"], $entity["type"]);
+        [$score, $metrics] = calculateCrisisScore($entity["name"]);
         $scores[] = [$entity["name"], $score, $metrics];
     }
 

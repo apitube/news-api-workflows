@@ -38,7 +38,7 @@ class AdvancedNarrativeAnalyzer:
                 "api_key": API_KEY,
                 "title": ",".join(keywords),
                 "published_at.start": start,
-                "language": "en",
+                "language.code": "en",
                 "sort.by": "published_at",
                 "sort.order": "asc",
                 "per_page": 50,
@@ -79,7 +79,7 @@ class AdvancedNarrativeAnalyzer:
             daily_data[date]["titles"].append(article.get("title", ""))
 
             opr = article.get("source", {}).get("rank", {}).get("opr", 0)
-            if opr >= 0.8:
+            if opr >= 6:
                 daily_data[date]["tier1_count"] += 1
 
         # Convert to timeline
@@ -284,20 +284,20 @@ class AdvancedNarrativeAnalyzer:
                 "title": ",".join(main_keywords),
                 "published_at.start": date,
                 "published_at.end": next_date,
-                "language": "en",
+                "language.code": "en",
                 "per_page": 1,
             })
-            main_daily[date] = resp.json().get("total_results", 0)
+            main_daily[date] = len(resp.json().get("results", []))
 
             resp = requests.get(BASE_URL, params={
                 "api_key": API_KEY,
                 "title": ",".join(counter_keywords),
                 "published_at.start": date,
                 "published_at.end": next_date,
-                "language": "en",
+                "language.code": "en",
                 "per_page": 1,
             })
-            counter_daily[date] = resp.json().get("total_results", 0)
+            counter_daily[date] = len(resp.json().get("results", []))
 
         # Calculate dynamics
         dates = sorted(main_daily.keys())
@@ -512,13 +512,13 @@ class NarrativeMonitor {
         title: narrative.keywords.join(","),
         "published_at.start": date,
         "published_at.end": nextDate,
-        language: "en",
+        "language.code": "en",
         per_page: "1",
       });
 
       let response = await fetch(`${BASE_URL}?${params}`);
       let data = await response.json();
-      const mainCount = data.total_results || 0;
+      const mainCount = data.results?.length || 0;
 
       // Sentiment
       params = new URLSearchParams({
@@ -527,13 +527,13 @@ class NarrativeMonitor {
         "sentiment.overall.polarity": "positive",
         "published_at.start": date,
         "published_at.end": nextDate,
-        language: "en",
+        "language.code": "en",
         per_page: "1",
       });
 
       response = await fetch(`${BASE_URL}?${params}`);
       data = await response.json();
-      const positiveCount = data.total_results || 0;
+      const positiveCount = data.results?.length || 0;
 
       // Counter narrative
       let counterCount = 0;
@@ -543,13 +543,13 @@ class NarrativeMonitor {
           title: narrative.counterKeywords.join(","),
           "published_at.start": date,
           "published_at.end": nextDate,
-          language: "en",
+          "language.code": "en",
           per_page: "1",
         });
 
         response = await fetch(`${BASE_URL}?${params}`);
         data = await response.json();
-        counterCount = data.total_results || 0;
+        counterCount = data.results?.length || 0;
       }
 
       timeline.push({
@@ -751,7 +751,7 @@ class NarrativeService
                 "api_key" => $this->apiKey,
                 "title" => implode(",", $keywords),
                 "published_at.start" => $start,
-                "language" => "en",
+                "language.code" => "en",
                 "sort.by" => "published_at",
                 "sort.order" => "asc",
                 "per_page" => 50,

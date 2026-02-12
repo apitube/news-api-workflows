@@ -31,14 +31,13 @@ class EventVelocityAnalyzer:
 
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": entity,
-            "entity.type": "organization",
+            "organization.name": entity,
             "published_at.start": start,
-            "language": "en",
+            "language.code": "en",
             "per_page": 1,
         })
 
-        total = resp.json().get("total_results", 0)
+        total = len(resp.json().get("results", []))
         daily_avg = total / days
         hourly_avg = daily_avg / 24
 
@@ -56,14 +55,13 @@ class EventVelocityAnalyzer:
 
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": entity,
-            "entity.type": "organization",
+            "organization.name": entity,
             "published_at.start": start,
-            "language": "en",
+            "language.code": "en",
             "per_page": 1,
         })
 
-        current_count = resp.json().get("total_results", 0)
+        current_count = len(resp.json().get("results", []))
         hourly_rate = current_count * (60 / minutes)
 
         return {
@@ -92,11 +90,10 @@ class EventVelocityAnalyzer:
                 # Get recent articles for context
                 resp = requests.get(BASE_URL, params={
                     "api_key": API_KEY,
-                    "entity.name": entity,
-                    "entity.type": "organization",
+                    "organization.name": entity,
                     "published_at.start": (datetime.utcnow() - timedelta(hours=1)).isoformat() + "Z",
-                    "language": "en",
-                    "source.rank.opr.min": 0.5,
+                    "language.code": "en",
+                    "source.rank.opr.min": 4,
                     "sort.by": "published_at",
                     "sort.order": "desc",
                     "per_page": 5,
@@ -130,14 +127,13 @@ class EventVelocityAnalyzer:
         for polarity in ["positive", "negative", "neutral"]:
             resp = requests.get(BASE_URL, params={
                 "api_key": API_KEY,
-                "entity.name": entity,
-                "entity.type": "organization",
+                "organization.name": entity,
                 "sentiment.overall.polarity": polarity,
                 "published_at.start": recent_start,
-                "language": "en",
+                "language.code": "en",
                 "per_page": 1,
             })
-            recent_sentiments[polarity] = resp.json().get("total_results", 0)
+            recent_sentiments[polarity] = len(resp.json().get("results", []))
 
         # Historical sentiment (last 24 hours)
         hist_start = (datetime.utcnow() - timedelta(hours=hours)).isoformat() + "Z"
@@ -146,14 +142,13 @@ class EventVelocityAnalyzer:
         for polarity in ["positive", "negative", "neutral"]:
             resp = requests.get(BASE_URL, params={
                 "api_key": API_KEY,
-                "entity.name": entity,
-                "entity.type": "organization",
+                "organization.name": entity,
                 "sentiment.overall.polarity": polarity,
                 "published_at.start": hist_start,
-                "language": "en",
+                "language.code": "en",
                 "per_page": 1,
             })
-            hist_sentiments[polarity] = resp.json().get("total_results", 0)
+            hist_sentiments[polarity] = len(resp.json().get("results", []))
 
         # Calculate sentiment scores
         recent_total = sum(recent_sentiments.values()) or 1
@@ -247,13 +242,13 @@ def get_co_mentions(entity1, entity2, hours=24):
 
     resp = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "entity.name": f"{entity1},{entity2}",
+        "organization.name": f"{entity1},{entity2}",
         "published_at.start": start,
-        "language": "en",
+        "language.code": "en",
         "per_page": 1,
     })
 
-    return resp.json().get("total_results", 0)
+    return len(resp.json().get("results", []))
 
 def calculate_correlation_strength(entity1, entity2, hours=24):
     """Calculate news correlation strength between two entities."""
@@ -262,21 +257,21 @@ def calculate_correlation_strength(entity1, entity2, hours=24):
     # Get individual counts
     resp1 = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "entity.name": entity1,
+        "organization.name": entity1,
         "published_at.start": start,
-        "language": "en",
+        "language.code": "en",
         "per_page": 1,
     })
-    count1 = resp1.json().get("total_results", 0)
+    count1 = len(resp1.json().get("results", []))
 
     resp2 = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "entity.name": entity2,
+        "organization.name": entity2,
         "published_at.start": start,
-        "language": "en",
+        "language.code": "en",
         "per_page": 1,
     })
-    count2 = resp2.json().get("total_results", 0)
+    count2 = len(resp2.json().get("results", []))
 
     # Get co-mentions
     co_mentions = get_co_mentions(entity1, entity2, hours)
@@ -392,60 +387,55 @@ class MultiSignalEventScorer:
         # 1. Breaking news signal
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": self.entity,
-            "entity.type": "organization",
-            "is_breaking": "true",
+            "organization.name": self.entity,
+            "is_breaking": 1,
             "published_at.start": start,
             "per_page": 1,
         })
-        breaking_count = resp.json().get("total_results", 0)
+        breaking_count = len(resp.json().get("results", []))
         self.signals["breaking_news"] = min(1.0, breaking_count * 0.2)
 
         # 2. Source authority signal (% from tier-1 sources)
         resp_tier1 = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": self.entity,
-            "entity.type": "organization",
+            "organization.name": self.entity,
             "source.domain": TIER_1_SOURCES,
             "published_at.start": start,
             "per_page": 1,
         })
-        tier1_count = resp_tier1.json().get("total_results", 0)
+        tier1_count = len(resp_tier1.json().get("results", []))
 
         resp_total = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": self.entity,
-            "entity.type": "organization",
+            "organization.name": self.entity,
             "published_at.start": start,
             "per_page": 1,
         })
-        total_count = resp_total.json().get("total_results", 0) or 1
+        total_count = len(resp_total.json().get("results", [])) or 1
         self.signals["source_authority"] = tier1_count / total_count
         self.signals["tier1_coverage"] = min(1.0, tier1_count * 0.1)
 
         # 3. Sentiment extremity signal
         resp_neg = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": self.entity,
-            "entity.type": "organization",
+            "organization.name": self.entity,
             "sentiment.overall.polarity": "negative",
             "sentiment.overall.score.max": 0.3,  # Very negative
             "published_at.start": start,
             "per_page": 1,
         })
-        extreme_neg = resp_neg.json().get("total_results", 0)
+        extreme_neg = len(resp_neg.json().get("results", []))
         self.signals["sentiment_extremity"] = min(1.0, extreme_neg * 0.15)
 
         # 4. Mention velocity (normalized against baseline)
         baseline_resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": self.entity,
-            "entity.type": "organization",
+            "organization.name": self.entity,
             "published_at.start": (datetime.utcnow() - timedelta(days=7)).strftime("%Y-%m-%d"),
-            "language": "en",
+            "language.code": "en",
             "per_page": 1,
         })
-        baseline_total = baseline_resp.json().get("total_results", 0)
+        baseline_total = len(baseline_resp.json().get("results", []))
         baseline_hourly = baseline_total / (7 * 24)
 
         current_hourly = total_count * (60 / minutes)
@@ -457,12 +447,12 @@ class MultiSignalEventScorer:
         for severity, keywords in self.SEVERITY_KEYWORDS.items():
             resp = requests.get(BASE_URL, params={
                 "api_key": API_KEY,
-                "entity.name": self.entity,
+                "organization.name": self.entity,
                 "title": ",".join(keywords),
                 "published_at.start": start,
                 "per_page": 1,
             })
-            count = resp.json().get("total_results", 0)
+            count = len(resp.json().get("results", []))
             multiplier = {"critical": 1.0, "high": 0.6, "medium": 0.3}[severity]
             severity_score += count * multiplier * 0.1
 
@@ -471,8 +461,7 @@ class MultiSignalEventScorer:
         # 6. Cross-entity spread (how many related entities are mentioned)
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": self.entity,
-            "entity.type": "organization",
+            "organization.name": self.entity,
             "published_at.start": start,
             "per_page": 10,
         })
@@ -603,16 +592,15 @@ class MarketEventStream {
     for (const entity of entities) {
       const params = new URLSearchParams({
         api_key: API_KEY,
-        "entity.name": entity,
-        "entity.type": "organization",
+        "organization.name": entity,
         "published_at.start": sevenDaysAgo,
-        language: "en",
+        "language.code": "en",
         per_page: "1",
       });
 
       const response = await fetch(`${BASE_URL}?${params}`);
       const data = await response.json();
-      const total = data.total_results || 0;
+      const total = data.results?.length || 0;
 
       this.baselines[entity] = {
         dailyAvg: total / 7,
@@ -673,10 +661,10 @@ class MarketEventStream {
 
     const params = new URLSearchParams({
       api_key: API_KEY,
-      is_breaking: "true",
+      is_breaking: "1",
       "source.domain": TIER_1_SOURCES,
       "published_at.start": tenMinutesAgo,
-      language: "en",
+      "language.code": "en",
       "sort.by": "published_at",
       "sort.order": "desc",
       per_page: "30",
@@ -835,10 +823,10 @@ function detectMarketEvents(int $minutes = 30): array
 
     $query = http_build_query([
         "api_key"            => $apiKey,
-        "is_breaking"        => "true",
+        "is_breaking"        => 1,
         "source.domain"      => $tier1Sources,
         "published_at.start" => $start,
-        "language"           => "en",
+        "language.code"      => "en",
         "sort.by"            => "published_at",
         "sort.order"         => "desc",
         "per_page"           => 30,

@@ -28,14 +28,14 @@ def get_language_volume(topic, languages, days=7):
         response = requests.get(BASE_URL, params={
             "api_key": API_KEY,
             "topic.id": topic,
-            "language": lang,
+            "language.code": lang,
             "published_at.start": start_date.strftime("%Y-%m-%d"),
             "published_at.end": end_date.strftime("%Y-%m-%d"),
             "per_page": 1,
         })
         response.raise_for_status()
         data = response.json()
-        volumes[lang] = data.get("total_results", 0)
+        volumes[lang] = len(data.get("results", []))
 
     return volumes
 
@@ -83,7 +83,7 @@ def build_sentiment_matrix(topic, languages, days=7):
             response = requests.get(BASE_URL, params={
                 "api_key": API_KEY,
                 "topic.id": topic,
-                "language": lang,
+                "language.code": lang,
                 "sentiment.overall.polarity": polarity,
                 "published_at.start": start_date.strftime("%Y-%m-%d"),
                 "published_at.end": end_date.strftime("%Y-%m-%d"),
@@ -91,7 +91,7 @@ def build_sentiment_matrix(topic, languages, days=7):
             })
             response.raise_for_status()
             data = response.json()
-            row[polarity] = data.get("total_results", 0)
+            row[polarity] = len(data.get("results", []))
 
         total = row["positive"] + row["negative"] + row["neutral"]
         row["total"] = total
@@ -147,14 +147,14 @@ def track_daily_coverage(keyword, languages, days=7):
             response = requests.get(BASE_URL, params={
                 "api_key": API_KEY,
                 "title": keyword,
-                "language": lang,
+                "language.code": lang,
                 "published_at.start": day_start.strftime("%Y-%m-%d"),
                 "published_at.end": day_end.strftime("%Y-%m-%d"),
                 "per_page": 1,
             })
             response.raise_for_status()
             data = response.json()
-            coverage[date_str][lang] = data.get("total_results", 0)
+            coverage[date_str][lang] = len(data.get("results", []))
 
     return coverage
 
@@ -280,8 +280,8 @@ def analyze_entity_perception(entity_name, languages, days=30):
         for polarity in ["positive", "negative", "neutral"]:
             response = requests.get(BASE_URL, params={
                 "api_key": API_KEY,
-                "entity.name": entity_name,
-                "language": lang,
+                "organization.name": entity_name,
+                "language.code": lang,
                 "sentiment.overall.polarity": polarity,
                 "published_at.start": start_date.strftime("%Y-%m-%d"),
                 "published_at.end": end_date.strftime("%Y-%m-%d"),
@@ -289,15 +289,15 @@ def analyze_entity_perception(entity_name, languages, days=30):
             })
             response.raise_for_status()
             data = response.json()
-            sentiment_data[polarity] = data.get("total_results", 0)
+            sentiment_data[polarity] = len(data.get("results", []))
 
         total = sum(sentiment_data.values())
 
         if total > 0:
             response = requests.get(BASE_URL, params={
                 "api_key": API_KEY,
-                "entity.name": entity_name,
-                "language": lang,
+                "organization.name": entity_name,
+                "language.code": lang,
                 "sort.by": "sentiment.overall.score",
                 "sort.order": "desc",
                 "published_at.start": start_date.strftime("%Y-%m-%d"),
@@ -366,7 +366,7 @@ async function getLanguageVolume(topic, languages, days = 7) {
     const params = new URLSearchParams({
       api_key: API_KEY,
       "topic.id": topic,
-      language: lang,
+      "language.code": lang,
       "published_at.start": startDate.toISOString().split("T")[0],
       "published_at.end": endDate.toISOString().split("T")[0],
       per_page: "1",
@@ -374,7 +374,7 @@ async function getLanguageVolume(topic, languages, days = 7) {
 
     const response = await fetch(`${BASE_URL}?${params}`);
     const data = await response.json();
-    return { lang, count: data.total_results || 0 };
+    return { lang, count: data.results?.length || 0 };
   });
 
   const results = await Promise.all(requests);
@@ -412,7 +412,7 @@ async function buildSentimentMatrix(topic, languages, days = 7) {
       const params = new URLSearchParams({
         api_key: API_KEY,
         "topic.id": topic,
-        language: lang,
+        "language.code": lang,
         "sentiment.overall.polarity": polarity,
         "published_at.start": startDate.toISOString().split("T")[0],
         "published_at.end": endDate.toISOString().split("T")[0],
@@ -421,7 +421,7 @@ async function buildSentimentMatrix(topic, languages, days = 7) {
 
       const response = await fetch(`${BASE_URL}?${params}`);
       const data = await response.json();
-      row[polarity] = data.total_results || 0;
+      row[polarity] = data.results?.length || 0;
     }
 
     const total = row.positive + row.negative + row.neutral;
@@ -485,7 +485,7 @@ async function trackDailyCoverage(keyword, languages, days = 7) {
       const params = new URLSearchParams({
         api_key: API_KEY,
         title: keyword,
-        language: lang,
+        "language.code": lang,
         "published_at.start": dayStart.toISOString().split("T")[0],
         "published_at.end": dayEnd.toISOString().split("T")[0],
         per_page: "1",
@@ -493,7 +493,7 @@ async function trackDailyCoverage(keyword, languages, days = 7) {
 
       const response = await fetch(`${BASE_URL}?${params}`);
       const data = await response.json();
-      return { lang, count: data.total_results || 0 };
+      return { lang, count: data.results?.length || 0 };
     });
 
     const results = await Promise.all(requests);
@@ -561,14 +561,14 @@ function getLanguageVolume(string $topic, array $languages, int $days = 7): arra
         $query = http_build_query([
             "api_key"            => $apiKey,
             "topic.id"           => $topic,
-            "language"           => $lang,
+            "language.code"      => $lang,
             "published_at.start" => $startDate->format("Y-m-d"),
             "published_at.end"   => $endDate->format("Y-m-d"),
             "per_page"           => 1,
         ]);
 
         $data = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
-        $volumes[$lang] = $data["total_results"] ?? 0;
+        $volumes[$lang] = count($data["results"] ?? []);
     }
 
     return $volumes;
@@ -609,8 +609,8 @@ function analyzeEntityPerception(string $entityName, array $languages, int $days
         foreach (["positive", "negative", "neutral"] as $polarity) {
             $query = http_build_query([
                 "api_key"                    => $apiKey,
-                "entity.name"                => $entityName,
-                "language"                   => $lang,
+                "organization.name"          => $entityName,
+                "language.code"              => $lang,
                 "sentiment.overall.polarity" => $polarity,
                 "published_at.start"         => $startDate->format("Y-m-d"),
                 "published_at.end"           => $endDate->format("Y-m-d"),
@@ -618,7 +618,7 @@ function analyzeEntityPerception(string $entityName, array $languages, int $days
             ]);
 
             $data = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
-            $sentimentData[$polarity] = $data["total_results"] ?? 0;
+            $sentimentData[$polarity] = count($data["results"] ?? []);
         }
 
         $total = array_sum($sentimentData);
@@ -626,8 +626,8 @@ function analyzeEntityPerception(string $entityName, array $languages, int $days
         if ($total > 0) {
             $query = http_build_query([
                 "api_key"            => $apiKey,
-                "entity.name"        => $entityName,
-                "language"           => $lang,
+                "organization.name"  => $entityName,
+                "language.code"      => $lang,
                 "sort.by"            => "sentiment.overall.score",
                 "sort.order"         => "desc",
                 "published_at.start" => $startDate->format("Y-m-d"),

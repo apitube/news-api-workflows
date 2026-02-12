@@ -19,19 +19,19 @@ BASE_URL = "https://api.apitube.io/v1/news/everything"
 JURISDICTIONS = {
     "United States": {
         "regulators": ["SEC", "FTC", "FDA", "EPA", "DOJ", "CFPB", "FINRA", "CFTC"],
-        "language": "en",
+        "language.code": "en",
     },
     "European Union": {
         "regulators": ["European Commission", "ECB", "ESMA", "EBA", "EDPB"],
-        "language": "en",
+        "language.code": "en",
     },
     "United Kingdom": {
         "regulators": ["FCA", "CMA", "ICO", "Ofcom", "Bank of England"],
-        "language": "en",
+        "language.code": "en",
     },
     "Asia Pacific": {
         "regulators": ["MAS", "HKMA", "FSA Japan", "ASIC", "SEBI"],
-        "language": "en",
+        "language.code": "en",
     },
 }
 
@@ -63,36 +63,33 @@ def analyze_jurisdiction(name, config, days=14):
         # Get total regulatory news
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": regulator,
-            "entity.type": "organization",
+            "organization.name": regulator,
             "published_at.start": start,
             "language": config["language"],
             "per_page": 1,
         })
-        regulator_data["total"] = resp.json().get("total_results", 0)
+        regulator_data["total"] = len(resp.json().get("results", []))
         results["total_activity"] += regulator_data["total"]
 
         # Analyze by category
         for category, keywords in REGULATORY_CATEGORIES.items():
             resp = requests.get(BASE_URL, params={
                 "api_key": API_KEY,
-                "entity.name": regulator,
-                "entity.type": "organization",
+                "organization.name": regulator,
                 "title": ",".join(keywords),
                 "published_at.start": start,
-                "language": config["language"],
+                "language.code": config["language"],
                 "per_page": 1,
             })
-            count = resp.json().get("total_results", 0)
+            count = len(resp.json().get("results", []))
             regulator_data["by_category"][category] = count
             results["category_breakdown"][category] += count
 
         # Get top stories
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": regulator,
-            "entity.type": "organization",
-            "source.rank.opr.min": 0.6,
+            "organization.name": regulator,
+            "source.rank.opr.min": 5,
             "published_at.start": start,
             "language": config["language"],
             "sort.by": "published_at",
@@ -201,12 +198,11 @@ def track_enforcement_by_regulator(regulator, days=30):
 
     response = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "entity.name": regulator,
-        "entity.type": "organization",
+        "organization.name": regulator,
         "title": ",".join(ENFORCEMENT_KEYWORDS),
         "published_at.start": start,
-        "language": "en",
-        "source.rank.opr.min": 0.5,
+        "language.code": "en",
+        "source.rank.opr.min": 4,
         "sort.by": "published_at",
         "sort.order": "desc",
         "per_page": 50,
@@ -224,7 +220,7 @@ def track_enforcement_by_regulator(regulator, days=30):
 
     return {
         "regulator": regulator,
-        "total_actions": data.get("total_results", 0),
+        "total_actions": len(data.get("results", [])),
         "actions": actions,
         "by_company": dict(by_company),
         "industries_affected": list(set(
@@ -348,32 +344,31 @@ def analyze_industry_regulation(industry, config, days=14):
             "api_key": API_KEY,
             "title": topic,
             "published_at.start": start,
-            "language": "en",
+            "language.code": "en",
             "per_page": 1,
         })
-        results["by_topic"][topic] = resp.json().get("total_results", 0)
+        results["by_topic"][topic] = len(resp.json().get("results", []))
         results["total_coverage"] += results["by_topic"][topic]
 
     # Analyze by regulator
     for regulator in config["regulators"]:
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": regulator,
-            "entity.type": "organization",
+            "organization.name": regulator,
             "title": ",".join(config["topics"]),
             "published_at.start": start,
-            "language": "en",
+            "language.code": "en",
             "per_page": 1,
         })
-        results["by_regulator"][regulator] = resp.json().get("total_results", 0)
+        results["by_regulator"][regulator] = len(resp.json().get("results", []))
 
     # Get key developments
     resp = requests.get(BASE_URL, params={
         "api_key": API_KEY,
         "title": ",".join(config["topics"]),
-        "source.rank.opr.min": 0.6,
+        "source.rank.opr.min": 5,
         "published_at.start": start,
-        "language": "en",
+        "language.code": "en",
         "sort.by": "published_at",
         "sort.order": "desc",
         "per_page": 20,
@@ -485,11 +480,10 @@ class RegulatoryAlertSystem {
       for (const [alertType, keywords] of Object.entries(ALERT_TRIGGERS)) {
         const params = new URLSearchParams({
           api_key: API_KEY,
-          "entity.name": regulator,
-          "entity.type": "organization",
+          "organization.name": regulator,
           title: keywords.join(","),
           "published_at.start": oneHourAgo,
-          "source.rank.opr.min": "0.5",
+          "source.rank.opr.min": "4",
           "sort.by": "published_at",
           "sort.order": "desc",
           per_page: "5",
@@ -590,8 +584,8 @@ async function findUpcomingDeadlines(industry, days = 30) {
     api_key: API_KEY,
     title: [...DEADLINE_KEYWORDS, industry].join(","),
     "published_at.start": new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
-    language: "en",
-    "source.rank.opr.min": "0.5",
+    "language.code": "en",
+    "source.rank.opr.min": "4",
     "sort.by": "published_at",
     "sort.order": "desc",
     per_page: "30",
@@ -617,7 +611,7 @@ async function findUpcomingDeadlines(industry, days = 30) {
 
   return {
     industry,
-    totalArticles: data.total_results || 0,
+    totalArticles: data.results?.length || 0,
     deadlines,
   };
 }
@@ -695,38 +689,35 @@ function analyzeRegulator(string $regulator, int $days = 14): array
     // Total coverage
     $query = http_build_query([
         "api_key"            => $apiKey,
-        "entity.name"        => $regulator,
-        "entity.type"        => "organization",
+        "organization.name"  => $regulator,
         "published_at.start" => $start,
-        "language"           => "en",
+        "language.code"      => "en",
         "per_page"           => 1,
     ]);
     $data = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
-    $result["total"] = $data["total_results"] ?? 0;
+    $result["total"] = count($data["results"] ?? []);
 
     // By category
     foreach ($categories as $category => $keywords) {
         $query = http_build_query([
             "api_key"            => $apiKey,
-            "entity.name"        => $regulator,
-            "entity.type"        => "organization",
+            "organization.name"  => $regulator,
             "title"              => implode(",", $keywords),
             "published_at.start" => $start,
-            "language"           => "en",
+            "language.code"      => "en",
             "per_page"           => 1,
         ]);
         $data = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
-        $result["by_category"][$category] = $data["total_results"] ?? 0;
+        $result["by_category"][$category] = count($data["results"] ?? []);
     }
 
     // Recent news
     $query = http_build_query([
         "api_key"             => $apiKey,
-        "entity.name"         => $regulator,
-        "entity.type"         => "organization",
+        "organization.name"   => $regulator,
         "published_at.start"  => $start,
-        "language"            => "en",
-        "source.rank.opr.min" => 0.5,
+        "language.code"       => "en",
+        "source.rank.opr.min" => 4,
         "sort.by"             => "published_at",
         "sort.order"          => "desc",
         "per_page"            => 5,
@@ -825,8 +816,8 @@ function detectPolicyChanges(string $industry, array $topics, int $days = 7): ar
         "api_key"             => $apiKey,
         "title"               => implode(",", $allKeywords),
         "published_at.start"  => $start,
-        "language"            => "en",
-        "source.rank.opr.min" => 0.5,
+        "language.code"       => "en",
+        "source.rank.opr.min" => 4,
         "sort.by"             => "published_at",
         "sort.order"          => "desc",
         "per_page"            => 20,
@@ -850,7 +841,7 @@ function detectPolicyChanges(string $industry, array $topics, int $days = 7): ar
 
     return [
         "industry" => $industry,
-        "total"    => $data["total_results"] ?? 0,
+        "total"    => count($data["results"] ?? []),
         "changes"  => $changes,
     ];
 }

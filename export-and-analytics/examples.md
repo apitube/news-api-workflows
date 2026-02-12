@@ -64,7 +64,7 @@ def export_to_csv(filename, params, max_articles=500):
 
 export_to_csv("tech_news.csv", {
     "topic.id": "technology",
-    "language": "en",
+    "language.code": "en",
     "sort.by": "published_at",
     "sort.order": "desc",
 })
@@ -111,7 +111,7 @@ def export_to_jsonl(filename, params, max_articles=1000):
 
 export_to_jsonl("ai_news.jsonl", {
     "topic.id": "artificial_intelligence",
-    "language": "en",
+    "language.code": "en",
     "sort.by": "published_at",
     "sort.order": "desc",
 })
@@ -152,7 +152,7 @@ with open(filename, "w", newline="", encoding="utf-8") as f:
                 "topic.id": topic,
                 "published_at.start": start.strftime("%Y-%m-%d"),
                 "published_at.end": today.strftime("%Y-%m-%d"),
-                "language": "en",
+                "language.code": "en",
                 "sort.by": "published_at",
                 "sort.order": "desc",
                 "per_page": 50,
@@ -212,7 +212,7 @@ while len(all_articles) < 200:
         "topic.id": topic,
         "published_at.start": start.strftime("%Y-%m-%d"),
         "published_at.end": today.strftime("%Y-%m-%d"),
-        "language": "en",
+        "language.code": "en",
         "sort.by": "published_at",
         "sort.order": "desc",
         "per_page": 50,
@@ -299,7 +299,7 @@ while True:
         "api_key": API_KEY,
         "published_at.start": last_export,
         "published_at.end": now_str,
-        "language": "en",
+        "language.code": "en",
         "sort.by": "published_at",
         "sort.order": "asc",
         "per_page": 50,
@@ -396,7 +396,7 @@ async function exportToCsv(filename, filterParams, maxArticles = 500) {
 
 await exportToCsv("tech_news.csv", {
   "topic.id": "technology",
-  language: "en",
+  "language.code": "en",
   "sort.by": "published_at",
   "sort.order": "desc",
 });
@@ -445,7 +445,7 @@ async function exportToJsonl(filename, filterParams, maxArticles = 1000) {
 
 await exportToJsonl("ai_news.jsonl", {
   "topic.id": "artificial_intelligence",
-  language: "en",
+  "language.code": "en",
   "sort.by": "published_at",
   "sort.order": "desc",
 });
@@ -472,7 +472,7 @@ async function generateReport(topic, days = 7) {
       "topic.id": topic,
       "published_at.start": fmt(start),
       "published_at.end": fmt(now),
-      language: "en",
+      "language.code": "en",
       "sort.by": "published_at",
       "sort.order": "desc",
       per_page: "50",
@@ -625,10 +625,10 @@ function exportToCsv(string $filename, array $filterParams, int $maxArticles = 5
 }
 
 exportToCsv("tech_news.csv", [
-    "topic.id"   => "technology",
-    "language"    => "en",
-    "sort.by"     => "published_at",
-    "sort.order"  => "desc",
+    "topic.id"      => "technology",
+    "language.code" => "en",
+    "sort.by"       => "published_at",
+    "sort.order"    => "desc",
 ]);
 ```
 
@@ -681,10 +681,10 @@ function exportToJsonl(string $filename, array $filterParams, int $maxArticles =
 }
 
 exportToJsonl("ai_news.jsonl", [
-    "topic.id"   => "artificial_intelligence",
-    "language"    => "en",
-    "sort.by"     => "published_at",
-    "sort.order"  => "desc",
+    "topic.id"      => "artificial_intelligence",
+    "language.code" => "en",
+    "sort.by"       => "published_at",
+    "sort.order"    => "desc",
 ]);
 ```
 
@@ -711,7 +711,7 @@ while (count($allArticles) < 200) {
         "topic.id"           => $topic,
         "published_at.start" => $start->format("Y-m-d"),
         "published_at.end"   => $now->format("Y-m-d"),
-        "language"           => "en",
+        "language.code"      => "en",
         "sort.by"            => "published_at",
         "sort.order"         => "desc",
         "per_page"           => 50,

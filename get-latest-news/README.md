@@ -22,24 +22,26 @@ https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY
 
 ## Parameters
 
-| Parameter    | Type     | Description                                      |
-|-------------|----------|--------------------------------------------------|
-| `api_key`   | string   | **Required.** Your API key.                      |
-| `limit`     | integer  | Number of articles to return (default: 50).      |
-| `language`  | string   | Filter by language code (e.g., `en`, `fr`, `de`).|
-| `country`   | string   | Filter by country code (e.g., `us`, `gb`, `de`). |
-| `category`  | string   | Filter by category (e.g., `technology`, `sports`).|
-| `query`     | string   | Search query to match in article title/body.     |
-| `sort_by`   | string   | Sort order: `published_at` (default), `relevance`.|
-| `from`      | string   | Start date in ISO 8601 format.                   |
-| `to`        | string   | End date in ISO 8601 format.                     |
+| Parameter             | Type     | Description                                                       |
+|-----------------------|----------|-------------------------------------------------------------------|
+| `api_key`             | string   | **Required.** Your API key.                                       |
+| `per_page`            | integer  | Number of articles to return (default: 50, max: 100).             |
+| `page`                | integer  | Page number for pagination.                                       |
+| `language.code`       | string   | Filter by language code (e.g., `en`, `fr`, `de`).                 |
+| `source.country.code` | string   | Filter by source country code (e.g., `us`, `gb`, `de`).           |
+| `category.id`         | string   | Filter by IPTC category ID (e.g., `medtop:04000000` for business).|
+| `title`               | string   | Search keywords in article title.                                 |
+| `sort.by`             | string   | Sort field: `published_at` (default), `sentiment.overall.score`.  |
+| `sort.order`          | string   | Sort direction: `asc` or `desc`.                                  |
+| `published_at.start`  | string   | Start date (ISO 8601 or `YYYY-MM-DD`).                            |
+| `published_at.end`    | string   | End date (ISO 8601 or `YYYY-MM-DD`).                              |
 
 ## Quick Start
 
 ### cURL
 
 ```bash
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&language=en&limit=10"
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&language.code=en&per_page=10"
 ```
 
 ### Python
@@ -49,8 +51,8 @@ import requests
 
 response = requests.get("https://api.apitube.io/v1/news/everything", params={
     "api_key": "YOUR_API_KEY",
-    "language": "en",
-    "limit": 10
+    "language.code": "en",
+    "per_page": 10
 })
 
 results = response.json().get("results", [])
@@ -62,7 +64,7 @@ for article in results:
 
 ```javascript
 const response = await fetch(
-  "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&language=en&limit=10"
+  "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&language.code=en&per_page=10"
 );
 const data = await response.json();
 
@@ -75,9 +77,9 @@ data.results.forEach((article) => {
 
 ```php
 $url = "https://api.apitube.io/v1/news/everything?" . http_build_query([
-    "api_key"  => "YOUR_API_KEY",
-    "language" => "en",
-    "limit"    => 10,
+    "api_key"       => "YOUR_API_KEY",
+    "language.code" => "en",
+    "per_page"      => 10,
 ]);
 
 $response = json_decode(file_get_contents($url), true);
@@ -94,19 +96,19 @@ foreach ($response["results"] as $article) {
   "status": "ok",
   "limit": 1,
   "page": 1,
-  "path": "https://api.apitube.io/v1/news/everything?language=en&per_page=1",
+  "path": "https://api.apitube.io/v1/news/everything?language.code=en&per_page=1",
   "has_next_pages": true,
-  "next_page": "https://api.apitube.io/v1/news/everything?language=en&per_page=1&page=2",
+  "next_page": "https://api.apitube.io/v1/news/everything?language.code=en&per_page=1&page=2",
   "has_previous_page": false,
   "previous_page": "",
   "request_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
   "export": {
-    "json": "https://api.apitube.io/v1/news/everything?language=en&per_page=1&export=json",
-    "xlsx": "https://api.apitube.io/v1/news/everything?language=en&per_page=1&export=xlsx",
-    "csv": "https://api.apitube.io/v1/news/everything?language=en&per_page=1&export=csv",
-    "tsv": "https://api.apitube.io/v1/news/everything?language=en&per_page=1&export=tsv",
-    "xml": "https://api.apitube.io/v1/news/everything?language=en&per_page=1&export=xml",
-    "rss": "https://api.apitube.io/v1/news/everything?language=en&per_page=1&export=rss"
+    "json": "https://api.apitube.io/v1/news/everything?language.code=en&per_page=1&export=json",
+    "xlsx": "https://api.apitube.io/v1/news/everything?language.code=en&per_page=1&export=xlsx",
+    "csv": "https://api.apitube.io/v1/news/everything?language.code=en&per_page=1&export=csv",
+    "tsv": "https://api.apitube.io/v1/news/everything?language.code=en&per_page=1&export=tsv",
+    "xml": "https://api.apitube.io/v1/news/everything?language.code=en&per_page=1&export=xml",
+    "rss": "https://api.apitube.io/v1/news/everything?language.code=en&per_page=1&export=rss"
   },
   "results": [
     {

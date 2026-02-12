@@ -14,12 +14,11 @@ import requests
 API_KEY = "YOUR_API_KEY"
 BASE_URL = "https://api.apitube.io/v1/news/everything"
 
-def track_entity(name, entity_type="organization", language="en", per_page=20):
+def track_entity(name, language="en", per_page=20):
     response = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "entity.name": name,
-        "entity.type": entity_type,
-        "language": language,
+        "organization.name": name,
+        "language.code": language,
         "sort.by": "published_at",
         "sort.order": "desc",
         "per_page": per_page,
@@ -28,7 +27,7 @@ def track_entity(name, entity_type="organization", language="en", per_page=20):
     return response.json()
 
 data = track_entity("Google")
-print(f"Found {data['total_results']} articles mentioning Google\n")
+print(f"Found {len(data['results'])} articles mentioning Google\n")
 
 for article in data["results"]:
     print(f"  [{article['published_at'][:10]}] {article['title']}")
@@ -43,19 +42,18 @@ import requests
 API_KEY = "YOUR_API_KEY"
 BASE_URL = "https://api.apitube.io/v1/news/everything"
 
-def entity_sentiment_breakdown(entity_name, entity_type="organization"):
+def entity_sentiment_breakdown(entity_name):
     results = {}
     for polarity in ["positive", "negative", "neutral"]:
         response = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": entity_name,
-            "entity.type": entity_type,
+            "organization.name": entity_name,
             "sentiment.overall.polarity": polarity,
-            "language": "en",
+            "language.code": "en",
             "per_page": 1,
         })
         response.raise_for_status()
-        results[polarity] = response.json().get("total_results", 0)
+        results[polarity] = len(response.json().get("results", []))
     return results
 
 companies = ["Apple", "Google", "Microsoft", "Amazon", "Meta"]
@@ -83,25 +81,24 @@ API_KEY = "YOUR_API_KEY"
 BASE_URL = "https://api.apitube.io/v1/news/everything"
 
 ENTITIES = [
-    {"name": "Tesla", "type": "organization"},
-    {"name": "Elon Musk", "type": "person"},
-    {"name": "SpaceX", "type": "organization"},
+    {"name": "Tesla", "param": "organization.name"},
+    {"name": "Elon Musk", "param": "person.name"},
+    {"name": "SpaceX", "param": "organization.name"},
 ]
 POLL_INTERVAL = 300
 NEGATIVE_THRESHOLD = 50
 
-def check_entity(entity_name, entity_type):
+def check_entity(entity_name, entity_param):
     response = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "entity.name": entity_name,
-        "entity.type": entity_type,
+        entity_param: entity_name,
         "sentiment.overall.polarity": "negative",
         "published_at.start": datetime.utcnow().strftime("%Y-%m-%dT00:00:00Z"),
-        "language": "en",
+        "language.code": "en",
         "per_page": 1,
     })
     response.raise_for_status()
-    return response.json().get("total_results", 0)
+    return len(response.json().get("results", []))
 
 print("Entity monitoring started...\n")
 
@@ -110,20 +107,19 @@ while True:
     print(f"[{timestamp}]")
 
     for entity in ENTITIES:
-        neg_count = check_entity(entity["name"], entity["type"])
+        neg_count = check_entity(entity["name"], entity["param"])
         status = "ALERT" if neg_count >= NEGATIVE_THRESHOLD else "OK"
-        print(f"  {entity['name']} ({entity['type']}): "
+        print(f"  {entity['name']}: "
               f"{neg_count} negative articles [{status}]")
 
         if neg_count >= NEGATIVE_THRESHOLD:
             response = requests.get(BASE_URL, params={
                 "api_key": API_KEY,
-                "entity.name": entity["name"],
-                "entity.type": entity["type"],
+                entity["param"]: entity["name"],
                 "sentiment.overall.polarity": "negative",
                 "sort.by": "published_at",
                 "sort.order": "desc",
-                "language": "en",
+                "language.code": "en",
                 "per_page": 3,
             })
             response.raise_for_status()
@@ -143,20 +139,19 @@ import requests
 API_KEY = "YOUR_API_KEY"
 BASE_URL = "https://api.apitube.io/v1/news/everything"
 
-def entity_coverage_by_source(entity_name, domains, entity_type="organization"):
+def entity_coverage_by_source(entity_name, domains):
     coverage = {}
     for domain in domains:
         response = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": entity_name,
-            "entity.type": entity_type,
+            "organization.name": entity_name,
             "source.domain": domain,
-            "language": "en",
+            "language.code": "en",
             "per_page": 1,
         })
         response.raise_for_status()
         data = response.json()
-        coverage[domain] = data.get("total_results", 0)
+        coverage[domain] = len(data.get("results", []))
     return coverage
 
 domains = [
@@ -195,13 +190,12 @@ page = 1
 while True:
     response = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "entity.name": person,
-        "entity.type": "person",
+        "person.name": person,
         "published_at.start": start.strftime("%Y-%m-%d"),
         "published_at.end": today.strftime("%Y-%m-%d"),
         "sort.by": "published_at",
         "sort.order": "desc",
-        "language": "en",
+        "language.code": "en",
         "per_page": 50,
         "page": page,
     })
@@ -239,12 +233,11 @@ for polarity, count in sentiments.most_common():
 const API_KEY = "YOUR_API_KEY";
 const BASE_URL = "https://api.apitube.io/v1/news/everything";
 
-async function trackEntity(name, type = "organization", perPage = 20) {
+async function trackEntity(name, perPage = 20) {
   const params = new URLSearchParams({
     api_key: API_KEY,
-    "entity.name": name,
-    "entity.type": type,
-    language: "en",
+    "organization.name": name,
+    "language.code": "en",
     "sort.by": "published_at",
     "sort.order": "desc",
     per_page: String(perPage),
@@ -256,7 +249,7 @@ async function trackEntity(name, type = "organization", perPage = 20) {
 }
 
 const data = await trackEntity("Google");
-console.log(`Found ${data.total_results} articles mentioning Google\n`);
+console.log(`Found ${data.results.length} articles mentioning Google\n`);
 
 data.results.forEach((article) => {
   const date = article.published_at.slice(0, 10);
@@ -271,22 +264,21 @@ data.results.forEach((article) => {
 const API_KEY = "YOUR_API_KEY";
 const BASE_URL = "https://api.apitube.io/v1/news/everything";
 
-async function entitySentimentBreakdown(entityName, entityType = "organization") {
+async function entitySentimentBreakdown(entityName) {
   const results = {};
 
   for (const polarity of ["positive", "negative", "neutral"]) {
     const params = new URLSearchParams({
       api_key: API_KEY,
-      "entity.name": entityName,
-      "entity.type": entityType,
+      "organization.name": entityName,
       "sentiment.overall.polarity": polarity,
-      language: "en",
+      "language.code": "en",
       per_page: "1",
     });
 
     const response = await fetch(`${BASE_URL}?${params}`);
     const data = await response.json();
-    results[polarity] = data.total_results || 0;
+    results[polarity] = data.results?.length || 0;
   }
 
   return results;
@@ -326,16 +318,15 @@ async function entityCoverageBySource(entityName, domains) {
   for (const domain of domains) {
     const params = new URLSearchParams({
       api_key: API_KEY,
-      "entity.name": entityName,
-      "entity.type": "organization",
+      "organization.name": entityName,
       "source.domain": domain,
-      language: "en",
+      "language.code": "en",
       per_page: "1",
     });
 
     const response = await fetch(`${BASE_URL}?${params}`);
     const data = await response.json();
-    coverage[domain] = data.total_results || 0;
+    coverage[domain] = data.results?.length || 0;
   }
 
   return coverage;
@@ -371,25 +362,24 @@ Object.entries(coverage)
 $apiKey  = "YOUR_API_KEY";
 $baseUrl = "https://api.apitube.io/v1/news/everything";
 
-function trackEntity(string $name, string $type = "organization", int $perPage = 20): array
+function trackEntity(string $name, int $perPage = 20): array
 {
     global $apiKey, $baseUrl;
 
     $query = http_build_query([
-        "api_key"     => $apiKey,
-        "entity.name" => $name,
-        "entity.type" => $type,
-        "language"    => "en",
-        "sort.by"     => "published_at",
-        "sort.order"  => "desc",
-        "per_page"    => $perPage,
+        "api_key"           => $apiKey,
+        "organization.name" => $name,
+        "language.code"     => "en",
+        "sort.by"           => "published_at",
+        "sort.order"        => "desc",
+        "per_page"          => $perPage,
     ]);
 
     return json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
 }
 
 $data = trackEntity("Google");
-echo "Found {$data['total_results']} articles mentioning Google\n\n";
+echo "Found " . count($data["results"]) . " articles mentioning Google\n\n";
 
 foreach ($data["results"] as $article) {
     $date = substr($article["published_at"], 0, 10);
@@ -406,7 +396,7 @@ foreach ($data["results"] as $article) {
 $apiKey  = "YOUR_API_KEY";
 $baseUrl = "https://api.apitube.io/v1/news/everything";
 
-function entitySentimentBreakdown(string $entityName, string $entityType = "organization"): array
+function entitySentimentBreakdown(string $entityName): array
 {
     global $apiKey, $baseUrl;
 
@@ -414,15 +404,14 @@ function entitySentimentBreakdown(string $entityName, string $entityType = "orga
     foreach (["positive", "negative", "neutral"] as $polarity) {
         $query = http_build_query([
             "api_key"                    => $apiKey,
-            "entity.name"                => $entityName,
-            "entity.type"                => $entityType,
+            "organization.name"          => $entityName,
             "sentiment.overall.polarity" => $polarity,
-            "language"                   => "en",
+            "language.code"              => "en",
             "per_page"                   => 1,
         ]);
 
         $data = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
-        $results[$polarity] = $data["total_results"] ?? 0;
+        $results[$polarity] = count($data["results"] ?? []);
     }
 
     return $results;
@@ -458,16 +447,15 @@ function entityCoverageBySource(string $entityName, array $domains): array
     $coverage = [];
     foreach ($domains as $domain) {
         $query = http_build_query([
-            "api_key"       => $apiKey,
-            "entity.name"   => $entityName,
-            "entity.type"   => "organization",
-            "source.domain" => $domain,
-            "language"      => "en",
-            "per_page"      => 1,
+            "api_key"           => $apiKey,
+            "organization.name" => $entityName,
+            "source.domain"     => $domain,
+            "language.code"     => "en",
+            "per_page"          => 1,
         ]);
 
         $data = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
-        $coverage[$domain] = $data["total_results"] ?? 0;
+        $coverage[$domain] = count($data["results"] ?? []);
     }
 
     return $coverage;

@@ -17,14 +17,17 @@ GET https://api.apitube.io/v1/news/everything
 | Parameter                      | Type    | Description                                                        |
 |-------------------------------|---------|-------------------------------------------------------------------|
 | `api_key`                     | string  | **Required.** Your API key.                                       |
-| `entity.name`                 | string  | Filter by entity name (e.g., `Apple`, `Elon Musk`).              |
-| `entity.type`                 | string  | Filter by entity type: `organization`, `person`, `location`, etc. |
+| `entity.id`                   | string  | Filter by entity ID (supports up to 3, comma-separated).          |
+| `organization.name`           | string  | Filter by organization name (e.g., `Apple`, `Google`).            |
+| `person.name`                 | string  | Filter by person name (e.g., `Elon Musk`, `Tim Cook`).            |
+| `location.name`               | string  | Filter by location name (e.g., `Tokyo`, `New York`).              |
+| `brand.name`                  | string  | Filter by brand name (e.g., `Nike`, `Tesla`).                     |
 | `title`                       | string  | Filter by keywords in article title (comma-separated).            |
 | `sentiment.overall.polarity`  | string  | Filter by sentiment: `positive`, `negative`, `neutral`.           |
 | `sort.by`                     | string  | Sort field (e.g., `published_at`, `sentiment.overall.score`).     |
 | `sort.order`                  | string  | Sort direction: `asc` or `desc`.                                  |
 | `source.domain`               | string  | Filter by source domain (comma-separated).                        |
-| `language`                    | string  | Filter by language code (e.g., `en`, `fr`).                      |
+| `language.code`               | string  | Filter by language code (e.g., `en`, `fr`).                       |
 | `published_at.start`          | string  | Start date (ISO 8601 or `YYYY-MM-DD`).                           |
 | `published_at.end`            | string  | End date (ISO 8601 or `YYYY-MM-DD`).                             |
 | `per_page`                    | integer | Number of results per page (default: 50).                         |
@@ -36,10 +39,10 @@ GET https://api.apitube.io/v1/news/everything
 
 ```bash
 # Track news about Apple as an organization
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&entity.name=Apple&entity.type=organization&language=en&per_page=10"
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&organization.name=Apple&language.code=en&per_page=10"
 
 # Track a person with sentiment filter
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&entity.name=Elon+Musk&entity.type=person&sentiment.overall.polarity=negative&per_page=10"
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&person.name=Elon+Musk&sentiment.overall.polarity=negative&per_page=10"
 ```
 
 ### Python
@@ -49,9 +52,8 @@ import requests
 
 response = requests.get("https://api.apitube.io/v1/news/everything", params={
     "api_key": "YOUR_API_KEY",
-    "entity.name": "Apple",
-    "entity.type": "organization",
-    "language": "en",
+    "organization.name": "Apple",
+    "language.code": "en",
     "per_page": 10,
 })
 
@@ -65,9 +67,8 @@ for article in data["results"]:
 ```javascript
 const params = new URLSearchParams({
   api_key: "YOUR_API_KEY",
-  "entity.name": "Apple",
-  "entity.type": "organization",
-  language: "en",
+  "organization.name": "Apple",
+  "language.code": "en",
   per_page: "10",
 });
 
@@ -85,11 +86,10 @@ data.results.forEach((a) => {
 
 ```php
 $query = http_build_query([
-    "api_key"     => "YOUR_API_KEY",
-    "entity.name" => "Apple",
-    "entity.type" => "organization",
-    "language"    => "en",
-    "per_page"    => 10,
+    "api_key"           => "YOUR_API_KEY",
+    "organization.name" => "Apple",
+    "language.code"     => "en",
+    "per_page"          => 10,
 ]);
 
 $data = json_decode(file_get_contents(

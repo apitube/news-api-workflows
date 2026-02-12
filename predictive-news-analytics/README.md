@@ -18,14 +18,15 @@ GET https://api.apitube.io/v1/news/trends
 | Parameter                      | Type    | Description                                                          |
 |-------------------------------|---------|----------------------------------------------------------------------|
 | `api_key`                     | string  | **Required.** Your API key.                                          |
-| `entity.name`                 | string  | Filter by entity for trend analysis.                                 |
+| `organization.name`           | string  | Filter by organization for trend analysis.                           |
+| `person.name`                 | string  | Filter by person for trend analysis.                                 |
 | `topic.id`                    | string  | Filter by topic for category trends.                                 |
 | `title`                       | string  | Filter by keywords for signal detection.                             |
 | `sentiment.overall.polarity`  | string  | Filter by sentiment: `positive`, `negative`, `neutral`.             |
-| `source.rank.opr.min`         | number  | Minimum source authority (0.0–1.0).                                 |
+| `source.rank.opr.min`         | number  | Minimum source authority (0–7).                                     |
 | `published_at.start`          | string  | Start date (ISO 8601 or `YYYY-MM-DD`).                             |
 | `published_at.end`            | string  | End date (ISO 8601 or `YYYY-MM-DD`).                               |
-| `language`                    | string  | Filter by language code.                                             |
+| `language.code`               | string  | Filter by language code.                                             |
 | `sort.by`                     | string  | Sort field: `published_at`.                                          |
 | `sort.order`                  | string  | Sort direction: `asc` or `desc`.                                    |
 | `per_page`                    | integer | Number of results per page.                                          |
@@ -36,13 +37,13 @@ GET https://api.apitube.io/v1/news/trends
 
 ```bash
 # Get historical coverage for trend analysis
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&entity.name=Tesla&published_at.start=2024-01-01&published_at.end=2024-01-31&language=en&per_page=1" | jq '.total_results'
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&organization.name=Tesla&published_at.start=2024-01-01&published_at.end=2024-01-31&language.code=en&per_page=100" | jq '.results | length'
 
 # Monitor emerging topics
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&title=breakthrough,revolutionary,first-ever&source.rank.opr.min=0.7&language=en&per_page=20"
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&title=breakthrough,revolutionary,first-ever&source.rank.opr.min=6&language.code=en&per_page=20"
 
 # Detect sudden coverage spikes
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&entity.name=OpenAI&published_at.start=$(date -v-1d +%Y-%m-%d)&language=en&per_page=1" | jq '.total_results'
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&organization.name=OpenAI&published_at.start=$(date -v-1d +%Y-%m-%d)&language.code=en&per_page=100" | jq '.results | length'
 ```
 
 ### Python
@@ -74,25 +75,25 @@ class PredictiveAnalyzer:
             # Total coverage
             resp = requests.get(BASE_URL, params={
                 "api_key": API_KEY,
-                "entity.name": self.entity,
+                "organization.name": self.entity,
                 "published_at.start": date,
                 "published_at.end": next_date,
-                "language": "en",
-                "per_page": 1,
+                "language.code": "en",
+                "per_page": 100,
             })
-            count = resp.json().get("total_results", 0)
+            count = len(resp.json().get("results", []))
 
             # Sentiment
             neg_resp = requests.get(BASE_URL, params={
                 "api_key": API_KEY,
-                "entity.name": self.entity,
+                "organization.name": self.entity,
                 "sentiment.overall.polarity": "negative",
                 "published_at.start": date,
                 "published_at.end": next_date,
-                "language": "en",
-                "per_page": 1,
+                "language.code": "en",
+                "per_page": 100,
             })
-            neg_count = neg_resp.json().get("total_results", 0)
+            neg_count = len(neg_resp.json().get("results", []))
 
             self.daily_counts.append({"date": date, "count": count})
             sentiment_ratio = neg_count / max(count, 1)
@@ -305,16 +306,16 @@ class PredictiveAnalyzer {
 
       const params = new URLSearchParams({
         api_key: API_KEY,
-        "entity.name": this.entity,
+        "organization.name": this.entity,
         "published_at.start": date,
         "published_at.end": nextDate,
-        language: "en",
-        per_page: "1",
+        "language.code": "en",
+        per_page: "100",
       });
 
       const response = await fetch(`${BASE_URL}?${params}`);
       const data = await response.json();
-      this.dailyCounts.push({ date, count: data.total_results || 0 });
+      this.dailyCounts.push({ date, count: (data.results || []).length });
     }
   }
 
@@ -445,15 +446,15 @@ class PredictiveAnalyzer
 
             $query = http_build_query([
                 "api_key" => $this->apiKey,
-                "entity.name" => $this->entity,
+                "organization.name" => $this->entity,
                 "published_at.start" => $date,
                 "published_at.end" => $nextDate,
-                "language" => "en",
-                "per_page" => 1,
+                "language.code" => "en",
+                "per_page" => 100,
             ]);
 
             $data = json_decode(file_get_contents("{$this->baseUrl}?{$query}"), true);
-            $this->dailyCounts[] = ["date" => $date, "count" => $data["total_results"] ?? 0];
+            $this->dailyCounts[] = ["date" => $date, "count" => count($data["results"] ?? [])];
         }
     }
 

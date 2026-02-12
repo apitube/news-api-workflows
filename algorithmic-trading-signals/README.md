@@ -17,14 +17,14 @@ GET https://api.apitube.io/v1/news/everything
 | Parameter                      | Type    | Description                                                          |
 |-------------------------------|---------|----------------------------------------------------------------------|
 | `api_key`                     | string  | **Required.** Your API key.                                          |
-| `entity.name`                 | string  | Filter by ticker/company.                                            |
+| `organization.name`           | string  | Filter by company/ticker.                                            |
 | `title`                       | string  | Filter by signal keywords.                                           |
 | `sentiment.overall.polarity`  | string  | Filter by sentiment: `positive`, `negative`, `neutral`.             |
 | `sentiment.overall.score.min` | number  | Minimum sentiment score (-1.0 to 1.0).                              |
-| `source.rank.opr.min`         | number  | Minimum source authority (0.0–1.0).                                 |
+| `source.rank.opr.min`         | number  | Minimum source authority (0–7).                                     |
 | `published_at.start`          | string  | Start date (ISO 8601 or `YYYY-MM-DD`).                             |
 | `published_at.end`            | string  | End date (ISO 8601 or `YYYY-MM-DD`).                               |
-| `language`                    | string  | Filter by language code.                                             |
+| `language.code`               | string  | Filter by language code.                                             |
 | `per_page`                    | integer | Number of results per page.                                          |
 
 ## Quick Start
@@ -76,38 +76,38 @@ class AlphaFactorEngine:
             # Total coverage
             resp = requests.get(BASE_URL, params={
                 "api_key": API_KEY,
-                "entity.name": ticker,
+                "organization.name": ticker,
                 "published_at.start": date,
                 "published_at.end": next_date,
-                "language": "en",
-                "per_page": 1,
+                "language.code": "en",
+                "per_page": 100,
             })
-            metrics["total"] = resp.json().get("total_results", 0)
+            metrics["total"] = len(resp.json().get("results", []))
 
             # Sentiment breakdown
             for polarity in ["positive", "negative"]:
                 resp = requests.get(BASE_URL, params={
                     "api_key": API_KEY,
-                    "entity.name": ticker,
+                    "organization.name": ticker,
                     "sentiment.overall.polarity": polarity,
                     "published_at.start": date,
                     "published_at.end": next_date,
-                    "language": "en",
-                    "per_page": 1,
+                    "language.code": "en",
+                    "per_page": 100,
                 })
-                metrics[polarity] = resp.json().get("total_results", 0)
+                metrics[polarity] = len(resp.json().get("results", []))
 
             # Tier-1 sources
             resp = requests.get(BASE_URL, params={
                 "api_key": API_KEY,
-                "entity.name": ticker,
-                "source.rank.opr.min": 0.75,
+                "organization.name": ticker,
+                "source.rank.opr.min": 5,
                 "published_at.start": date,
                 "published_at.end": next_date,
-                "language": "en",
-                "per_page": 1,
+                "language.code": "en",
+                "per_page": 100,
             })
-            metrics["tier1"] = resp.json().get("total_results", 0)
+            metrics["tier1"] = len(resp.json().get("results", []))
 
             # Calculate derived metrics
             metrics["net_sentiment"] = metrics["positive"] - metrics["negative"]
@@ -208,25 +208,25 @@ class AlphaFactorEngine:
 
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": ticker,
+            "organization.name": ticker,
             "title": ",".join(impact_keywords),
-            "source.rank.opr.min": 0.7,
+            "source.rank.opr.min": 5,
             "published_at.start": start,
-            "language": "en",
-            "per_page": 1,
+            "language.code": "en",
+            "per_page": 100,
         })
 
-        event_count = resp.json().get("total_results", 0)
+        event_count = len(resp.json().get("results", []))
 
         # Normalize by total coverage
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": ticker,
+            "organization.name": ticker,
             "published_at.start": start,
-            "language": "en",
-            "per_page": 1,
+            "language.code": "en",
+            "per_page": 100,
         })
-        total = resp.json().get("total_results", 1)
+        total = len(resp.json().get("results", [])) or 1
 
         return event_count / max(total, 1)
 
@@ -238,9 +238,9 @@ class AlphaFactorEngine:
 
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": ticker,
+            "organization.name": ticker,
             "published_at.start": start,
-            "language": "en",
+            "language.code": "en",
             "sort.by": "published_at",
             "sort.order": "desc",
             "per_page": 100,
@@ -264,24 +264,24 @@ class AlphaFactorEngine:
 
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": ticker,
+            "organization.name": ticker,
             "title": ",".join(controversy_keywords),
             "sentiment.overall.polarity": "negative",
             "published_at.start": start,
-            "language": "en",
-            "per_page": 1,
+            "language.code": "en",
+            "per_page": 100,
         })
 
-        controversy_count = resp.json().get("total_results", 0)
+        controversy_count = len(resp.json().get("results", []))
 
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": ticker,
+            "organization.name": ticker,
             "published_at.start": start,
-            "language": "en",
-            "per_page": 1,
+            "language.code": "en",
+            "per_page": 100,
         })
-        total = resp.json().get("total_results", 1)
+        total = len(resp.json().get("results", [])) or 1
 
         return controversy_count / max(total, 1)
 

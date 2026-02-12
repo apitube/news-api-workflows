@@ -17,12 +17,14 @@ GET https://api.apitube.io/v1/news/everything
 | Parameter                      | Type    | Description                                                          |
 |-------------------------------|---------|----------------------------------------------------------------------|
 | `api_key`                     | string  | **Required.** Your API key.                                          |
-| `entity.name`                 | string  | Filter by entity.                                                    |
-| `entity.type`                 | string  | Filter by entity type.                                               |
+| `organization.name`           | string  | Filter by organization entity.                                       |
+| `person.name`                 | string  | Filter by person entity.                                             |
+| `location.name`               | string  | Filter by location entity.                                           |
+| `brand.name`                  | string  | Filter by brand entity.                                              |
 | `title`                       | string  | Filter by keywords.                                                  |
 | `published_at.start`          | string  | Start date (ISO 8601 or `YYYY-MM-DD`).                             |
 | `published_at.end`            | string  | End date (ISO 8601 or `YYYY-MM-DD`).                               |
-| `language`                    | string  | Filter by language code.                                             |
+| `language.code`               | string  | Filter by language code.                                             |
 | `per_page`                    | integer | Number of results per page.                                          |
 
 ## Quick Start
@@ -480,8 +482,8 @@ graph = NewsKnowledgeGraph()
 print("\nIngesting articles...")
 count = graph.fetch_and_ingest({
     "title": "Apple,Microsoft,Google,Amazon,NVIDIA",
-    "language": "en",
-    "source.rank.opr.min": 0.6,
+    "language.code": "en",
+    "source.rank.opr.min": 4,
     "published_at.start": (datetime.utcnow() - timedelta(days=30)).strftime("%Y-%m-%d"),
 }, max_articles=300)
 

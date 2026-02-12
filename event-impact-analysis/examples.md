@@ -44,28 +44,27 @@ class EventImpactAnalyzer:
         # Total coverage
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": self.entity,
-            "entity.type": "organization",
+            "organization.name": self.entity,
             "published_at.start": start,
             "published_at.end": end,
-            "language": "en",
+            "language.code": "en",
             "per_page": 1,
         })
-        metrics["total"] = resp.json().get("total_results", 0)
+        metrics["total"] = len(resp.json().get("results", []))
         metrics["daily_avg"] = metrics["total"] / days
 
         # Sentiment breakdown
         for polarity in ["positive", "negative", "neutral"]:
             resp = requests.get(BASE_URL, params={
                 "api_key": API_KEY,
-                "entity.name": self.entity,
+                "organization.name": self.entity,
                 "sentiment.overall.polarity": polarity,
                 "published_at.start": start,
                 "published_at.end": end,
-                "language": "en",
+                "language.code": "en",
                 "per_page": 1,
             })
-            metrics[polarity] = resp.json().get("total_results", 0)
+            metrics[polarity] = len(resp.json().get("results", []))
 
         # Calculate ratios
         total = metrics["total"] or 1
@@ -76,27 +75,27 @@ class EventImpactAnalyzer:
         # Tier-1 coverage
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": self.entity,
-            "source.rank.opr.min": 0.7,
+            "organization.name": self.entity,
+            "source.rank.opr.min": 5,
             "published_at.start": start,
             "published_at.end": end,
             "per_page": 1,
         })
-        metrics["tier1"] = resp.json().get("total_results", 0)
+        metrics["tier1"] = len(resp.json().get("results", []))
         metrics["tier1_ratio"] = metrics["tier1"] / total
 
         # Event-specific coverage
         if self.event_keywords:
             resp = requests.get(BASE_URL, params={
                 "api_key": API_KEY,
-                "entity.name": self.entity,
+                "organization.name": self.entity,
                 "title": ",".join(self.event_keywords),
                 "published_at.start": start,
                 "published_at.end": end,
-                "language": "en",
+                "language.code": "en",
                 "per_page": 1,
             })
-            metrics["event_specific"] = resp.json().get("total_results", 0)
+            metrics["event_specific"] = len(resp.json().get("results", []))
             metrics["event_dominance"] = metrics["event_specific"] / total
 
         self.periods[period_name] = metrics
@@ -118,28 +117,27 @@ class EventImpactAnalyzer:
             # Get daily metrics
             resp = requests.get(BASE_URL, params={
                 "api_key": API_KEY,
-                "entity.name": self.entity,
-                "entity.type": "organization",
+                "organization.name": self.entity,
                 "published_at.start": day_start,
                 "published_at.end": day_end,
-                "language": "en",
+                "language.code": "en",
                 "per_page": 1,
             })
-            total = resp.json().get("total_results", 0)
+            total = len(resp.json().get("results", []))
 
             # Get sentiment
             negative = 0
             if total > 0:
                 resp = requests.get(BASE_URL, params={
                     "api_key": API_KEY,
-                    "entity.name": self.entity,
+                    "organization.name": self.entity,
                     "sentiment.overall.polarity": "negative",
                     "published_at.start": day_start,
                     "published_at.end": day_end,
-                    "language": "en",
+                    "language.code": "en",
                     "per_page": 1,
                 })
-                negative = resp.json().get("total_results", 0)
+                negative = len(resp.json().get("results", []))
 
             day_data = {
                 "date": day_start,
@@ -321,48 +319,46 @@ def analyze_spillover(primary_entity, related_entities, event_date, before_days=
         # Before
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": entity,
-            "entity.type": "organization",
+            "organization.name": entity,
             "published_at.start": before_start,
             "published_at.end": event_date,
-            "language": "en",
+            "language.code": "en",
             "per_page": 1,
         })
-        entity_data["before"]["total"] = resp.json().get("total_results", 0)
+        entity_data["before"]["total"] = len(resp.json().get("results", []))
 
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": entity,
+            "organization.name": entity,
             "sentiment.overall.polarity": "negative",
             "published_at.start": before_start,
             "published_at.end": event_date,
-            "language": "en",
+            "language.code": "en",
             "per_page": 1,
         })
-        entity_data["before"]["negative"] = resp.json().get("total_results", 0)
+        entity_data["before"]["negative"] = len(resp.json().get("results", []))
 
         # After
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": entity,
-            "entity.type": "organization",
+            "organization.name": entity,
             "published_at.start": event_date,
             "published_at.end": after_end,
-            "language": "en",
+            "language.code": "en",
             "per_page": 1,
         })
-        entity_data["after"]["total"] = resp.json().get("total_results", 0)
+        entity_data["after"]["total"] = len(resp.json().get("results", []))
 
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": entity,
+            "organization.name": entity,
             "sentiment.overall.polarity": "negative",
             "published_at.start": event_date,
             "published_at.end": after_end,
-            "language": "en",
+            "language.code": "en",
             "per_page": 1,
         })
-        entity_data["after"]["negative"] = resp.json().get("total_results", 0)
+        entity_data["after"]["negative"] = len(resp.json().get("results", []))
 
         # Calculate changes
         before_total = entity_data["before"]["total"] or 1
@@ -430,23 +426,22 @@ const BASE_URL = "https://api.apitube.io/v1/news/everything";
 async function fetchPeriodMetrics(entity, startDate, endDate) {
   const params = new URLSearchParams({
     api_key: API_KEY,
-    "entity.name": entity,
-    "entity.type": "organization",
+    "organization.name": entity,
     "published_at.start": startDate,
     "published_at.end": endDate,
-    language: "en",
+    "language.code": "en",
     per_page: "1",
   });
 
   const response = await fetch(`${BASE_URL}?${params}`);
   const data = await response.json();
-  const total = data.total_results || 0;
+  const total = data.results?.length || 0;
 
   // Get negative
   params.set("sentiment.overall.polarity", "negative");
   const negResponse = await fetch(`${BASE_URL}?${params}`);
   const negData = await negResponse.json();
-  const negative = negData.total_results || 0;
+  const negative = negData.results?.length || 0;
 
   return {
     total,
@@ -533,28 +528,27 @@ function fetchPeriodMetrics(string $entity, string $start, string $end): array
     // Total
     $query = http_build_query([
         "api_key"            => $apiKey,
-        "entity.name"        => $entity,
-        "entity.type"        => "organization",
+        "organization.name"  => $entity,
         "published_at.start" => $start,
         "published_at.end"   => $end,
-        "language"           => "en",
+        "language.code"      => "en",
         "per_page"           => 1,
     ]);
     $data = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
-    $total = $data["total_results"] ?? 0;
+    $total = count($data["results"] ?? []);
 
     // Negative
     $query = http_build_query([
         "api_key"                    => $apiKey,
-        "entity.name"                => $entity,
+        "organization.name"          => $entity,
         "sentiment.overall.polarity" => "negative",
         "published_at.start"         => $start,
         "published_at.end"           => $end,
-        "language"                   => "en",
+        "language.code"              => "en",
         "per_page"                   => 1,
     ]);
     $data = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
-    $negative = $data["total_results"] ?? 0;
+    $negative = count($data["results"] ?? []);
 
     return [
         "total"          => $total,

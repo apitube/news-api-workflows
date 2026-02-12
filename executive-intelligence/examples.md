@@ -64,69 +64,65 @@ def calculate_executive_reputation(name, title, company, days=30):
     # Total coverage
     resp = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "entity.name": name,
-        "entity.type": "person",
+        "person.name": name,
         "published_at.start": start,
-        "language": "en",
+        "language.code": "en",
         "per_page": 1,
     })
-    metrics["total_coverage"] = resp.json().get("total_results", 0)
+    metrics["total_coverage"] = len(resp.json().get("results", []))
 
     # Sentiment breakdown
     for polarity in ["positive", "negative", "neutral"]:
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": name,
-            "entity.type": "person",
+            "person.name": name,
             "sentiment.overall.polarity": polarity,
             "published_at.start": start,
-            "language": "en",
+            "language.code": "en",
             "per_page": 1,
         })
-        metrics[polarity] = resp.json().get("total_results", 0)
+        metrics[polarity] = len(resp.json().get("results", []))
 
     # Tier-1 coverage
     resp = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "entity.name": name,
-        "entity.type": "person",
+        "person.name": name,
         "source.domain": REPUTATION_FACTORS["tier1_mentions"]["sources"],
         "published_at.start": start,
-        "language": "en",
+        "language.code": "en",
         "per_page": 1,
     })
-    metrics["tier1_coverage"] = resp.json().get("total_results", 0)
+    metrics["tier1_coverage"] = len(resp.json().get("results", []))
 
     # Leadership mentions
     resp = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "entity.name": name,
+        "person.name": name,
         "title": ",".join(REPUTATION_FACTORS["leadership_mentions"]["keywords"]),
         "published_at.start": start,
-        "language": "en",
+        "language.code": "en",
         "per_page": 1,
     })
-    metrics["leadership_mentions"] = resp.json().get("total_results", 0)
+    metrics["leadership_mentions"] = len(resp.json().get("results", []))
 
     # Controversy mentions
     resp = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "entity.name": name,
+        "person.name": name,
         "title": ",".join(REPUTATION_FACTORS["controversy_mentions"]["keywords"]),
         "published_at.start": start,
-        "language": "en",
+        "language.code": "en",
         "per_page": 1,
     })
-    metrics["controversy_mentions"] = resp.json().get("total_results", 0)
+    metrics["controversy_mentions"] = len(resp.json().get("results", []))
 
     # Get recent articles
     resp = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "entity.name": name,
-        "entity.type": "person",
-        "source.rank.opr.min": 0.5,
+        "person.name": name,
+        "source.rank.opr.min": 4,
         "published_at.start": start,
-        "language": "en",
+        "language.code": "en",
         "sort.by": "published_at",
         "sort.order": "desc",
         "per_page": 5,
@@ -270,9 +266,9 @@ def detect_leadership_changes(hours=24):
             resp = requests.get(BASE_URL, params={
                 "api_key": API_KEY,
                 "title": ",".join(search_terms),
-                "source.rank.opr.min": 0.5,
+                "source.rank.opr.min": 4,
                 "published_at.start": start,
-                "language": "en",
+                "language.code": "en",
                 "sort.by": "published_at",
                 "sort.order": "desc",
                 "per_page": 20,
@@ -365,38 +361,37 @@ def analyze_executive_company_correlation(executive, company, days=30):
     for polarity in ["positive", "negative"]:
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": executive,
-            "entity.type": "person",
+            "person.name": executive,
             "sentiment.overall.polarity": polarity,
             "published_at.start": start,
-            "language": "en",
+            "language.code": "en",
             "per_page": 1,
         })
-        exec_sentiment[polarity] = resp.json().get("total_results", 0)
+        exec_sentiment[polarity] = len(resp.json().get("results", []))
 
     # Company sentiment
     company_sentiment = {}
     for polarity in ["positive", "negative"]:
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": company,
-            "entity.type": "organization",
+            "organization.name": company,
             "sentiment.overall.polarity": polarity,
             "published_at.start": start,
-            "language": "en",
+            "language.code": "en",
             "per_page": 1,
         })
-        company_sentiment[polarity] = resp.json().get("total_results", 0)
+        company_sentiment[polarity] = len(resp.json().get("results", []))
 
     # Co-mentions
     resp = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "entity.name": f"{executive},{company}",
+        "person.name": executive,
+        "organization.name": company,
         "published_at.start": start,
-        "language": "en",
+        "language.code": "en",
         "per_page": 1,
     })
-    co_mentions = resp.json().get("total_results", 0)
+    co_mentions = len(resp.json().get("results", []))
 
     # Calculate scores
     exec_total = sum(exec_sentiment.values()) or 1
@@ -479,11 +474,10 @@ class ExecutiveAlertSystem {
     for (const [alertType, keywords] of Object.entries(ALERT_KEYWORDS)) {
       const params = new URLSearchParams({
         api_key: API_KEY,
-        "entity.name": exec.name,
-        "entity.type": "person",
+        "person.name": exec.name,
         title: keywords.join(","),
         "published_at.start": oneHourAgo,
-        "source.rank.opr.min": "0.5",
+        "source.rank.opr.min": "4",
         per_page: "5",
       });
 
@@ -584,39 +578,36 @@ function generateExecutiveReport(array $exec, int $days = 30): array
     // Total coverage
     $query = http_build_query([
         "api_key"            => $apiKey,
-        "entity.name"        => $exec["name"],
-        "entity.type"        => "person",
+        "person.name"        => $exec["name"],
         "published_at.start" => $start,
-        "language"           => "en",
+        "language.code"      => "en",
         "per_page"           => 1,
     ]);
     $data = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
-    $totalCoverage = $data["total_results"] ?? 0;
+    $totalCoverage = count($data["results"] ?? []);
 
     // Sentiment
     $sentiments = [];
     foreach (["positive", "negative", "neutral"] as $polarity) {
         $query = http_build_query([
             "api_key"                    => $apiKey,
-            "entity.name"                => $exec["name"],
-            "entity.type"                => "person",
+            "person.name"                => $exec["name"],
             "sentiment.overall.polarity" => $polarity,
             "published_at.start"         => $start,
-            "language"                   => "en",
+            "language.code"              => "en",
             "per_page"                   => 1,
         ]);
         $data = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
-        $sentiments[$polarity] = $data["total_results"] ?? 0;
+        $sentiments[$polarity] = count($data["results"] ?? []);
     }
 
     // Recent headlines
     $query = http_build_query([
         "api_key"             => $apiKey,
-        "entity.name"         => $exec["name"],
-        "entity.type"         => "person",
-        "source.rank.opr.min" => 0.5,
+        "person.name"         => $exec["name"],
+        "source.rank.opr.min" => 4,
         "published_at.start"  => $start,
-        "language"            => "en",
+        "language.code"       => "en",
         "sort.by"             => "published_at",
         "sort.order"          => "desc",
         "per_page"            => 5,

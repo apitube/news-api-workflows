@@ -46,17 +46,17 @@ class DynamicTensorAnalyzer:
             for t_idx, topic in enumerate(self.topics):
                 params = {
                     "api_key": API_KEY,
-                    "entity.name": entity,
+                    "organization.name": entity,
                     "topic.id": topic,
                     "published_at.start": start_date,
                     "published_at.end": end_date,
-                    "language": "en",
+                    "language.code": "en",
                     "per_page": 1
                 }
 
                 try:
                     response = requests.get(BASE_URL, params=params)
-                    count = response.json().get("total_results", 0)
+                    count = len(response.json().get("results", []))
                     matrix[e_idx, t_idx] = count
                 except:
                     matrix[e_idx, t_idx] = 0
@@ -373,11 +373,11 @@ class SparseTensorFactorizer:
 
                     params = {
                         "api_key": API_KEY,
-                        "entity.name": entity,
+                        "organization.name": entity,
                         "topic.id": topic,
                         "published_at.start": start,
                         "published_at.end": end,
-                        "language": "en",
+                        "language.code": "en",
                         "per_page": 100
                     }
 
@@ -389,9 +389,9 @@ class SparseTensorFactorizer:
                         source_counts = defaultdict(int)
                         for article in articles:
                             opr = article.get("source", {}).get("rankings", {}).get("opr", 0)
-                            if opr >= 0.7:
+                            if opr >= 5:
                                 source_counts["tier1"] += 1
-                            elif opr >= 0.4:
+                            elif opr >= 3:
                                 source_counts["tier2"] += 1
                             else:
                                 source_counts["tier3"] += 1
@@ -646,18 +646,18 @@ class MultiModalTensorAnalyzer:
 
                         params = {
                             "api_key": API_KEY,
-                            "entity.name": entity,
+                            "organization.name": entity,
                             "topic.id": topic,
                             "sentiment.overall.polarity": sentiment,
                             "published_at.start": start,
                             "published_at.end": end,
-                            "language": "en",
+                            "language.code": "en",
                             "per_page": 1
                         }
 
                         try:
                             response = requests.get(BASE_URL, params=params)
-                            count = response.json().get("total_results", 0)
+                            count = len(response.json().get("results", []))
                             self.tensor[e_idx, t_idx, s_idx, d] = count
                         except:
                             pass

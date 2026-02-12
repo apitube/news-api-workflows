@@ -19,19 +19,19 @@ GET https://api.apitube.io/v1/news/entity
 | Parameter                      | Type    | Description                                                          |
 |-------------------------------|---------|----------------------------------------------------------------------|
 | `api_key`                     | string  | **Required.** Your API key.                                          |
-| `entity.name`                 | string  | Filter by company, index, commodity, or currency.                   |
-| `entity.type`                 | string  | Filter by type: `organization`, `product`, `location`.              |
-| `is_breaking`                 | boolean | Filter for breaking news articles.                                   |
+| `organization.name`           | string  | Filter by company or index.                                         |
+| `location.name`               | string  | Filter by location.                                                 |
+| `is_breaking`                 | integer | Filter for breaking news articles (1 or 0).                          |
 | `sentiment.overall.polarity`  | string  | Filter by sentiment: `positive`, `negative`, `neutral`.             |
 | `sentiment.overall.score.min` | number  | Minimum sentiment score (0.0–1.0).                                  |
 | `sentiment.overall.score.max` | number  | Maximum sentiment score (0.0–1.0).                                  |
 | `title`                       | string  | Filter by market-moving keywords.                                    |
 | `topic.id`                    | string  | Filter by topic (earnings, mergers, macro, etc.).                   |
-| `source.rank.opr.min`         | number  | Minimum source authority (0.0–1.0).                                 |
+| `source.rank.opr.min`         | number  | Minimum source authority (0–7).                                     |
 | `source.domain`               | string  | Filter by financial news sources.                                    |
 | `published_at.start`          | string  | Start date (ISO 8601 or `YYYY-MM-DD`).                             |
 | `published_at.end`            | string  | End date (ISO 8601 or `YYYY-MM-DD`).                               |
-| `language`                    | string  | Filter by language code.                                             |
+| `language.code`               | string  | Filter by language code.                                             |
 | `sort.by`                     | string  | Sort field: `published_at`.                                          |
 | `sort.order`                  | string  | Sort direction: `asc` or `desc`.                                    |
 | `per_page`                    | integer | Number of results per page.                                          |
@@ -42,13 +42,13 @@ GET https://api.apitube.io/v1/news/entity
 
 ```bash
 # Detect breaking market news
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&is_breaking=true&title=earnings,merger,acquisition,bankruptcy,FDA,SEC,lawsuit&source.rank.opr.min=0.7&per_page=20"
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&is_breaking=1&title=earnings,merger,acquisition,bankruptcy,FDA,SEC,lawsuit&source.rank.opr.min=5&per_page=20"
 
 # Monitor high-impact financial keywords
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&title=beat expectations,missed estimates,guidance raised,guidance cut,stock buyback,dividend&language=en&per_page=30"
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&title=beat expectations,missed estimates,guidance raised,guidance cut,stock buyback,dividend&language.code=en&per_page=30"
 
 # Track sudden negative sentiment spikes
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&sentiment.overall.polarity=negative&sentiment.overall.score.max=0.2&is_breaking=true&source.rank.opr.min=0.6&per_page=20"
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&sentiment.overall.polarity=negative&sentiment.overall.score.max=0.2&is_breaking=1&source.rank.opr.min=4&per_page=20"
 ```
 
 ### Python
@@ -80,10 +80,10 @@ def detect_market_moving_events(minutes=30):
     # Check breaking news from tier-1 sources
     resp = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "is_breaking": "true",
+        "is_breaking": 1,
         "source.domain": TIER_1_SOURCES,
         "published_at.start": start,
-        "language": "en",
+        "language.code": "en",
         "sort.by": "published_at",
         "sort.order": "desc",
         "per_page": 20,
@@ -178,10 +178,10 @@ async function detectMarketEvents(minutes = 30) {
 
   const params = new URLSearchParams({
     api_key: API_KEY,
-    is_breaking: "true",
+    is_breaking: "1",
     "source.domain": TIER_1_SOURCES,
     "published_at.start": start,
-    language: "en",
+    "language.code": "en",
     "sort.by": "published_at",
     "sort.order": "desc",
     per_page: "20",
@@ -282,10 +282,10 @@ function detectMarketEvents(int $minutes = 30): array
 
     $query = http_build_query([
         "api_key"            => $apiKey,
-        "is_breaking"        => "true",
+        "is_breaking"        => 1,
         "source.domain"      => $tier1Sources,
         "published_at.start" => $start,
-        "language"           => "en",
+        "language.code"      => "en",
         "sort.by"            => "published_at",
         "sort.order"         => "desc",
         "per_page"           => 20,

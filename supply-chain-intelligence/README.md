@@ -19,8 +19,8 @@ GET https://api.apitube.io/v1/news/entity
 | Parameter                      | Type    | Description                                                          |
 |-------------------------------|---------|----------------------------------------------------------------------|
 | `api_key`                     | string  | **Required.** Your API key.                                          |
-| `entity.name`                 | string  | Filter by company, port, or shipping route.                         |
-| `entity.type`                 | string  | Filter by type: `organization`, `location`, `product`.              |
+| `organization.name`           | string  | Filter by company.                                                   |
+| `location.name`               | string  | Filter by port or shipping route.                                   |
 | `industry.id`                 | string  | Filter by industry (logistics, manufacturing, agriculture, etc.).   |
 | `topic.id`                    | string  | Filter by topic (commodities, shipping, trade).                     |
 | `title`                       | string  | Filter by keywords (shortage, delay, disruption, etc.).             |
@@ -29,8 +29,8 @@ GET https://api.apitube.io/v1/news/entity
 | `sentiment.overall.polarity`  | string  | Filter by sentiment: `positive`, `negative`, `neutral`.             |
 | `published_at.start`          | string  | Start date (ISO 8601 or `YYYY-MM-DD`).                             |
 | `published_at.end`            | string  | End date (ISO 8601 or `YYYY-MM-DD`).                               |
-| `is_breaking`                 | boolean | Filter for breaking news.                                            |
-| `language`                    | string  | Filter by language code.                                             |
+| `is_breaking`                 | integer | Filter for breaking news (1 or 0).                                   |
+| `language.code`               | string  | Filter by language code.                                             |
 | `sort.by`                     | string  | Sort field: `published_at`.                                          |
 | `sort.order`                  | string  | Sort direction: `asc` or `desc`.                                    |
 | `per_page`                    | integer | Number of results per page.                                          |
@@ -41,7 +41,7 @@ GET https://api.apitube.io/v1/news/entity
 
 ```bash
 # Monitor supply chain disruption news
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&title=supply chain,shortage,disruption,delay,bottleneck&language=en&per_page=20"
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&title=supply chain,shortage,disruption,delay,bottleneck&language.code=en&per_page=20"
 
 # Track shipping and logistics news
 curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&industry.id=logistics&title=shipping,freight,port,container&per_page=20"
@@ -77,8 +77,8 @@ def monitor_supply_chain_disruptions(hours=24):
         "title": ",".join(DISRUPTION_KEYWORDS),
         "sentiment.overall.polarity": "negative",
         "published_at.start": start,
-        "language": "en",
-        "source.rank.opr.min": 0.5,
+        "language.code": "en",
+        "source.rank.opr.min": 3,
         "sort.by": "published_at",
         "sort.order": "desc",
         "per_page": 30,
@@ -103,7 +103,7 @@ def monitor_supply_chain_disruptions(hours=24):
         })
 
     return {
-        "total_disruptions": data.get("total_results", 0),
+        "total_disruptions": len(data.get("results", [])),
         "disruptions": disruptions,
     }
 
@@ -117,7 +117,7 @@ def monitor_commodity_supply(commodity, hours=24):
         "api_key": API_KEY,
         "title": f"{commodity},supply,production,shortage,price",
         "published_at.start": start,
-        "language": "en",
+        "language.code": "en",
         "per_page": 20,
     })
 
@@ -134,7 +134,7 @@ def monitor_commodity_supply(commodity, hours=24):
 
     return {
         "commodity": commodity,
-        "total_articles": data.get("total_results", 0),
+        "total_articles": len(articles),
         "sentiments": sentiments,
         "supply_risk_score": supply_risk,
         "risk_level": "HIGH" if supply_risk > 0.5 else "MEDIUM" if supply_risk > 0.3 else "LOW",
@@ -188,8 +188,8 @@ async function getSupplyChainAlerts(hours = 24) {
     title: DISRUPTION_KEYWORDS.join(","),
     "sentiment.overall.polarity": "negative",
     "published_at.start": start,
-    language: "en",
-    "source.rank.opr.min": "0.5",
+    "language.code": "en",
+    "source.rank.opr.min": "3",
     "sort.by": "published_at",
     "sort.order": "desc",
     per_page: "20",
@@ -199,7 +199,7 @@ async function getSupplyChainAlerts(hours = 24) {
   const data = await response.json();
 
   return {
-    total: data.total_results || 0,
+    total: (data.results || []).length,
     alerts: (data.results || []).map(article => ({
       title: article.title,
       source: article.source.domain,
@@ -252,8 +252,8 @@ function getSupplyChainAlerts(int $hours = 24): array
         "title"                      => implode(",", $disruptionKeywords),
         "sentiment.overall.polarity" => "negative",
         "published_at.start"         => $start,
-        "language"                   => "en",
-        "source.rank.opr.min"        => 0.5,
+        "language.code"              => "en",
+        "source.rank.opr.min"        => 3,
         "sort.by"                    => "published_at",
         "sort.order"                 => "desc",
         "per_page"                   => 20,
@@ -262,7 +262,7 @@ function getSupplyChainAlerts(int $hours = 24): array
     $data = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
 
     return [
-        "total"  => $data["total_results"] ?? 0,
+        "total"  => count($data["results"] ?? []),
         "alerts" => array_map(fn($a) => [
             "title"        => $a["title"],
             "source"       => $a["source"]["domain"],

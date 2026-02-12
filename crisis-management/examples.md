@@ -17,12 +17,12 @@ import time
 API_KEY = "YOUR_API_KEY"
 BASE_URL = "https://api.apitube.io/v1/news/everything"
 
-BRANDS = {
-    "Tesla": "organization",
-    "Elon Musk": "person",
-    "SpaceX": "organization",
-    "Twitter": "organization",
-}
+BRANDS = [
+    {"name": "Tesla", "param": "organization.name"},
+    {"name": "Elon Musk", "param": "person.name"},
+    {"name": "SpaceX", "param": "organization.name"},
+    {"name": "Twitter", "param": "organization.name"},
+]
 
 CRISIS_KEYWORDS = [
     "lawsuit", "scandal", "fraud", "recall", "investigation",
@@ -33,7 +33,7 @@ CRISIS_KEYWORDS = [
 TIER_1_SOURCES = "reuters.com,bloomberg.com,nytimes.com,wsj.com,ft.com,bbc.com,cnn.com"
 TIER_2_SOURCES = "techcrunch.com,theverge.com,wired.com,arstechnica.com,engadget.com"
 
-def get_crisis_metrics(entity_name, entity_type, hours=24):
+def get_crisis_metrics(entity_name, entity_param, hours=24):
     """Collect comprehensive crisis metrics for an entity."""
     start_time = (datetime.utcnow() - timedelta(hours=hours)).isoformat() + "Z"
 
@@ -51,98 +51,91 @@ def get_crisis_metrics(entity_name, entity_type, hours=24):
     # Total mentions
     resp = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "entity.name": entity_name,
-        "entity.type": entity_type,
+        entity_param: entity_name,
         "published_at.start": start_time,
-        "language": "en",
+        "language.code": "en",
         "per_page": 1,
     })
-    metrics["total_mentions"] = resp.json().get("total_results", 0)
+    metrics["total_mentions"] = len(resp.json().get("results", []))
 
     # Negative mentions
     resp = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "entity.name": entity_name,
-        "entity.type": entity_type,
+        entity_param: entity_name,
         "sentiment.overall.polarity": "negative",
         "published_at.start": start_time,
-        "language": "en",
+        "language.code": "en",
         "per_page": 1,
     })
-    metrics["negative_mentions"] = resp.json().get("total_results", 0)
+    metrics["negative_mentions"] = len(resp.json().get("results", []))
 
     # Positive mentions
     resp = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "entity.name": entity_name,
-        "entity.type": entity_type,
+        entity_param: entity_name,
         "sentiment.overall.polarity": "positive",
         "published_at.start": start_time,
-        "language": "en",
+        "language.code": "en",
         "per_page": 1,
     })
-    metrics["positive_mentions"] = resp.json().get("total_results", 0)
+    metrics["positive_mentions"] = len(resp.json().get("results", []))
 
     # Breaking negative
     resp = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "entity.name": entity_name,
-        "entity.type": entity_type,
-        "is_breaking": "true",
+        entity_param: entity_name,
+        "is_breaking": "1",
         "sentiment.overall.polarity": "negative",
         "published_at.start": start_time,
-        "language": "en",
+        "language.code": "en",
         "per_page": 1,
     })
-    metrics["breaking_negative"] = resp.json().get("total_results", 0)
+    metrics["breaking_negative"] = len(resp.json().get("results", []))
 
     # Tier 1 negative
     resp = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "entity.name": entity_name,
-        "entity.type": entity_type,
+        entity_param: entity_name,
         "sentiment.overall.polarity": "negative",
         "source.domain": TIER_1_SOURCES,
         "published_at.start": start_time,
         "per_page": 1,
     })
-    metrics["tier1_negative"] = resp.json().get("total_results", 0)
+    metrics["tier1_negative"] = len(resp.json().get("results", []))
 
     # Tier 2 negative
     resp = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "entity.name": entity_name,
-        "entity.type": entity_type,
+        entity_param: entity_name,
         "sentiment.overall.polarity": "negative",
         "source.domain": TIER_2_SOURCES,
         "published_at.start": start_time,
         "per_page": 1,
     })
-    metrics["tier2_negative"] = resp.json().get("total_results", 0)
+    metrics["tier2_negative"] = len(resp.json().get("results", []))
 
     # Crisis keywords
     resp = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "entity.name": entity_name,
+        entity_param: entity_name,
         "title": ",".join(CRISIS_KEYWORDS),
         "published_at.start": start_time,
-        "language": "en",
+        "language.code": "en",
         "per_page": 1,
     })
-    metrics["crisis_keyword_hits"] = resp.json().get("total_results", 0)
+    metrics["crisis_keyword_hits"] = len(resp.json().get("results", []))
 
     # High severity negative (score < 0.3)
     resp = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "entity.name": entity_name,
-        "entity.type": entity_type,
+        entity_param: entity_name,
         "sentiment.overall.polarity": "negative",
         "sentiment.overall.score.max": 0.3,
         "published_at.start": start_time,
-        "language": "en",
+        "language.code": "en",
         "per_page": 1,
     })
-    metrics["high_severity_negative"] = resp.json().get("total_results", 0)
+    metrics["high_severity_negative"] = len(resp.json().get("results", []))
 
     return metrics
 
@@ -184,12 +177,12 @@ print("MULTI-BRAND CRISIS DASHBOARD")
 print(f"Generated: {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')}")
 print("=" * 80)
 
-for entity_name, entity_type in BRANDS.items():
-    metrics = get_crisis_metrics(entity_name, entity_type, hours=24)
+for brand in BRANDS:
+    metrics = get_crisis_metrics(brand["name"], brand["param"], hours=24)
     score = calculate_crisis_score(metrics)
     status = get_status_emoji(score)
 
-    print(f"\n{entity_name} ({entity_type})")
+    print(f"\n{brand['name']}")
     print("-" * 40)
     print(f"  Crisis Score: {score:.0f}/100  {status}")
     print(f"  Total Mentions (24h): {metrics['total_mentions']}")
@@ -235,38 +228,36 @@ def reconstruct_crisis_timeline(entity_name, crisis_start_date, days=7):
         for polarity in ["positive", "negative", "neutral"]:
             resp = requests.get(BASE_URL, params={
                 "api_key": API_KEY,
-                "entity.name": entity_name,
-                "entity.type": "organization",
+                "organization.name": entity_name,
                 "sentiment.overall.polarity": polarity,
                 "published_at.start": day_start.isoformat() + "Z",
                 "published_at.end": day_end.isoformat() + "Z",
-                "language": "en",
+                "language.code": "en",
                 "per_page": 1,
             })
-            count = resp.json().get("total_results", 0)
+            count = len(resp.json().get("results", []))
             day_metrics[polarity] = count
             day_metrics["total"] += count
 
         # Get breaking news count
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": entity_name,
-            "is_breaking": "true",
+            "organization.name": entity_name,
+            "is_breaking": "1",
             "published_at.start": day_start.isoformat() + "Z",
             "published_at.end": day_end.isoformat() + "Z",
             "per_page": 1,
         })
-        day_metrics["breaking"] = resp.json().get("total_results", 0)
+        day_metrics["breaking"] = len(resp.json().get("results", []))
 
         # Get key headlines
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": entity_name,
-            "entity.type": "organization",
+            "organization.name": entity_name,
             "sentiment.overall.polarity": "negative",
             "published_at.start": day_start.isoformat() + "Z",
             "published_at.end": day_end.isoformat() + "Z",
-            "source.rank.opr.min": 0.6,
+            "source.rank.opr.min": 5,
             "sort.by": "source.rank.opr",
             "sort.order": "desc",
             "per_page": 5,
@@ -328,27 +319,25 @@ class CrisisAlertSystem:
         """Establish baseline metrics for anomaly detection."""
         start = (datetime.utcnow() - timedelta(hours=hours)).isoformat() + "Z"
 
-        for entity_name, entity_type in self.entities.items():
+        for entity_name in self.entities:
             resp = requests.get(BASE_URL, params={
                 "api_key": API_KEY,
-                "entity.name": entity_name,
-                "entity.type": entity_type,
+                "organization.name": entity_name,
                 "published_at.start": start,
-                "language": "en",
+                "language.code": "en",
                 "per_page": 1,
             })
-            total = resp.json().get("total_results", 0)
+            total = len(resp.json().get("results", []))
 
             resp = requests.get(BASE_URL, params={
                 "api_key": API_KEY,
-                "entity.name": entity_name,
-                "entity.type": entity_type,
+                "organization.name": entity_name,
                 "sentiment.overall.polarity": "negative",
                 "published_at.start": start,
-                "language": "en",
+                "language.code": "en",
                 "per_page": 1,
             })
-            negative = resp.json().get("total_results", 0)
+            negative = len(resp.json().get("results", []))
 
             self.baseline_metrics[entity_name] = {
                 "avg_daily_mentions": total / (hours / 24),
@@ -367,45 +356,42 @@ class CrisisAlertSystem:
         """Check current metrics against baselines."""
         alerts = []
 
-        for entity_name, entity_type in self.entities.items():
+        for entity_name in self.entities:
             since = self.last_check.get(entity_name, datetime.utcnow() - timedelta(hours=1))
             start = since.isoformat() + "Z"
 
             # Get recent mentions
             resp = requests.get(BASE_URL, params={
                 "api_key": API_KEY,
-                "entity.name": entity_name,
-                "entity.type": entity_type,
+                "organization.name": entity_name,
                 "published_at.start": start,
-                "language": "en",
+                "language.code": "en",
                 "per_page": 1,
             })
-            recent_total = resp.json().get("total_results", 0)
+            recent_total = len(resp.json().get("results", []))
 
             # Get recent negative
             resp = requests.get(BASE_URL, params={
                 "api_key": API_KEY,
-                "entity.name": entity_name,
-                "entity.type": entity_type,
+                "organization.name": entity_name,
                 "sentiment.overall.polarity": "negative",
                 "published_at.start": start,
-                "language": "en",
+                "language.code": "en",
                 "per_page": 1,
             })
-            recent_negative = resp.json().get("total_results", 0)
+            recent_negative = len(resp.json().get("results", []))
 
             # Get breaking negative
             resp = requests.get(BASE_URL, params={
                 "api_key": API_KEY,
-                "entity.name": entity_name,
-                "entity.type": entity_type,
-                "is_breaking": "true",
+                "organization.name": entity_name,
+                "is_breaking": "1",
                 "sentiment.overall.polarity": "negative",
                 "published_at.start": start,
                 "per_page": 5,
             })
             breaking_data = resp.json()
-            breaking_negative = breaking_data.get("total_results", 0)
+            breaking_negative = breaking_len(data.get("results", []))
             breaking_articles = breaking_data.get("results", [])
 
             # Calculate anomaly scores
@@ -490,11 +476,7 @@ def send_alert(alert):
     # })
 
 # Initialize and run
-entities = {
-    "Apple": "organization",
-    "Google": "organization",
-    "Microsoft": "organization",
-}
+entities = ["Apple", "Google", "Microsoft"]
 
 system = CrisisAlertSystem(entities, send_alert)
 system.initialize_baselines(hours=168)
@@ -534,11 +516,10 @@ def track_crisis_propagation(entity_name, hours=72):
         # Get negative coverage
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": entity_name,
-            "entity.type": "organization",
+            "organization.name": entity_name,
             "sentiment.overall.polarity": "negative",
             "published_at.start": start,
-            "language": lang_code,
+            "language.code": lang_code,
             "sort.by": "published_at",
             "sort.order": "asc",
             "per_page": 5,
@@ -549,7 +530,7 @@ def track_crisis_propagation(entity_name, hours=72):
 
         results[lang_code] = {
             "language": lang_name,
-            "negative_count": data.get("total_results", 0),
+            "negative_count": len(data.get("results", [])),
             "first_mention": first_article["published_at"] if first_article else None,
             "first_headline": first_article["title"] if first_article else None,
             "first_source": first_article["source"]["domain"] if first_article else None,
@@ -612,7 +593,7 @@ class CrisisCommandCenter {
     this.metrics = {};
   }
 
-  async fetchMetrics(entityName, entityType, hours = 24) {
+  async fetchMetrics(entityName, hours = 24) {
     const start = new Date(Date.now() - hours * 60 * 60 * 1000).toISOString();
 
     const metrics = {
@@ -630,38 +611,34 @@ class CrisisCommandCenter {
       // Total mentions
       fetch(`${BASE_URL}?${new URLSearchParams({
         api_key: API_KEY,
-        "entity.name": entityName,
-        "entity.type": entityType,
+        "organization.name": entityName,
         "published_at.start": start,
-        language: "en",
+        "language.code": "en",
         per_page: "1",
       })}`),
       // Negative
       fetch(`${BASE_URL}?${new URLSearchParams({
         api_key: API_KEY,
-        "entity.name": entityName,
-        "entity.type": entityType,
+        "organization.name": entityName,
         "sentiment.overall.polarity": "negative",
         "published_at.start": start,
-        language: "en",
+        "language.code": "en",
         per_page: "1",
       })}`),
       // Positive
       fetch(`${BASE_URL}?${new URLSearchParams({
         api_key: API_KEY,
-        "entity.name": entityName,
-        "entity.type": entityType,
+        "organization.name": entityName,
         "sentiment.overall.polarity": "positive",
         "published_at.start": start,
-        language: "en",
+        "language.code": "en",
         per_page: "1",
       })}`),
       // Breaking
       fetch(`${BASE_URL}?${new URLSearchParams({
         api_key: API_KEY,
-        "entity.name": entityName,
-        "entity.type": entityType,
-        is_breaking: "true",
+        "organization.name": entityName,
+        is_breaking: "1",
         "sentiment.overall.polarity": "negative",
         "published_at.start": start,
         per_page: "1",
@@ -669,7 +646,7 @@ class CrisisCommandCenter {
       // Tier 1 negative
       fetch(`${BASE_URL}?${new URLSearchParams({
         api_key: API_KEY,
-        "entity.name": entityName,
+        "organization.name": entityName,
         "sentiment.overall.polarity": "negative",
         "source.domain": TIER_1_SOURCES,
         "published_at.start": start,
@@ -678,7 +655,7 @@ class CrisisCommandCenter {
       // Crisis keywords
       fetch(`${BASE_URL}?${new URLSearchParams({
         api_key: API_KEY,
-        "entity.name": entityName,
+        "organization.name": entityName,
         title: CRISIS_KEYWORDS.join(","),
         "published_at.start": start,
         per_page: "1",
@@ -688,12 +665,12 @@ class CrisisCommandCenter {
     const responses = await Promise.all(requests);
     const data = await Promise.all(responses.map(r => r.json()));
 
-    metrics.total = data[0].total_results || 0;
-    metrics.negative = data[1].total_results || 0;
-    metrics.positive = data[2].total_results || 0;
-    metrics.breaking = data[3].total_results || 0;
-    metrics.tier1Negative = data[4].total_results || 0;
-    metrics.crisisKeywords = data[5].total_results || 0;
+    metrics.total = data[0].results?.length || 0;
+    metrics.negative = data[1].results?.length || 0;
+    metrics.positive = data[2].results?.length || 0;
+    metrics.breaking = data[3].results?.length || 0;
+    metrics.tier1Negative = data[4].results?.length || 0;
+    metrics.crisisKeywords = data[5].results?.length || 0;
 
     return metrics;
   }
@@ -724,14 +701,14 @@ class CrisisCommandCenter {
     console.log(`Generated: ${new Date().toISOString()}`);
     console.log("=".repeat(70));
 
-    for (const [entityName, entityType] of Object.entries(this.entities)) {
-      const metrics = await this.fetchMetrics(entityName, entityType);
+    for (const entityName of this.entities) {
+      const metrics = await this.fetchMetrics(entityName);
       const score = this.calculateScore(metrics);
       const status = this.getStatus(score);
 
       this.metrics[entityName] = { metrics, score, status };
 
-      console.log(`\n${entityName} (${entityType})`);
+      console.log(`\n${entityName}`);
       console.log("-".repeat(40));
       console.log(`  Score: ${score}/100  ${status.emoji} ${status.level}`);
       console.log(`  Total: ${metrics.total} | +${metrics.positive} / -${metrics.negative}`);
@@ -744,12 +721,7 @@ class CrisisCommandCenter {
 }
 
 // Run dashboard
-const entities = {
-  "Tesla": "organization",
-  "Apple": "organization",
-  "Meta": "organization",
-  "Amazon": "organization",
-};
+const entities = ["Tesla", "Apple", "Meta", "Amazon"];
 
 const center = new CrisisCommandCenter(entities);
 center.generateReport();
@@ -773,13 +745,12 @@ class CrisisStreamMonitor {
     this.alertHandlers.push(handler);
   }
 
-  async checkNewArticles(entityName, entityType) {
+  async checkNewArticles(entityName) {
     const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
 
     const params = new URLSearchParams({
       api_key: API_KEY,
-      "entity.name": entityName,
-      "entity.type": entityType,
+      "organization.name": entityName,
       "sentiment.overall.polarity": "negative",
       "published_at.start": fiveMinutesAgo,
       "sort.by": "published_at",
@@ -801,12 +772,11 @@ class CrisisStreamMonitor {
     return newArticles;
   }
 
-  async checkBreakingNews(entityName, entityType) {
+  async checkBreakingNews(entityName) {
     const params = new URLSearchParams({
       api_key: API_KEY,
-      "entity.name": entityName,
-      "entity.type": entityType,
-      is_breaking: "true",
+      "organization.name": entityName,
+      is_breaking: "1",
       "sentiment.overall.polarity": "negative",
       "sort.by": "published_at",
       "sort.order": "desc",
@@ -831,9 +801,9 @@ class CrisisStreamMonitor {
     const timestamp = new Date().toISOString();
     console.log(`\n[${timestamp}] Polling...`);
 
-    for (const [entityName, entityType] of Object.entries(this.entities)) {
+    for (const entityName of this.entities) {
       // Check breaking news first
-      const breaking = await this.checkBreakingNews(entityName, entityType);
+      const breaking = await this.checkBreakingNews(entityName);
 
       for (const article of breaking) {
         const alert = {
@@ -852,7 +822,7 @@ class CrisisStreamMonitor {
       }
 
       // Check other negative news
-      const negative = await this.checkNewArticles(entityName, entityType);
+      const negative = await this.checkNewArticles(entityName);
 
       if (negative.length > 3) {
         const alert = {
@@ -944,76 +914,72 @@ function fetchMetrics(string $entity, string $type, int $hours = 24): array
     // Total
     $query = http_build_query([
         "api_key"            => $apiKey,
-        "entity.name"        => $entity,
-        "entity.type"        => $type,
+        "organization.name"  => $entity,
         "published_at.start" => $start,
-        "language"           => "en",
+        "language.code"      => "en",
         "per_page"           => 1,
     ]);
     $data = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
-    $metrics["total"] = $data["total_results"] ?? 0;
+    $metrics["total"] = count($data["results"] ?? []);
 
     // Negative
     $query = http_build_query([
         "api_key"                    => $apiKey,
-        "entity.name"                => $entity,
-        "entity.type"                => $type,
+        "organization.name"          => $entity,
         "sentiment.overall.polarity" => "negative",
         "published_at.start"         => $start,
-        "language"                   => "en",
+        "language.code"              => "en",
         "per_page"                   => 1,
     ]);
     $data = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
-    $metrics["negative"] = $data["total_results"] ?? 0;
+    $metrics["negative"] = count($data["results"] ?? []);
 
     // Positive
     $query = http_build_query([
         "api_key"                    => $apiKey,
-        "entity.name"                => $entity,
-        "entity.type"                => $type,
+        "organization.name"          => $entity,
         "sentiment.overall.polarity" => "positive",
         "published_at.start"         => $start,
-        "language"                   => "en",
+        "language.code"              => "en",
         "per_page"                   => 1,
     ]);
     $data = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
-    $metrics["positive"] = $data["total_results"] ?? 0;
+    $metrics["positive"] = count($data["results"] ?? []);
 
     // Breaking negative
     $query = http_build_query([
         "api_key"                    => $apiKey,
-        "entity.name"                => $entity,
-        "entity.type"                => $type,
-        "is_breaking"                => "true",
+        "organization.name"          => $entity,
+        "is_breaking"                => "1",
         "sentiment.overall.polarity" => "negative",
         "published_at.start"         => $start,
         "per_page"                   => 1,
     ]);
     $data = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
-    $metrics["breaking"] = $data["total_results"] ?? 0;
+    $metrics["breaking"] = count($data["results"] ?? []);
 
     // Tier 1 negative
     $query = http_build_query([
         "api_key"                    => $apiKey,
-        "entity.name"                => $entity,
+        "organization.name"          => $entity,
         "sentiment.overall.polarity" => "negative",
         "source.domain"              => $tier1Sources,
         "published_at.start"         => $start,
         "per_page"                   => 1,
     ]);
     $data = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
-    $metrics["tier1_negative"] = $data["total_results"] ?? 0;
+    $metrics["tier1_negative"] = count($data["results"] ?? []);
 
     // Crisis keywords
     $query = http_build_query([
         "api_key"            => $apiKey,
-        "entity.name"        => $entity,
+        "organization.name"  => $entity,
         "title"              => implode(",", $crisisKeywords),
         "published_at.start" => $start,
         "per_page"           => 1,
     ]);
     $data = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
-    $metrics["crisis_keywords"] = $data["total_results"] ?? 0;
+    $metrics["crisis_keywords"] = count($data["results"] ?? []);
 
     return $metrics;
 }
@@ -1098,17 +1064,16 @@ function trackRecovery(string $entity, string $crisisDate, int $days = 30): arra
         foreach (["positive", "negative", "neutral"] as $polarity) {
             $query = http_build_query([
                 "api_key"                    => $apiKey,
-                "entity.name"                => $entity,
-                "entity.type"                => "organization",
+                "organization.name"          => $entity,
                 "sentiment.overall.polarity" => $polarity,
                 "published_at.start"         => $dayStart->format("c"),
                 "published_at.end"           => $dayEnd->format("c"),
-                "language"                   => "en",
+                "language.code"              => "en",
                 "per_page"                   => 1,
             ]);
 
             $data = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
-            $count = $data["total_results"] ?? 0;
+            $count = count($data["results"] ?? []);
             $dayMetrics[$polarity] = $count;
             $dayMetrics["total"] += $count;
         }

@@ -32,11 +32,11 @@ for topic in TOPICS:
     response = requests.get(BASE_URL, params={
         "api_key": API_KEY,
         "topic.id": topic,
-        "language": "en",
+        "language.code": "en",
         "per_page": 1,
     })
     response.raise_for_status()
-    volumes[topic] = response.json().get("total_results", 0)
+    volumes[topic] = len(response.json().get("results", []))
 
 max_vol = max(volumes.values()) or 1
 
@@ -67,7 +67,7 @@ def build_digest(topics, articles_per_topic=5, days=1):
             "published_at.end": today.strftime("%Y-%m-%d"),
             "sort.by": "published_at",
             "sort.order": "desc",
-            "language": "en",
+            "language.code": "en",
             "per_page": articles_per_topic,
         })
         response.raise_for_status()
@@ -121,22 +121,22 @@ for topic in topics:
             "sentiment.overall.polarity": "positive",
             "published_at.start": day_start.strftime("%Y-%m-%d"),
             "published_at.end": day_end.strftime("%Y-%m-%d"),
-            "language": "en",
+            "language.code": "en",
             "per_page": 1,
         })
         pos_resp.raise_for_status()
-        pos = pos_resp.json().get("total_results", 0)
+        pos = len(pos_resp.json().get("results", []))
 
         total_resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
             "topic.id": topic,
             "published_at.start": day_start.strftime("%Y-%m-%d"),
             "published_at.end": day_end.strftime("%Y-%m-%d"),
-            "language": "en",
+            "language.code": "en",
             "per_page": 1,
         })
         total_resp.raise_for_status()
-        total = total_resp.json().get("total_results", 0) or 1
+        total = len(total_resp.json().get("results", [])) or 1
 
         ratio = pos / total
         row += f" {ratio:>5.0%} "
@@ -173,11 +173,11 @@ for topic in topics:
         "topic.id": topic,
         "published_at.start": this_week_start.strftime("%Y-%m-%d"),
         "published_at.end": today.strftime("%Y-%m-%d"),
-        "language": "en",
+        "language.code": "en",
         "per_page": 1,
     })
     resp1.raise_for_status()
-    this_week = resp1.json().get("total_results", 0)
+    this_week = len(resp1.json().get("results", []))
 
     # Last week
     resp2 = requests.get(BASE_URL, params={
@@ -185,11 +185,11 @@ for topic in topics:
         "topic.id": topic,
         "published_at.start": last_week_start.strftime("%Y-%m-%d"),
         "published_at.end": this_week_start.strftime("%Y-%m-%d"),
-        "language": "en",
+        "language.code": "en",
         "per_page": 1,
     })
     resp2.raise_for_status()
-    last_week = resp2.json().get("total_results", 0)
+    last_week = len(resp2.json().get("results", []))
 
     if last_week > 0:
         change = (this_week - last_week) / last_week * 100
@@ -213,7 +213,7 @@ topic = "artificial_intelligence"
 response = requests.get(BASE_URL, params={
     "api_key": API_KEY,
     "topic.id": topic,
-    "language": "en",
+    "language.code": "en",
     "sort.by": "published_at",
     "sort.order": "desc",
     "per_page": 50,
@@ -266,13 +266,13 @@ for (const topic of TOPICS) {
   const params = new URLSearchParams({
     api_key: API_KEY,
     "topic.id": topic,
-    language: "en",
+    "language.code": "en",
     per_page: "1",
   });
 
   const response = await fetch(`${BASE_URL}?${params}`);
   const data = await response.json();
-  volumes[topic] = data.total_results || 0;
+  volumes[topic] = data.results?.length || 0;
 }
 
 const maxVol = Math.max(...Object.values(volumes)) || 1;
@@ -305,7 +305,7 @@ async function buildDigest(topics, articlesPerTopic = 5, days = 1) {
       "published_at.end": now.toISOString().split("T")[0],
       "sort.by": "published_at",
       "sort.order": "desc",
-      language: "en",
+      "language.code": "en",
       per_page: String(articlesPerTopic),
     });
 
@@ -364,7 +364,7 @@ for (const topic of topics) {
     "topic.id": topic,
     "published_at.start": fmt(thisWeekStart),
     "published_at.end": fmt(now),
-    language: "en",
+    "language.code": "en",
     per_page: "1",
   });
 
@@ -373,7 +373,7 @@ for (const topic of topics) {
     "topic.id": topic,
     "published_at.start": fmt(lastWeekStart),
     "published_at.end": fmt(thisWeekStart),
-    language: "en",
+    "language.code": "en",
     per_page: "1",
   });
 
@@ -382,8 +382,8 @@ for (const topic of topics) {
     fetch(`${BASE_URL}?${lastParams}`).then((r) => r.json()),
   ]);
 
-  const thisWeek = thisResp.total_results || 0;
-  const lastWeek = lastResp.total_results || 0;
+  const thisWeek = thisResp.results?.length || 0;
+  const lastWeek = lastResp.results?.length || 0;
 
   if (lastWeek > 0) {
     const change = ((thisWeek - lastWeek) / lastWeek) * 100;
@@ -430,14 +430,14 @@ echo "Topic volume comparison:\n\n";
 $volumes = [];
 foreach ($topics as $topic) {
     $query = http_build_query([
-        "api_key"  => $apiKey,
-        "topic.id" => $topic,
-        "language" => "en",
-        "per_page" => 1,
+        "api_key"       => $apiKey,
+        "topic.id"      => $topic,
+        "language.code" => "en",
+        "per_page"      => 1,
     ]);
 
     $data = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
-    $volumes[$topic] = $data["total_results"] ?? 0;
+    $volumes[$topic] = count($data["results"] ?? []);
 }
 
 arsort($volumes);
@@ -473,7 +473,7 @@ function buildDigest(array $topics, int $articlesPerTopic = 5, int $days = 1): a
             "published_at.end"   => $now->format("Y-m-d"),
             "sort.by"            => "published_at",
             "sort.order"         => "desc",
-            "language"           => "en",
+            "language.code"      => "en",
             "per_page"           => $articlesPerTopic,
         ]);
 
@@ -529,11 +529,11 @@ foreach ($topics as $topic) {
         "topic.id"           => $topic,
         "published_at.start" => $thisWeekStart->format("Y-m-d"),
         "published_at.end"   => $now->format("Y-m-d"),
-        "language"           => "en",
+        "language.code"      => "en",
         "per_page"           => 1,
     ]);
     $d1       = json_decode(file_get_contents("{$baseUrl}?{$q1}"), true);
-    $thisWeek = $d1["total_results"] ?? 0;
+    $thisWeek = count($d1["results"] ?? []);
 
     // Last week
     $q2 = http_build_query([
@@ -541,11 +541,11 @@ foreach ($topics as $topic) {
         "topic.id"           => $topic,
         "published_at.start" => $lastWeekStart->format("Y-m-d"),
         "published_at.end"   => $thisWeekStart->format("Y-m-d"),
-        "language"           => "en",
+        "language.code"      => "en",
         "per_page"           => 1,
     ]);
     $d2       = json_decode(file_get_contents("{$baseUrl}?{$q2}"), true);
-    $lastWeek = $d2["total_results"] ?? 0;
+    $lastWeek = count($d2["results"] ?? []);
 
     if ($lastWeek > 0) {
         $change = ($thisWeek - $lastWeek) / $lastWeek * 100;

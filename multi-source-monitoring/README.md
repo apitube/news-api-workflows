@@ -19,14 +19,14 @@ GET https://api.apitube.io/v1/news/everything
 | `api_key`                     | string  | **Required.** Your API key.                                            |
 | `source.domain`               | string  | Filter by source domain (comma-separated, e.g., `cnn.com,bbc.com`).  |
 | `source.country.code`         | string  | Filter by source country code (comma-separated, e.g., `us,gb`).      |
-| `source.rank.opr.min`         | number  | Minimum source OPR rank (0.0 to 1.0). Higher = more authoritative.    |
-| `source.rank.opr.max`         | number  | Maximum source OPR rank.                                               |
+| `source.rank.opr.min`         | integer | Minimum source OPR rank (0–7). Higher = more authoritative.            |
+| `source.rank.opr.max`         | integer | Maximum source OPR rank (0–7).                                         |
 | `title`                       | string  | Filter by keywords in article title (comma-separated).                |
-| `topic.id`                    | string  | Filter by topic (e.g., `technology`, `politics`).                     |
+| `topic.id`                    | string  | Filter by topic (e.g., `crypto_news`, `climate_change`).              |
 | `sentiment.overall.polarity`  | string  | Filter by sentiment: `positive`, `negative`, `neutral`.               |
 | `sort.by`                     | string  | Sort field: `published_at`, `source.domain`, `sentiment.overall.score`.|
 | `sort.order`                  | string  | Sort direction: `asc` or `desc`.                                      |
-| `language`                    | string  | Filter by language code.                                               |
+| `language.code`               | string  | Filter by language code.                                               |
 | `published_at.start`          | string  | Start date (ISO 8601 or `YYYY-MM-DD`).                                |
 | `published_at.end`            | string  | End date (ISO 8601 or `YYYY-MM-DD`).                                  |
 | `per_page`                    | integer | Number of results per page (default: 50).                              |
@@ -38,10 +38,10 @@ GET https://api.apitube.io/v1/news/everything
 
 ```bash
 # Get news from specific sources
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&source.domain=reuters.com,bbc.com,bloomberg.com&language=en&per_page=10"
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&source.domain=reuters.com,bbc.com,bloomberg.com&language.code=en&per_page=10"
 
 # Get news from high-ranked sources only
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&source.rank.opr.min=0.8&language=en&per_page=10&sort.by=published_at&sort.order=desc"
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&source.rank.opr.min=6&language.code=en&per_page=10&sort.by=published_at&sort.order=desc"
 ```
 
 ### Python
@@ -52,7 +52,7 @@ import requests
 response = requests.get("https://api.apitube.io/v1/news/everything", params={
     "api_key": "YOUR_API_KEY",
     "source.domain": "reuters.com,bbc.com,bloomberg.com",
-    "language": "en",
+    "language.code": "en",
     "sort.by": "published_at",
     "sort.order": "desc",
     "per_page": 10,
@@ -69,7 +69,7 @@ for article in data["results"]:
 const params = new URLSearchParams({
   api_key: "YOUR_API_KEY",
   "source.domain": "reuters.com,bbc.com,bloomberg.com",
-  language: "en",
+  "language.code": "en",
   "sort.by": "published_at",
   "sort.order": "desc",
   per_page: "10",
@@ -91,7 +91,7 @@ data.results.forEach((a) => {
 $query = http_build_query([
     "api_key"       => "YOUR_API_KEY",
     "source.domain" => "reuters.com,bbc.com,bloomberg.com",
-    "language"      => "en",
+    "language.code" => "en",
     "sort.by"       => "published_at",
     "sort.order"    => "desc",
     "per_page"      => 10,

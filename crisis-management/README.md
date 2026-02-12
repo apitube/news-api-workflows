@@ -18,18 +18,18 @@ GET https://api.apitube.io/v1/news/trends
 | Parameter                      | Type    | Description                                                          |
 |-------------------------------|---------|----------------------------------------------------------------------|
 | `api_key`                     | string  | **Required.** Your API key.                                          |
-| `entity.name`                 | string  | Filter by entity name (company, person, product).                   |
-| `entity.type`                 | string  | Filter by entity type: `organization`, `person`, `brand`, `product`.|
+| `organization.name`           | string  | Filter by organization name (e.g., `Tesla`, `Boeing`).               |
+| `person.name`                 | string  | Filter by person name (e.g., `Elon Musk`).                           |
+| `brand.name`                  | string  | Filter by brand name.                                                |
 | `sentiment.overall.polarity`  | string  | Filter by sentiment: `positive`, `negative`, `neutral`.             |
-| `sentiment.overall.score.min` | number  | Minimum sentiment score (0.0–1.0).                                  |
-| `sentiment.overall.score.max` | number  | Maximum sentiment score (0.0–1.0).                                  |
-| `is_breaking`                 | boolean | Filter for breaking news articles.                                   |
-| `title`                       | string  | Filter by keywords in title (supports boolean operators).           |
-| `title_pattern`               | string  | Filter by regex pattern in title.                                    |
-| `source.rank.opr.min`         | number  | Minimum source authority rank (0.0–1.0).                            |
+| `sentiment.overall.score.min` | float   | Minimum sentiment score (-1.0 to 1.0).                               |
+| `sentiment.overall.score.max` | float   | Maximum sentiment score (-1.0 to 1.0).                               |
+| `is_breaking`                 | integer | Filter for breaking news articles (`1` = yes, `0` = no).             |
+| `title`                       | string  | Filter by keywords in title (comma-separated).                       |
+| `source.rank.opr.min`         | integer | Minimum source authority rank (0–7).                                 |
 | `source.domain`               | string  | Filter by source domains (comma-separated).                         |
 | `source.country.code`         | string  | Filter by source country (ISO 3166-1).                              |
-| `language`                    | string  | Filter by language code (comma-separated for multi-lang).           |
+| `language.code`               | string  | Filter by language code (comma-separated for multi-lang).           |
 | `published_at.start`          | string  | Start date (ISO 8601 or `YYYY-MM-DD`).                             |
 | `published_at.end`            | string  | End date (ISO 8601 or `YYYY-MM-DD`).                               |
 | `category.id`                 | string  | Filter by IPTC category (e.g., `medtop:20000763` for scandals).    |
@@ -44,13 +44,13 @@ GET https://api.apitube.io/v1/news/trends
 
 ```bash
 # Detect negative breaking news about your brand
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&entity.name=Tesla&entity.type=organization&is_breaking=true&sentiment.overall.polarity=negative&per_page=10" | jq '.results[] | {title, source: .source.domain, sentiment: .sentiment.overall}'
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&organization.name=Tesla&is_breaking=1&sentiment.overall.polarity=negative&per_page=10" | jq '.results[] | {title, source: .source.domain, sentiment: .sentiment.overall}'
 
 # Monitor crisis keywords across multiple languages
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&title=lawsuit,scandal,fraud,investigation&entity.name=Tesla&language=en,de,fr,es&per_page=20"
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&title=lawsuit,scandal,fraud,investigation&organization.name=Tesla&language.code=en,de,fr&per_page=20"
 
 # Get high-authority negative coverage
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&entity.name=Tesla&sentiment.overall.polarity=negative&source.rank.opr.min=0.7&sort.by=published_at&sort.order=desc&per_page=10"
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&organization.name=Tesla&sentiment.overall.polarity=negative&source.rank.opr.min=6&sort.by=published_at&sort.order=desc&per_page=10"
 ```
 
 ### Python
@@ -76,41 +76,39 @@ crisis_signals = {
 # Check breaking negative news
 response = requests.get(BASE_URL, params={
     "api_key": API_KEY,
-    "entity.name": BRAND,
-    "entity.type": "organization",
-    "is_breaking": "true",
+    "organization.name": BRAND,
+    "is_breaking": 1,
     "sentiment.overall.polarity": "negative",
-    "per_page": 1,
+    "per_page": 100,
 })
-crisis_signals["breaking_negative"] = response.json().get("total_results", 0)
+crisis_signals["breaking_negative"] = len(response.json().get("results", []))
 
 # Check high-authority negative coverage
 response = requests.get(BASE_URL, params={
     "api_key": API_KEY,
-    "entity.name": BRAND,
-    "entity.type": "organization",
+    "organization.name": BRAND,
     "sentiment.overall.polarity": "negative",
-    "source.rank.opr.min": 0.7,
+    "source.rank.opr.min": 6,
     "published_at.start": (datetime.utcnow() - timedelta(hours=24)).isoformat() + "Z",
-    "per_page": 1,
+    "per_page": 100,
 })
-crisis_signals["high_authority_negative"] = response.json().get("total_results", 0)
+crisis_signals["high_authority_negative"] = len(response.json().get("results", []))
 
 # Check crisis keywords
 response = requests.get(BASE_URL, params={
     "api_key": API_KEY,
-    "entity.name": BRAND,
+    "organization.name": BRAND,
     "title": ",".join(CRISIS_KEYWORDS),
     "published_at.start": (datetime.utcnow() - timedelta(hours=24)).isoformat() + "Z",
-    "per_page": 1,
+    "per_page": 100,
 })
-crisis_signals["crisis_keywords"] = response.json().get("total_results", 0)
+crisis_signals["crisis_keywords"] = len(response.json().get("results", []))
 
 # Calculate crisis score (0-100)
 crisis_score = min(100, (
-    crisis_signals["breaking_negative"] * 20 +
-    crisis_signals["high_authority_negative"] * 10 +
-    crisis_signals["crisis_keywords"] * 15
+    crisis_signals["breaking_negative"] * 2 +
+    crisis_signals["high_authority_negative"] * 1 +
+    crisis_signals["crisis_keywords"] * 1
 ))
 
 print(f"Crisis Score for {BRAND}: {crisis_score}/100")
@@ -141,49 +139,48 @@ async function detectCrisis() {
   // Breaking negative news
   const breakingParams = new URLSearchParams({
     api_key: API_KEY,
-    "entity.name": BRAND,
-    "entity.type": "organization",
-    is_breaking: "true",
+    "organization.name": BRAND,
+    is_breaking: "1",
     "sentiment.overall.polarity": "negative",
-    per_page: "1",
+    per_page: "100",
   });
 
   let response = await fetch(`${BASE_URL}?${breakingParams}`);
   let data = await response.json();
-  signals.breakingNegative = data.total_results || 0;
+  signals.breakingNegative = data.results?.length || 0;
 
   // High-authority negative coverage
   const authorityParams = new URLSearchParams({
     api_key: API_KEY,
-    "entity.name": BRAND,
+    "organization.name": BRAND,
     "sentiment.overall.polarity": "negative",
-    "source.rank.opr.min": "0.7",
+    "source.rank.opr.min": "6",
     "published_at.start": yesterday,
-    per_page: "1",
+    per_page: "100",
   });
 
   response = await fetch(`${BASE_URL}?${authorityParams}`);
   data = await response.json();
-  signals.highAuthorityNegative = data.total_results || 0;
+  signals.highAuthorityNegative = data.results?.length || 0;
 
   // Crisis keywords
   const keywordParams = new URLSearchParams({
     api_key: API_KEY,
-    "entity.name": BRAND,
+    "organization.name": BRAND,
     title: CRISIS_KEYWORDS.join(","),
     "published_at.start": yesterday,
-    per_page: "1",
+    per_page: "100",
   });
 
   response = await fetch(`${BASE_URL}?${keywordParams}`);
   data = await response.json();
-  signals.crisisKeywords = data.total_results || 0;
+  signals.crisisKeywords = data.results?.length || 0;
 
   // Calculate score
   const crisisScore = Math.min(100,
-    signals.breakingNegative * 20 +
-    signals.highAuthorityNegative * 10 +
-    signals.crisisKeywords * 15
+    signals.breakingNegative * 2 +
+    signals.highAuthorityNegative * 1 +
+    signals.crisisKeywords * 1
   );
 
   console.log(`Crisis Score for ${BRAND}: ${crisisScore}/100`);
@@ -221,43 +218,42 @@ $yesterday = (new DateTime("-24 hours"))->format("c");
 // Breaking negative news
 $query = http_build_query([
     "api_key"                    => $apiKey,
-    "entity.name"                => $brand,
-    "entity.type"                => "organization",
-    "is_breaking"                => "true",
+    "organization.name"          => $brand,
+    "is_breaking"                => 1,
     "sentiment.overall.polarity" => "negative",
-    "per_page"                   => 1,
+    "per_page"                   => 100,
 ]);
 $data = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
-$signals["breaking_negative"] = $data["total_results"] ?? 0;
+$signals["breaking_negative"] = count($data["results"] ?? []);
 
 // High-authority negative
 $query = http_build_query([
     "api_key"                    => $apiKey,
-    "entity.name"                => $brand,
+    "organization.name"          => $brand,
     "sentiment.overall.polarity" => "negative",
-    "source.rank.opr.min"        => 0.7,
+    "source.rank.opr.min"        => 6,
     "published_at.start"         => $yesterday,
-    "per_page"                   => 1,
+    "per_page"                   => 100,
 ]);
 $data = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
-$signals["high_authority_negative"] = $data["total_results"] ?? 0;
+$signals["high_authority_negative"] = count($data["results"] ?? []);
 
 // Crisis keywords
 $query = http_build_query([
     "api_key"            => $apiKey,
-    "entity.name"        => $brand,
+    "organization.name"  => $brand,
     "title"              => implode(",", $crisisKeywords),
     "published_at.start" => $yesterday,
-    "per_page"           => 1,
+    "per_page"           => 100,
 ]);
 $data = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
-$signals["crisis_keywords"] = $data["total_results"] ?? 0;
+$signals["crisis_keywords"] = count($data["results"] ?? []);
 
 // Calculate score
 $crisisScore = min(100,
-    $signals["breaking_negative"] * 20 +
-    $signals["high_authority_negative"] * 10 +
-    $signals["crisis_keywords"] * 15
+    $signals["breaking_negative"] * 2 +
+    $signals["high_authority_negative"] * 1 +
+    $signals["crisis_keywords"] * 1
 );
 
 echo "Crisis Score for {$brand}: {$crisisScore}/100\n";

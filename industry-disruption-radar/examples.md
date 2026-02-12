@@ -81,62 +81,62 @@ class DisruptionRadar:
             "api_key": API_KEY,
             "title": ",".join(config["keywords"]),
             "published_at.start": start,
-            "language": "en",
+            "language.code": "en",
             "per_page": 1,
         })
-        analysis["metrics"]["total_coverage"] = resp.json().get("total_results", 0)
+        analysis["metrics"]["total_coverage"] = len(resp.json().get("results", []))
 
         # Disruption signal intensity
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
             "title": ",".join(config["keywords"] + self.DISRUPTION_SIGNALS),
             "published_at.start": start,
-            "language": "en",
+            "language.code": "en",
             "per_page": 1,
         })
-        analysis["metrics"]["disruption_signals"] = resp.json().get("total_results", 0)
+        analysis["metrics"]["disruption_signals"] = len(resp.json().get("results", []))
 
         # Momentum signals
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
             "title": ",".join(config["keywords"] + self.MOMENTUM_SIGNALS),
             "published_at.start": start,
-            "language": "en",
+            "language.code": "en",
             "per_page": 1,
         })
-        analysis["metrics"]["momentum_signals"] = resp.json().get("total_results", 0)
+        analysis["metrics"]["momentum_signals"] = len(resp.json().get("results", []))
 
         # Tier-1 coverage
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
             "title": ",".join(config["keywords"]),
-            "source.rank.opr.min": 0.7,
+            "source.rank.opr.min": 5,
             "published_at.start": start,
             "per_page": 1,
         })
-        analysis["metrics"]["tier1_coverage"] = resp.json().get("total_results", 0)
+        analysis["metrics"]["tier1_coverage"] = len(resp.json().get("results", []))
 
         # Analyze incumbents
         for incumbent in config["incumbents"]:
             resp = requests.get(BASE_URL, params={
                 "api_key": API_KEY,
-                "entity.name": incumbent,
+                "organization.name": incumbent,
                 "title": ",".join(config["keywords"]),
                 "published_at.start": start,
-                "language": "en",
+                "language.code": "en",
                 "per_page": 1,
             })
-            total = resp.json().get("total_results", 0)
+            total = len(resp.json().get("results", []))
 
             resp = requests.get(BASE_URL, params={
                 "api_key": API_KEY,
-                "entity.name": incumbent,
+                "organization.name": incumbent,
                 "title": ",".join(config["keywords"] + self.DISRUPTION_SIGNALS),
                 "published_at.start": start,
-                "language": "en",
+                "language.code": "en",
                 "per_page": 1,
             })
-            disruption = resp.json().get("total_results", 0)
+            disruption = len(resp.json().get("results", []))
 
             analysis["incumbent_analysis"][incumbent] = {
                 "coverage": total,
@@ -148,23 +148,22 @@ class DisruptionRadar:
         for disruptor in config["disruptors"]:
             resp = requests.get(BASE_URL, params={
                 "api_key": API_KEY,
-                "entity.name": disruptor,
-                "entity.type": "organization",
+                "organization.name": disruptor,
                 "published_at.start": start,
-                "language": "en",
+                "language.code": "en",
                 "per_page": 1,
             })
-            total = resp.json().get("total_results", 0)
+            total = len(resp.json().get("results", []))
 
             resp = requests.get(BASE_URL, params={
                 "api_key": API_KEY,
-                "entity.name": disruptor,
+                "organization.name": disruptor,
                 "title": ",".join(self.MOMENTUM_SIGNALS),
                 "published_at.start": start,
-                "language": "en",
+                "language.code": "en",
                 "per_page": 1,
             })
-            momentum = resp.json().get("total_results", 0)
+            momentum = len(resp.json().get("results", []))
 
             analysis["disruptor_analysis"][disruptor] = {
                 "coverage": total,
@@ -176,9 +175,9 @@ class DisruptionRadar:
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
             "title": ",".join(config["keywords"]),
-            "source.rank.opr.min": 0.6,
+            "source.rank.opr.min": 4,
             "published_at.start": start,
-            "language": "en",
+            "language.code": "en",
             "sort.by": "published_at",
             "sort.order": "desc",
             "per_page": 10,
@@ -338,11 +337,11 @@ def track_funding_activity(days=14):
             "api_key": API_KEY,
             "title": ",".join(keywords),
             "published_at.start": start,
-            "language": "en",
-            "source.rank.opr.min": 0.5,
+            "language.code": "en",
+            "source.rank.opr.min": 4,
             "per_page": 1,
         })
-        results["by_stage"][stage] = resp.json().get("total_results", 0)
+        results["by_stage"][stage] = len(resp.json().get("results", []))
 
     # By sector
     for sector in SECTORS:
@@ -352,19 +351,19 @@ def track_funding_activity(days=14):
             "api_key": API_KEY,
             "title": f"{sector}," + ",".join(all_funding_keywords[:5]),
             "published_at.start": start,
-            "language": "en",
+            "language.code": "en",
             "per_page": 1,
         })
-        results["by_sector"][sector] = resp.json().get("total_results", 0)
+        results["by_sector"][sector] = len(resp.json().get("results", []))
 
     # Get top deals (recent high-authority funding news)
     all_funding = [kw for keywords in FUNDING_KEYWORDS.values() for kw in keywords]
     resp = requests.get(BASE_URL, params={
         "api_key": API_KEY,
         "title": ",".join(all_funding[:10]),
-        "source.rank.opr.min": 0.6,
+        "source.rank.opr.min": 4,
         "published_at.start": start,
-        "language": "en",
+        "language.code": "en",
         "sort.by": "published_at",
         "sort.order": "desc",
         "per_page": 15,
@@ -440,39 +439,39 @@ async function analyzeDisruptionTheme(themeName, keywords, days = 30) {
     api_key: API_KEY,
     title: keywords.join(","),
     "published_at.start": start,
-    language: "en",
+    "language.code": "en",
     per_page: "1",
   });
 
   let response = await fetch(`${BASE_URL}?${totalParams}`);
   let data = await response.json();
-  const totalCoverage = data.total_results || 0;
+  const totalCoverage = data.results?.length || 0;
 
   // Disruption signals
   const signalParams = new URLSearchParams({
     api_key: API_KEY,
     title: [...keywords, ...DISRUPTION_SIGNALS].join(","),
     "published_at.start": start,
-    language: "en",
+    "language.code": "en",
     per_page: "1",
   });
 
   response = await fetch(`${BASE_URL}?${signalParams}`);
   data = await response.json();
-  const disruptionSignals = data.total_results || 0;
+  const disruptionSignals = data.results?.length || 0;
 
   // Tier-1 coverage
   const tier1Params = new URLSearchParams({
     api_key: API_KEY,
     title: keywords.join(","),
-    "source.rank.opr.min": "0.7",
+    "source.rank.opr.min": "5",
     "published_at.start": start,
     per_page: "1",
   });
 
   response = await fetch(`${BASE_URL}?${tier1Params}`);
   data = await response.json();
-  const tier1Coverage = data.total_results || 0;
+  const tier1Coverage = data.results?.length || 0;
 
   // Calculate scores
   const disruptionIntensity = disruptionSignals / Math.max(totalCoverage, 1);
@@ -558,33 +557,33 @@ function analyzeTheme(string $theme, array $keywords, int $days = 30): array
         "api_key"            => $apiKey,
         "title"              => implode(",", $keywords),
         "published_at.start" => $start,
-        "language"           => "en",
+        "language.code"      => "en",
         "per_page"           => 1,
     ]);
     $data = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
-    $totalCoverage = $data["total_results"] ?? 0;
+    $totalCoverage = count($data["results"] ?? []);
 
     // Disruption signals
     $query = http_build_query([
         "api_key"            => $apiKey,
         "title"              => implode(",", array_merge($keywords, $disruptionSignals)),
         "published_at.start" => $start,
-        "language"           => "en",
+        "language.code"      => "en",
         "per_page"           => 1,
     ]);
     $data = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
-    $signals = $data["total_results"] ?? 0;
+    $signals = count($data["results"] ?? []);
 
     // Tier-1 coverage
     $query = http_build_query([
         "api_key"             => $apiKey,
         "title"               => implode(",", $keywords),
-        "source.rank.opr.min" => 0.7,
+        "source.rank.opr.min" => 5,
         "published_at.start"  => $start,
         "per_page"            => 1,
     ]);
     $data = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
-    $tier1 = $data["total_results"] ?? 0;
+    $tier1 = count($data["results"] ?? []);
 
     $total = max($totalCoverage, 1);
     $intensity = $signals / $total;

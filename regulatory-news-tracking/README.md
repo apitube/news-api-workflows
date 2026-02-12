@@ -19,8 +19,9 @@ GET https://api.apitube.io/v1/news/category
 | Parameter                      | Type    | Description                                                          |
 |-------------------------------|---------|----------------------------------------------------------------------|
 | `api_key`                     | string  | **Required.** Your API key.                                          |
-| `entity.name`                 | string  | Filter by regulatory body, company, or jurisdiction.                |
-| `entity.type`                 | string  | Filter by type: `organization`, `location`, `person`.               |
+| `organization.name`           | string  | Filter by regulatory body or company.                               |
+| `location.name`               | string  | Filter by jurisdiction.                                             |
+| `person.name`                 | string  | Filter by person name.                                              |
 | `category.id`                 | string  | Filter by IPTC category (e.g., `medtop:11000000` for politics).    |
 | `topic.id`                    | string  | Filter by topic (regulation, compliance, policy).                   |
 | `title`                       | string  | Filter by keywords (fine, penalty, regulation, compliance, etc.).   |
@@ -29,8 +30,8 @@ GET https://api.apitube.io/v1/news/category
 | `sentiment.overall.polarity`  | string  | Filter by sentiment: `positive`, `negative`, `neutral`.             |
 | `published_at.start`          | string  | Start date (ISO 8601 or `YYYY-MM-DD`).                             |
 | `published_at.end`            | string  | End date (ISO 8601 or `YYYY-MM-DD`).                               |
-| `source.rank.opr.min`         | number  | Minimum source authority (0.0–1.0).                                 |
-| `language`                    | string  | Filter by language code.                                             |
+| `source.rank.opr.min`         | number  | Minimum source authority (0–7).                                     |
+| `language.code`               | string  | Filter by language code.                                             |
 | `sort.by`                     | string  | Sort field: `published_at`.                                          |
 | `sort.order`                  | string  | Sort direction: `asc` or `desc`.                                    |
 | `per_page`                    | integer | Number of results per page.                                          |
@@ -41,13 +42,13 @@ GET https://api.apitube.io/v1/news/category
 
 ```bash
 # Monitor regulatory enforcement actions
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&title=fine,penalty,violation,enforcement,settlement&source.rank.opr.min=0.6&language=en&per_page=20"
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&title=fine,penalty,violation,enforcement,settlement&source.rank.opr.min=4&language.code=en&per_page=20"
 
 # Track data privacy regulations
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&title=GDPR,privacy,data protection,CCPA&language=en&per_page=20"
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&title=GDPR,privacy,data protection,CCPA&language.code=en&per_page=20"
 
 # Monitor financial regulations
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&entity.name=SEC,FCA,FINRA&entity.type=organization&title=regulation,rule,enforcement&per_page=20"
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&organization.name=SEC,FCA,FINRA&title=regulation,rule,enforcement&per_page=20"
 ```
 
 ### Python
@@ -77,12 +78,11 @@ def track_enforcement_actions(regulator, days=7):
 
     response = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "entity.name": regulator,
-        "entity.type": "organization",
+        "organization.name": regulator,
         "title": ",".join(ENFORCEMENT_KEYWORDS),
         "published_at.start": start,
-        "language": "en",
-        "source.rank.opr.min": 0.5,
+        "language.code": "en",
+        "source.rank.opr.min": 3,
         "sort.by": "published_at",
         "sort.order": "desc",
         "per_page": 20,
@@ -107,7 +107,7 @@ def track_enforcement_actions(regulator, days=7):
 
     return {
         "regulator": regulator,
-        "total_actions": data.get("total_results", 0),
+        "total_actions": len(data.get("results", [])),
         "actions": actions,
     }
 
@@ -146,12 +146,11 @@ async function trackRegulatoryNews(regulator, days = 7) {
 
   const params = new URLSearchParams({
     api_key: API_KEY,
-    "entity.name": regulator,
-    "entity.type": "organization",
+    "organization.name": regulator,
     title: REGULATORY_KEYWORDS.join(","),
     "published_at.start": start,
-    language: "en",
-    "source.rank.opr.min": "0.5",
+    "language.code": "en",
+    "source.rank.opr.min": "3",
     "sort.by": "published_at",
     "sort.order": "desc",
     per_page: "15",
@@ -162,7 +161,7 @@ async function trackRegulatoryNews(regulator, days = 7) {
 
   return {
     regulator,
-    total: data.total_results || 0,
+    total: (data.results || []).length,
     articles: (data.results || []).map(article => ({
       title: article.title,
       source: article.source.domain,
@@ -212,12 +211,11 @@ function trackRegulator(string $regulator, int $days = 7): array
 
     $query = http_build_query([
         "api_key"             => $apiKey,
-        "entity.name"         => $regulator,
-        "entity.type"         => "organization",
+        "organization.name"   => $regulator,
         "title"               => implode(",", $keywords),
         "published_at.start"  => $start,
-        "language"            => "en",
-        "source.rank.opr.min" => 0.5,
+        "language.code"       => "en",
+        "source.rank.opr.min" => 3,
         "sort.by"             => "published_at",
         "sort.order"          => "desc",
         "per_page"            => 15,
@@ -227,7 +225,7 @@ function trackRegulator(string $regulator, int $days = 7): array
 
     return [
         "regulator" => $regulator,
-        "total"     => $data["total_results"] ?? 0,
+        "total"     => count($data["results"] ?? []),
         "articles"  => array_map(fn($a) => [
             "title"        => $a["title"],
             "source"       => $a["source"]["domain"],

@@ -14,27 +14,20 @@ import requests
 API_KEY = "YOUR_API_KEY"
 BASE_URL = "https://api.apitube.io/v1/news/everything"
 
-COMPETITORS = {
-    "Tesla": "organization",
-    "Rivian": "organization",
-    "Lucid Motors": "organization",
-    "BYD": "organization",
-    "NIO": "organization",
-}
+COMPETITORS = ["Tesla", "Rivian", "Lucid Motors", "BYD", "NIO"]
 
 print("Share of Voice Analysis (Electric Vehicles)\n")
 
 volumes = {}
-for name, entity_type in COMPETITORS.items():
+for name in COMPETITORS:
     response = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "entity.name": name,
-        "entity.type": entity_type,
-        "language": "en",
+        "organization.name": name,
+        "language.code": "en",
         "per_page": 1,
     })
     response.raise_for_status()
-    volumes[name] = response.json().get("total_results", 0)
+    volumes[name] = len(response.json().get("results", []))
 
 total = sum(volumes.values()) or 1
 
@@ -62,14 +55,13 @@ def get_sentiment_counts(entity_name):
     for polarity in ["positive", "negative", "neutral"]:
         response = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": entity_name,
-            "entity.type": "organization",
+            "organization.name": entity_name,
             "sentiment.overall.polarity": polarity,
-            "language": "en",
+            "language.code": "en",
             "per_page": 1,
         })
         response.raise_for_status()
-        counts[polarity] = response.json().get("total_results", 0)
+        counts[polarity] = len(response.json().get("results", []))
     return counts
 
 print("Competitive Sentiment Scorecard\n")
@@ -113,14 +105,13 @@ for company in companies:
     for topic in topics:
         response = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": company,
-            "entity.type": "organization",
+            "organization.name": company,
             "topic.id": topic,
-            "language": "en",
+            "language.code": "en",
             "per_page": 1,
         })
         response.raise_for_status()
-        count = response.json().get("total_results", 0)
+        count = len(response.json().get("results", []))
         row += f" {count:>12}"
     print(row)
 ```
@@ -145,15 +136,14 @@ def get_today_sentiment(entity_name):
     for polarity in ["positive", "negative"]:
         response = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": entity_name,
-            "entity.type": "organization",
+            "organization.name": entity_name,
             "sentiment.overall.polarity": polarity,
             "published_at.start": today,
-            "language": "en",
+            "language.code": "en",
             "per_page": 1,
         })
         response.raise_for_status()
-        counts[polarity] = response.json().get("total_results", 0)
+        counts[polarity] = len(response.json().get("results", []))
     return counts
 
 print("PR Crisis Detection Dashboard\n")
@@ -179,12 +169,11 @@ while True:
         if ratio >= CRISIS_THRESHOLD:
             response = requests.get(BASE_URL, params={
                 "api_key": API_KEY,
-                "entity.name": company,
-                "entity.type": "organization",
+                "organization.name": company,
                 "sentiment.overall.polarity": "negative",
                 "sort.by": "published_at",
                 "sort.order": "desc",
-                "language": "en",
+                "language.code": "en",
                 "per_page": 3,
             })
             response.raise_for_status()
@@ -213,38 +202,35 @@ print("-" * 54)
 for company in COMPETITORS:
     total_resp = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "entity.name": company,
-        "entity.type": "organization",
+        "organization.name": company,
         "source.domain": TOP_SOURCES,
-        "language": "en",
+        "language.code": "en",
         "per_page": 1,
     })
     total_resp.raise_for_status()
-    total = total_resp.json().get("total_results", 0)
+    total = len(total_resp.json().get("results", []))
 
     pos_resp = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "entity.name": company,
-        "entity.type": "organization",
+        "organization.name": company,
         "source.domain": TOP_SOURCES,
         "sentiment.overall.polarity": "positive",
-        "language": "en",
+        "language.code": "en",
         "per_page": 1,
     })
     pos_resp.raise_for_status()
-    positive = pos_resp.json().get("total_results", 0)
+    positive = len(pos_resp.json().get("results", []))
 
     neg_resp = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "entity.name": company,
-        "entity.type": "organization",
+        "organization.name": company,
         "source.domain": TOP_SOURCES,
         "sentiment.overall.polarity": "negative",
-        "language": "en",
+        "language.code": "en",
         "per_page": 1,
     })
     neg_resp.raise_for_status()
-    negative = neg_resp.json().get("total_results", 0)
+    negative = len(neg_resp.json().get("results", []))
 
     ratio = positive / max(negative, 1)
     print(f"  {company:<12} {total:>8} {positive:>10} {negative:>10} {ratio:>7.2f}")
@@ -260,30 +246,23 @@ for company in COMPETITORS:
 const API_KEY = "YOUR_API_KEY";
 const BASE_URL = "https://api.apitube.io/v1/news/everything";
 
-const COMPETITORS = [
-  { name: "Tesla", type: "organization" },
-  { name: "Rivian", type: "organization" },
-  { name: "Lucid Motors", type: "organization" },
-  { name: "BYD", type: "organization" },
-  { name: "NIO", type: "organization" },
-];
+const COMPETITORS = ["Tesla", "Rivian", "Lucid Motors", "BYD", "NIO"];
 
 console.log("Share of Voice Analysis (Electric Vehicles)\n");
 
 const volumes = {};
 
-for (const { name, type } of COMPETITORS) {
+for (const name of COMPETITORS) {
   const params = new URLSearchParams({
     api_key: API_KEY,
-    "entity.name": name,
-    "entity.type": type,
-    language: "en",
+    "organization.name": name,
+    "language.code": "en",
     per_page: "1",
   });
 
   const response = await fetch(`${BASE_URL}?${params}`);
   const data = await response.json();
-  volumes[name] = data.total_results || 0;
+  volumes[name] = data.results?.length || 0;
 }
 
 const total = Object.values(volumes).reduce((a, b) => a + b, 0) || 1;
@@ -314,16 +293,15 @@ async function getSentimentCounts(entityName) {
   for (const polarity of ["positive", "negative", "neutral"]) {
     const params = new URLSearchParams({
       api_key: API_KEY,
-      "entity.name": entityName,
-      "entity.type": "organization",
+      "organization.name": entityName,
       "sentiment.overall.polarity": polarity,
-      language: "en",
+      "language.code": "en",
       per_page: "1",
     });
 
     const response = await fetch(`${BASE_URL}?${params}`);
     const data = await response.json();
-    counts[polarity] = data.total_results || 0;
+    counts[polarity] = data.results?.length || 0;
   }
 
   return counts;
@@ -385,16 +363,15 @@ for (const company of companies) {
   for (const topic of topics) {
     const params = new URLSearchParams({
       api_key: API_KEY,
-      "entity.name": company,
-      "entity.type": "organization",
+      "organization.name": company,
       "topic.id": topic,
-      language: "en",
+      "language.code": "en",
       per_page: "1",
     });
 
     const response = await fetch(`${BASE_URL}?${params}`);
     const data = await response.json();
-    const count = data.total_results || 0;
+    const count = data.results?.length || 0;
     row += ` ${String(count).padStart(12)}`;
   }
 
@@ -414,28 +391,21 @@ for (const company of companies) {
 $apiKey  = "YOUR_API_KEY";
 $baseUrl = "https://api.apitube.io/v1/news/everything";
 
-$competitors = [
-    ["name" => "Tesla", "type" => "organization"],
-    ["name" => "Rivian", "type" => "organization"],
-    ["name" => "Lucid Motors", "type" => "organization"],
-    ["name" => "BYD", "type" => "organization"],
-    ["name" => "NIO", "type" => "organization"],
-];
+$competitors = ["Tesla", "Rivian", "Lucid Motors", "BYD", "NIO"];
 
 echo "Share of Voice Analysis (Electric Vehicles)\n\n";
 
 $volumes = [];
-foreach ($competitors as $comp) {
+foreach ($competitors as $name) {
     $query = http_build_query([
-        "api_key"     => $apiKey,
-        "entity.name" => $comp["name"],
-        "entity.type" => $comp["type"],
-        "language"    => "en",
-        "per_page"    => 1,
+        "api_key"           => $apiKey,
+        "organization.name" => $name,
+        "language.code"     => "en",
+        "per_page"          => 1,
     ]);
 
     $data = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
-    $volumes[$comp["name"]] = $data["total_results"] ?? 0;
+    $volumes[$name] = count($data["results"] ?? []);
 }
 
 arsort($volumes);
@@ -467,15 +437,14 @@ function getSentimentCounts(string $entityName): array
     foreach (["positive", "negative", "neutral"] as $polarity) {
         $query = http_build_query([
             "api_key"                    => $apiKey,
-            "entity.name"                => $entityName,
-            "entity.type"                => "organization",
+            "organization.name"          => $entityName,
             "sentiment.overall.polarity" => $polarity,
-            "language"                   => "en",
+            "language.code"              => "en",
             "per_page"                   => 1,
         ]);
 
         $data = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
-        $counts[$polarity] = $data["total_results"] ?? 0;
+        $counts[$polarity] = count($data["results"] ?? []);
     }
 
     return $counts;
@@ -532,16 +501,15 @@ foreach ($companies as $company) {
 
     foreach ($topics as $topic) {
         $query = http_build_query([
-            "api_key"     => $apiKey,
-            "entity.name" => $company,
-            "entity.type" => "organization",
-            "topic.id"    => $topic,
-            "language"    => "en",
-            "per_page"    => 1,
+            "api_key"           => $apiKey,
+            "organization.name" => $company,
+            "topic.id"          => $topic,
+            "language.code"     => "en",
+            "per_page"          => 1,
         ]);
 
         $data  = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
-        $count = $data["total_results"] ?? 0;
+        $count = count($data["results"] ?? []);
         $row  .= sprintf(" %12d", $count);
     }
 

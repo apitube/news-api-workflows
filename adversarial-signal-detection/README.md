@@ -19,11 +19,11 @@ GET https://api.apitube.io/v1/news/everything
 | `api_key`                     | string  | **Required.** Your API key.                                          |
 | `title`                       | string  | Filter by keywords in title.                                         |
 | `text`                        | string  | Filter by keywords in article text.                                  |
-| `entity.name`                 | string  | Filter by mentioned entities.                                        |
+| `organization.name`           | string  | Filter by organization name.                                         |
 | `source.domain`               | string  | Filter by source domain.                                             |
-| `source.rank.opr.min`         | number  | Minimum source authority (0.0–1.0).                                 |
-| `source.rank.opr.max`         | number  | Maximum source authority (0.0–1.0).                                 |
-| `language`                    | string  | Filter by language code.                                             |
+| `source.rank.opr.min`         | number  | Minimum source authority (0–7).                                     |
+| `source.rank.opr.max`         | number  | Maximum source authority (0–7).                                     |
+| `language.code`               | string  | Filter by language code.                                             |
 | `country`                     | string  | Filter by country code.                                              |
 | `published_at.start`          | string  | Start date (ISO 8601 or `YYYY-MM-DD`).                             |
 | `published_at.end`            | string  | End date (ISO 8601 or `YYYY-MM-DD`).                               |
@@ -68,7 +68,7 @@ class AdversarialDetector:
     # Detection thresholds
     BURST_THRESHOLD = 3.0  # Standard deviations above baseline
     COORDINATION_THRESHOLD = 0.7  # Similarity score for coordination
-    LOW_AUTHORITY_THRESHOLD = 0.3  # OPR below this is suspicious
+    LOW_AUTHORITY_THRESHOLD = 2  # OPR below this is suspicious
     TEMPORAL_WINDOW_MINUTES = 30  # Window for burst detection
 
     def __init__(self):
@@ -84,7 +84,7 @@ class AdversarialDetector:
             "api_key": API_KEY,
             "title": query,
             "published_at.start": start,
-            "language": "en",
+            "language.code.eq": "en",
             "per_page": 100,
             "sort.by": "published_at",
             "sort.order": "asc",
@@ -185,9 +185,9 @@ class AdversarialDetector:
             opr = source.get("rankings", {}).get("opr", 0)
             domain = source.get("domain", "unknown")
 
-            if opr >= 0.7:
+            if opr >= 5:
                 authority_buckets["high"].append(domain)
-            elif opr >= 0.4:
+            elif opr >= 3:
                 authority_buckets["medium"].append(domain)
             elif opr > 0:
                 authority_buckets["low"].append(domain)
@@ -289,10 +289,10 @@ class AdversarialDetector:
         Compares coverage from high vs low authority sources.
         """
         # Fetch from low-authority sources
-        low_auth = self.fetch_articles(entity, hours, max_authority=0.3)
+        low_auth = self.fetch_articles(entity, hours, max_authority=2)
 
         # Fetch from high-authority sources
-        high_auth = self.fetch_articles(entity, hours, min_authority=0.7)
+        high_auth = self.fetch_articles(entity, hours, min_authority=5)
 
         if len(low_auth) < 5:
             return None
@@ -361,7 +361,7 @@ class AdversarialDetector:
                 "api_key": API_KEY,
                 "title": query,
                 "published_at.start": (datetime.utcnow() - timedelta(hours=hours)).strftime("%Y-%m-%dT%H:%M:%SZ"),
-                "language": lang,
+                "language.code.eq": lang,
                 "per_page": 50,
             }
             response = requests.get(BASE_URL, params=params)

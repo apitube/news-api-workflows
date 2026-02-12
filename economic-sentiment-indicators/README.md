@@ -20,11 +20,11 @@ GET https://api.apitube.io/v1/news/everything
 | `topic.id`                    | string  | Filter by economic topic.                                            |
 | `title`                       | string  | Filter by economic keywords.                                         |
 | `sentiment.overall.polarity`  | string  | Filter by sentiment.                                                 |
-| `source.rank.opr.min`         | number  | Minimum source authority.                                            |
+| `source.rank.opr.min`         | number  | Minimum source authority (0-7).                                      |
 | `source.country`              | string  | Filter by country.                                                   |
 | `published_at.start`          | string  | Start date.                                                          |
 | `published_at.end`            | string  | End date.                                                            |
-| `language`                    | string  | Filter by language code.                                             |
+| `language.code`               | string  | Filter by language code.                                             |
 | `per_page`                    | integer | Number of results per page.                                          |
 
 ## Quick Start
@@ -150,10 +150,10 @@ class EconomicSentimentIndex:
                 "source.country": self.country,
                 "published_at.start": date,
                 "published_at.end": next_date,
-                "language": "en",
+                "language.code": "en",
                 "per_page": 1,
             })
-            positive = resp.json().get("total_results", 0)
+            positive = len(resp.json().get("results", []))
 
             # Negative mentions
             resp = requests.get(BASE_URL, params={
@@ -162,10 +162,10 @@ class EconomicSentimentIndex:
                 "source.country": self.country,
                 "published_at.start": date,
                 "published_at.end": next_date,
-                "language": "en",
+                "language.code": "en",
                 "per_page": 1,
             })
-            negative = resp.json().get("total_results", 0)
+            negative = len(resp.json().get("results", []))
 
             total = positive + negative
             theme.add_reading(date, positive, negative, total)
@@ -356,10 +356,10 @@ class EconomicSentimentIndex:
                     "source.country": self.country,
                     "published_at.start": date,
                     "published_at.end": next_date,
-                    "language": "en",
+                    "language.code": "en",
                     "per_page": 1,
                 })
-                positive = resp.json().get("total_results", 0)
+                positive = len(resp.json().get("results", []))
 
                 # Negative sentiment
                 resp = requests.get(BASE_URL, params={
@@ -369,10 +369,10 @@ class EconomicSentimentIndex:
                     "source.country": self.country,
                     "published_at.start": date,
                     "published_at.end": next_date,
-                    "language": "en",
+                    "language.code": "en",
                     "per_page": 1,
                 })
-                negative = resp.json().get("total_results", 0)
+                negative = len(resp.json().get("results", []))
 
                 total = positive + negative
                 sentiment = (positive - negative) / total if total > 0 else 0
@@ -441,10 +441,10 @@ class InflationExpectations:
                     "source.country": country,
                     "published_at.start": date,
                     "published_at.end": next_date,
-                    "language": "en",
+                    "language.code": "en",
                     "per_page": 1,
                 })
-                readings[direction] = resp.json().get("total_results", 0)
+                readings[direction] = len(resp.json().get("results", []))
 
             total = sum(readings.values())
             if total > 0:

@@ -25,7 +25,7 @@ GET https://api.apitube.io/v1/news/everything
 | `sort.order`                  | string  | Sort direction: `asc` or `desc`.                                    |
 | `source.domain`               | string  | Filter by source domain (comma-separated).                          |
 | `source.country.code`         | string  | Filter by source country (comma-separated).                         |
-| `language`                    | string  | Filter by language code.                                             |
+| `language.code`                    | string  | Filter by language code.                                             |
 | `published_at.start`          | string  | Start date (ISO 8601 or `YYYY-MM-DD`).                             |
 | `published_at.end`            | string  | End date (ISO 8601 or `YYYY-MM-DD`).                               |
 | `per_page`                    | integer | Number of results per page (default: 50).                           |
@@ -52,10 +52,10 @@ For the complete list, see the [APITube Topics Reference](https://docs.apitube.i
 
 ```bash
 # Get crypto news sorted by date
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&topic.id=cryptocurrency&language=en&sort.by=published_at&sort.order=desc&per_page=10"
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&topic.id=cryptocurrency&language.code=en&sort.by=published_at&sort.order=desc&per_page=10"
 
 # Get AI news with positive sentiment
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&topic.id=artificial_intelligence&sentiment.overall.polarity=positive&language=en&per_page=10"
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&topic.id=artificial_intelligence&sentiment.overall.polarity=positive&language.code=en&per_page=10"
 ```
 
 ### Python
@@ -66,7 +66,7 @@ import requests
 response = requests.get("https://api.apitube.io/v1/news/everything", params={
     "api_key": "YOUR_API_KEY",
     "topic.id": "cryptocurrency",
-    "language": "en",
+    "language.code": "en",
     "sort.by": "published_at",
     "sort.order": "desc",
     "per_page": 10,
@@ -83,7 +83,7 @@ for article in data["results"]:
 const params = new URLSearchParams({
   api_key: "YOUR_API_KEY",
   "topic.id": "cryptocurrency",
-  language: "en",
+  language.code: "en",
   "sort.by": "published_at",
   "sort.order": "desc",
   per_page: "10",
@@ -105,7 +105,7 @@ data.results.forEach((a) => {
 $query = http_build_query([
     "api_key"    => "YOUR_API_KEY",
     "topic.id"   => "cryptocurrency",
-    "language"   => "en",
+    "language.code"   => "en",
     "sort.by"    => "published_at",
     "sort.order" => "desc",
     "per_page"   => 10,

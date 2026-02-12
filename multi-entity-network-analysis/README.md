@@ -17,14 +17,16 @@ GET https://api.apitube.io/v1/news/everything
 | Parameter                      | Type    | Description                                                          |
 |-------------------------------|---------|----------------------------------------------------------------------|
 | `api_key`                     | string  | **Required.** Your API key.                                          |
-| `entity.name`                 | string  | Filter by primary entity.                                            |
-| `entity.type`                 | string  | Filter by type: `organization`, `person`, `location`.               |
+| `organization.name`           | string  | Filter by organization name.                                         |
+| `person.name`                 | string  | Filter by person name.                                               |
+| `location.name`               | string  | Filter by location name.                                             |
+| `brand.name`                  | string  | Filter by brand name.                                                |
 | `title`                       | string  | Filter by keywords.                                                  |
 | `sentiment.overall.polarity`  | string  | Filter by sentiment: `positive`, `negative`, `neutral`.             |
-| `source.rank.opr.min`         | number  | Minimum source authority (0.0–1.0).                                 |
+| `source.rank.opr.min`         | number  | Minimum source authority (0–7).                                     |
 | `published_at.start`          | string  | Start date (ISO 8601 or `YYYY-MM-DD`).                             |
 | `published_at.end`            | string  | End date (ISO 8601 or `YYYY-MM-DD`).                               |
-| `language`                    | string  | Filter by language code.                                             |
+| `language.code`               | string  | Filter by language code.                                             |
 | `sort.by`                     | string  | Sort field: `published_at`.                                          |
 | `sort.order`                  | string  | Sort direction: `asc` or `desc`.                                    |
 | `per_page`                    | integer | Number of results per page.                                          |
@@ -35,13 +37,13 @@ GET https://api.apitube.io/v1/news/everything
 
 ```bash
 # Find co-mentioned entities with primary entity
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&entity.name=Tesla&source.rank.opr.min=0.6&language=en&per_page=50" | jq '.results[].entities[].name' | sort | uniq -c | sort -rn
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&organization.name=Tesla&source.rank.opr.min=4&language.code=en&per_page=50" | jq '.results[].entities[].name' | sort | uniq -c | sort -rn
 
 # Analyze relationship between two entities
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&title=Tesla,SpaceX&language=en&per_page=30"
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&title=Tesla,SpaceX&language.code=en&per_page=30"
 
 # Track sentiment in co-mentions
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&entity.name=Apple&sentiment.overall.polarity=negative&language=en&per_page=30"
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&organization.name=Apple&sentiment.overall.polarity=negative&language.code=en&per_page=30"
 ```
 
 ### Python
@@ -72,10 +74,10 @@ class EntityNetworkAnalyzer:
         while len(articles) < max_articles:
             resp = requests.get(BASE_URL, params={
                 "api_key": API_KEY,
-                "entity.name": entity,
+                "organization.name": entity,
                 "published_at.start": start,
-                "source.rank.opr.min": 0.5,
-                "language": "en",
+                "source.rank.opr.min": 4,
+                "language.code": "en",
                 "sort.by": "published_at",
                 "sort.order": "desc",
                 "per_page": 50,
@@ -274,10 +276,10 @@ class EntityNetworkAnalyzer {
     while (articles.length < maxArticles) {
       const params = new URLSearchParams({
         api_key: API_KEY,
-        "entity.name": entity,
+        "organization.name": entity,
         "published_at.start": start,
-        "source.rank.opr.min": "0.5",
-        language: "en",
+        "source.rank.opr.min": "4",
+        "language.code": "en",
         per_page: "50",
         page: String(page),
       });
@@ -456,10 +458,10 @@ class EntityNetworkAnalyzer
         while (count($articles) < $maxArticles) {
             $query = http_build_query([
                 "api_key" => $this->apiKey,
-                "entity.name" => $entity,
+                "organization.name" => $entity,
                 "published_at.start" => $start,
-                "source.rank.opr.min" => 0.5,
-                "language" => "en",
+                "source.rank.opr.min" => 4,
+                "language.code" => "en",
                 "per_page" => 50,
                 "page" => $page,
             ]);

@@ -82,9 +82,9 @@ class MultiEntityCrisisNowcaster:
 
         params = {
             "api_key": self.api_key,
-            "entity.name": entity,
+            "organization.name": entity,
             "published_at.start": start,
-            "language": "en",
+            "language.code": "en",
             "per_page": 100
         }
 
@@ -135,16 +135,16 @@ class MultiEntityCrisisNowcaster:
 
                     params = {
                         "api_key": self.api_key,
-                        "entity.name": entity,
+                        "organization.name": entity,
                         "published_at.start": start,
                         "published_at.end": end,
-                        "language": "en",
+                        "language.code": "en",
                         "per_page": 1
                     }
 
                     async with session.get(self.base_url, params=params) as response:
                         data = await response.json()
-                        daily_volumes.append(data.get("total_results", 0))
+                        daily_volumes.append(len(data.get("results", [])))
 
                 self.baselines[entity] = {
                     "volume_mean": np.mean(daily_volumes) / 24,
@@ -562,15 +562,15 @@ class RegimeSwitchingFilter:
 
             params = {
                 "api_key": API_KEY,
-                "entity.name": self.entity,
+                "organization.name": self.entity,
                 "published_at.start": start,
                 "published_at.end": end,
-                "language": "en",
+                "language.code": "en",
                 "per_page": 1
             }
 
             response = requests.get(BASE_URL, params=params)
-            daily_volumes.append(response.json().get("total_results", 0))
+            daily_volumes.append(len(response.json().get("results", [])))
 
         self.baseline_coverage = np.mean(daily_volumes) / 24 if daily_volumes else 1.0
         return self.baseline_coverage
@@ -581,9 +581,9 @@ class RegimeSwitchingFilter:
 
         params = {
             "api_key": API_KEY,
-            "entity.name": self.entity,
+            "organization.name": self.entity,
             "published_at.start": start,
-            "language": "en",
+            "language.code": "en",
             "per_page": 100
         }
 

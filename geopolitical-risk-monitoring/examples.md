@@ -59,47 +59,45 @@ def analyze_hotspot(name, config, hours=24):
         # Total
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": location,
-            "entity.type": "location",
+            "location.name": location,
             "published_at.start": start,
-            "language": "en",
+            "language.code": "en",
             "per_page": 1,
         })
-        metrics["total_coverage"] += resp.json().get("total_results", 0)
+        metrics["total_coverage"] += len(resp.json().get("results", []))
 
         # Negative
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": location,
-            "entity.type": "location",
+            "location.name": location,
             "sentiment.overall.polarity": "negative",
             "published_at.start": start,
-            "language": "en",
+            "language.code": "en",
             "per_page": 1,
         })
-        metrics["negative_coverage"] += resp.json().get("total_results", 0)
+        metrics["negative_coverage"] += len(resp.json().get("results", []))
 
     # Keyword hits (combined locations)
     resp = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "entity.name": ",".join(locations),
+        "location.name": ",".join(locations),
         "title": ",".join(keywords),
         "published_at.start": start,
-        "language": "en",
+        "language.code": "en",
         "per_page": 1,
     })
-    metrics["keyword_hits"] = resp.json().get("total_results", 0)
+    metrics["keyword_hits"] = len(resp.json().get("results", []))
 
     # Breaking news
     resp = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "entity.name": ",".join(locations),
-        "is_breaking": "true",
+        "location.name": ",".join(locations),
+        "is_breaking": "1",
         "published_at.start": start,
         "per_page": 5,
     })
     data = resp.json()
-    metrics["breaking_news"] = data.get("total_results", 0)
+    metrics["breaking_news"] = len(data.get("results", []))
     metrics["top_headlines"] = [
         {"title": a["title"], "source": a["source"]["domain"]}
         for a in data.get("results", [])[:3]
@@ -182,12 +180,11 @@ def track_sanctions_news(hours=72):
     for country in SANCTIONED_ENTITIES["countries"]:
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": country,
-            "entity.type": "location",
+            "location.name": country,
             "title": ",".join(SANCTION_KEYWORDS),
             "published_at.start": start,
-            "language": "en",
-            "source.rank.opr.min": 0.5,
+            "language.code": "en",
+            "source.rank.opr.min": 4,
             "sort.by": "published_at",
             "sort.order": "desc",
             "per_page": 10,
@@ -208,11 +205,10 @@ def track_sanctions_news(hours=72):
     for org in SANCTIONED_ENTITIES["organizations"]:
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": org,
-            "entity.type": "organization",
+            "organization.name": org,
             "title": ",".join(SANCTION_KEYWORDS),
             "published_at.start": start,
-            "language": "en",
+            "language.code": "en",
             "sort.by": "published_at",
             "sort.order": "desc",
             "per_page": 5,
@@ -311,15 +307,14 @@ def analyze_bilateral_relations(country1, country2, days=7):
     # Search for articles mentioning both countries
     resp = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "entity.name": f"{country1},{country2}",
-        "entity.type": "location",
+        "location.name": f"{country1},{country2}",
         "published_at.start": start,
-        "language": "en",
+        "language.code": "en",
         "per_page": 50,
     })
 
     data = resp.json()
-    total = data.get("total_results", 0)
+    total = len(data.get("results", []))
     articles = data.get("results", [])
 
     # Analyze sentiment distribution
@@ -331,13 +326,13 @@ def analyze_bilateral_relations(country1, country2, days=7):
     # Get diplomatic-specific coverage
     resp = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "entity.name": f"{country1},{country2}",
+        "location.name": f"{country1},{country2}",
         "title": ",".join(DIPLOMATIC_KEYWORDS),
         "published_at.start": start,
-        "language": "en",
+        "language.code": "en",
         "per_page": 1,
     })
-    diplomatic_mentions = resp.json().get("total_results", 0)
+    diplomatic_mentions = len(resp.json().get("results", []))
 
     # Calculate relation score (-1 to +1)
     total_sentiment = sum(sentiments.values()) or 1
@@ -456,36 +451,34 @@ def calculate_stability_index(region_name, config, days=7):
         # Total coverage
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": country,
-            "entity.type": "location",
+            "location.name": country,
             "published_at.start": start,
-            "language": "en",
+            "language.code": "en",
             "per_page": 1,
         })
-        total_coverage += resp.json().get("total_results", 0)
+        total_coverage += len(resp.json().get("results", []))
 
         # Negative coverage
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": country,
-            "entity.type": "location",
+            "location.name": country,
             "sentiment.overall.polarity": "negative",
             "published_at.start": start,
-            "language": "en",
+            "language.code": "en",
             "per_page": 1,
         })
-        negative_coverage += resp.json().get("total_results", 0)
+        negative_coverage += len(resp.json().get("results", []))
 
         # Instability keywords
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": country,
+            "location.name": country,
             "title": ",".join(INSTABILITY_KEYWORDS),
             "published_at.start": start,
-            "language": "en",
+            "language.code": "en",
             "per_page": 1,
         })
-        instability_mentions += resp.json().get("total_results", 0)
+        instability_mentions += len(resp.json().get("results", []))
 
     # Calculate raw instability score (0-100)
     total = total_coverage or 1
@@ -587,10 +580,9 @@ class GeopoliticalAlertSystem {
 
     const params = new URLSearchParams({
       api_key: API_KEY,
-      "entity.name": countries.join(","),
-      "entity.type": "location",
+      "location.name": countries.join(","),
       title: ALERT_KEYWORDS.join(","),
-      is_breaking: "true",
+      is_breaking: "1",
       "published_at.start": thirtyMinutesAgo,
       "sort.by": "published_at",
       "sort.order": "desc",
@@ -682,10 +674,10 @@ async function analyzeTradeRelations(pair, days = 14) {
 
   const params = new URLSearchParams({
     api_key: API_KEY,
-    "entity.name": pair.countries.join(","),
+    "location.name": pair.countries.join(","),
     title: TRADE_KEYWORDS.join(","),
     "published_at.start": start,
-    language: "en",
+    "language.code": "en",
     "sort.by": "published_at",
     "sort.order": "desc",
     per_page: "50",
@@ -701,7 +693,7 @@ async function analyzeTradeRelations(pair, days = 14) {
     sentiments[polarity]++;
   }
 
-  const total = data.total_results || 0;
+  const total = data.results?.length || 0;
   const sentimentTotal = Object.values(sentiments).reduce((a, b) => a + b, 0) || 1;
   const tensionScore = sentiments.negative / sentimentTotal;
 
@@ -795,50 +787,48 @@ function assessCountry(string $country, array $config, int $days = 7): array
     // Total coverage
     $query = http_build_query([
         "api_key"            => $apiKey,
-        "entity.name"        => $country,
-        "entity.type"        => "location",
+        "location.name"      => $country,
         "published_at.start" => $start,
-        "language"           => "en",
+        "language.code"      => "en",
         "per_page"           => 1,
     ]);
     $data = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
-    $metrics["total"] = $data["total_results"] ?? 0;
+    $metrics["total"] = count($data["results"] ?? []);
 
     // Negative coverage
     $query = http_build_query([
         "api_key"                    => $apiKey,
-        "entity.name"                => $country,
-        "entity.type"                => "location",
+        "location.name"              => $country,
         "sentiment.overall.polarity" => "negative",
         "published_at.start"         => $start,
-        "language"                   => "en",
+        "language.code"              => "en",
         "per_page"                   => 1,
     ]);
     $data = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
-    $metrics["negative"] = $data["total_results"] ?? 0;
+    $metrics["negative"] = count($data["results"] ?? []);
 
     // Risk keywords
     $query = http_build_query([
         "api_key"            => $apiKey,
-        "entity.name"        => $country,
+        "location.name"      => $country,
         "title"              => implode(",", $riskKeywords),
         "published_at.start" => $start,
-        "language"           => "en",
+        "language.code"      => "en",
         "per_page"           => 1,
     ]);
     $data = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
-    $metrics["risk_keywords"] = $data["total_results"] ?? 0;
+    $metrics["risk_keywords"] = count($data["results"] ?? []);
 
     // Breaking news
     $query = http_build_query([
         "api_key"            => $apiKey,
-        "entity.name"        => $country,
-        "is_breaking"        => "true",
+        "location.name"      => $country,
+        "is_breaking"        => "1",
         "published_at.start" => $start,
         "per_page"           => 1,
     ]);
     $data = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
-    $metrics["breaking"] = $data["total_results"] ?? 0;
+    $metrics["breaking"] = count($data["results"] ?? []);
 
     // Calculate risk score
     $total = $metrics["total"] ?: 1;

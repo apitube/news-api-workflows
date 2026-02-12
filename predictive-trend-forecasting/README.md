@@ -18,14 +18,14 @@ GET https://api.apitube.io/v1/news/everything
 |-------------------------------|---------|----------------------------------------------------------------------|
 | `api_key`                     | string  | **Required.** Your API key.                                          |
 | `topic.id`                    | string  | Filter by topic ID.                                                  |
-| `entity.name`                 | string  | Filter by entity name.                                               |
+| `organization.name`           | string  | Filter by organization name.                                         |
 | `category.id`                 | string  | Filter by category ID.                                               |
 | `title`                       | string  | Filter by keywords in title.                                         |
 | `sentiment.overall.polarity`  | string  | Filter by sentiment: `positive`, `negative`, `neutral`.             |
-| `source.rank.opr.min`         | number  | Minimum source authority (0.0–1.0).                                 |
+| `source.rank.opr.min`         | number  | Minimum source authority (0–7).                                     |
 | `published_at.start`          | string  | Start date (ISO 8601 or `YYYY-MM-DD`).                             |
 | `published_at.end`            | string  | End date (ISO 8601 or `YYYY-MM-DD`).                               |
-| `language`                    | string  | Filter by language code.                                             |
+| `language.code`               | string  | Filter by language code.                                             |
 | `per_page`                    | integer | Number of results per page.                                          |
 
 ## Quick Start
@@ -78,7 +78,7 @@ class TrendForecaster:
                 "topic.id": self.topic,
                 "published_at.start": date,
                 "published_at.end": next_date,
-                "language": "en",
+                "language.code.eq": "en",
                 "per_page": 100,
             }
 
@@ -96,7 +96,7 @@ class TrendForecaster:
 
             high_authority = sum(
                 1 for a in articles
-                if a.get("source", {}).get("rankings", {}).get("opr", 0) >= 0.7
+                if a.get("source", {}).get("rankings", {}).get("opr", 0) >= 5
             )
 
             data.append({

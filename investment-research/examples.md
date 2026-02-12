@@ -36,32 +36,30 @@ def analyze_pre_earnings_sentiment(company: str, earnings_date: str, days_before
     # Get all articles
     response = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "entity.name": company,
-        "entity.type": "organization",
+        "organization.name": company,
         "source.domain": FINANCIAL_SOURCES,
         "published_at.start": start.strftime("%Y-%m-%d"),
         "published_at.end": end.strftime("%Y-%m-%d"),
-        "language": "en",
+        "language.code": "en",
         "per_page": 100,
     })
     data = response.json()
-    total = data.get("total_results", 0)
+    total = len(data.get("results", []))
 
     # Get sentiment breakdown
     sentiments = {}
     for polarity in ["positive", "negative", "neutral"]:
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": company,
-            "entity.type": "organization",
+            "organization.name": company,
             "sentiment.overall.polarity": polarity,
             "source.domain": FINANCIAL_SOURCES,
             "published_at.start": start.strftime("%Y-%m-%d"),
             "published_at.end": end.strftime("%Y-%m-%d"),
-            "language": "en",
+            "language.code": "en",
             "per_page": 1,
         })
-        sentiments[polarity] = resp.json().get("total_results", 0)
+        sentiments[polarity] = len(resp.json().get("results", []))
 
     # Calculate metrics
     total_sentiment = sum(sentiments.values()) or 1
@@ -70,15 +68,15 @@ def analyze_pre_earnings_sentiment(company: str, earnings_date: str, days_before
     # Get earnings-specific coverage
     resp = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "entity.name": company,
+        "organization.name": company,
         "title": "earnings,revenue,guidance,forecast,results",
         "source.domain": FINANCIAL_SOURCES,
         "published_at.start": start.strftime("%Y-%m-%d"),
         "published_at.end": end.strftime("%Y-%m-%d"),
-        "language": "en",
+        "language.code": "en",
         "per_page": 1,
     })
-    earnings_mentions = resp.json().get("total_results", 0)
+    earnings_mentions = len(resp.json().get("results", []))
 
     return {
         "company": company,
@@ -158,14 +156,13 @@ def calculate_sector_sentiment(sector_name: str, companies: list, days: int = 7)
         for polarity in ["positive", "negative", "neutral"]:
             resp = requests.get(BASE_URL, params={
                 "api_key": API_KEY,
-                "entity.name": company,
-                "entity.type": "organization",
+                "organization.name": company,
                 "sentiment.overall.polarity": polarity,
                 "published_at.start": start,
-                "language": "en",
+                "language.code": "en",
                 "per_page": 1,
             })
-            count = resp.json().get("total_results", 0)
+            count = len(resp.json().get("results", []))
 
             if polarity == "positive":
                 total_positive += count
@@ -267,7 +264,7 @@ def scan_ma_rumors(hours: int = 24) -> list:
         "topic.id": "mergers_acquisitions",
         "source.domain": PREMIUM_SOURCES,
         "published_at.start": start,
-        "language": "en",
+        "language.code": "en",
         "sort.by": "published_at",
         "sort.order": "desc",
         "per_page": 50,
@@ -377,28 +374,26 @@ def calculate_sentiment_signal(stock: str, lookback_days: int = 7) -> dict:
     # Get total coverage
     resp = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "entity.name": stock,
-        "entity.type": "organization",
+        "organization.name": stock,
         "source.domain": FINANCIAL_SOURCES,
         "published_at.start": start,
-        "language": "en",
+        "language.code": "en",
         "per_page": 1,
     })
-    signals["total_articles"] = resp.json().get("total_results", 0)
+    signals["total_articles"] = len(resp.json().get("results", []))
 
     # Get sentiment counts
     for polarity in ["positive", "negative", "neutral"]:
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "entity.name": stock,
-            "entity.type": "organization",
+            "organization.name": stock,
             "sentiment.overall.polarity": polarity,
             "source.domain": FINANCIAL_SOURCES,
             "published_at.start": start,
-            "language": "en",
+            "language.code": "en",
             "per_page": 1,
         })
-        signals[f"{polarity}_count"] = resp.json().get("total_results", 0)
+        signals[f"{polarity}_count"] = len(resp.json().get("results", []))
 
     # Calculate derived signals
     total = signals["positive_count"] + signals["negative_count"] + signals["neutral_count"] or 1
@@ -498,18 +493,17 @@ async function getStockSentiment(company, hours = 24) {
   for (const polarity of ["positive", "negative", "neutral"]) {
     const params = new URLSearchParams({
       api_key: API_KEY,
-      "entity.name": company,
-      "entity.type": "organization",
+      "organization.name": company,
       "sentiment.overall.polarity": polarity,
       "source.domain": FINANCIAL_SOURCES,
       "published_at.start": start,
-      language: "en",
+      "language.code": "en",
       per_page: "1",
     });
 
     const response = await fetch(`${BASE_URL}?${params}`);
     const data = await response.json();
-    sentiments[polarity] = data.total_results || 0;
+    sentiments[polarity] = data.results?.length || 0;
   }
 
   return sentiments;
@@ -520,12 +514,11 @@ async function getEarningsNews(company, hours = 24) {
 
   const params = new URLSearchParams({
     api_key: API_KEY,
-    "entity.name": company,
-    "entity.type": "organization",
+    "organization.name": company,
     title: "earnings,revenue,guidance,forecast,beat,miss",
     "source.domain": FINANCIAL_SOURCES,
     "published_at.start": start,
-    language: "en",
+    "language.code": "en",
     "sort.by": "published_at",
     "sort.order": "desc",
     per_page: "10",
@@ -626,17 +619,16 @@ async function calculatePortfolioSentiment() {
     for (const polarity of ["positive", "negative", "neutral"]) {
       const params = new URLSearchParams({
         api_key: API_KEY,
-        "entity.name": stock.name,
-        "entity.type": "organization",
+        "organization.name": stock.name,
         "sentiment.overall.polarity": polarity,
         "published_at.start": start,
-        language: "en",
+        "language.code": "en",
         per_page: "1",
       });
 
       const response = await fetch(`${BASE_URL}?${params}`);
       const data = await response.json();
-      sentiments[polarity] = data.total_results || 0;
+      sentiments[polarity] = data.results?.length || 0;
     }
 
     const total = sentiments.positive + sentiments.negative + sentiments.neutral || 1;
@@ -721,17 +713,16 @@ function calculateStockMetrics(string $stock, int $days = 7): array
     foreach (["positive", "negative", "neutral"] as $polarity) {
         $query = http_build_query([
             "api_key"                    => $apiKey,
-            "entity.name"                => $stock,
-            "entity.type"                => "organization",
+            "organization.name"          => $stock,
             "sentiment.overall.polarity" => $polarity,
             "source.domain"              => $financialSources,
             "published_at.start"         => $start,
-            "language"                   => "en",
+            "language.code"              => "en",
             "per_page"                   => 1,
         ]);
 
         $data = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
-        $sentiments[$polarity] = $data["total_results"] ?? 0;
+        $sentiments[$polarity] = count($data["results"] ?? []);
     }
 
     $total = array_sum($sentiments) ?: 1;
@@ -817,26 +808,24 @@ function generateWeeklyDigest(array $stocks): string
         foreach (["positive", "negative"] as $polarity) {
             $query = http_build_query([
                 "api_key"                    => $apiKey,
-                "entity.name"                => $stock,
-                "entity.type"                => "organization",
+                "organization.name"          => $stock,
                 "sentiment.overall.polarity" => $polarity,
                 "published_at.start"         => $start,
-                "language"                   => "en",
+                "language.code"              => "en",
                 "per_page"                   => 1,
             ]);
 
             $data = json_decode(file_get_contents("{$baseUrl}?{$query}"), true);
-            $sentiments[$polarity] = $data["total_results"] ?? 0;
+            $sentiments[$polarity] = count($data["results"] ?? []);
         }
 
         // Get top headlines
         $query = http_build_query([
             "api_key"            => $apiKey,
-            "entity.name"        => $stock,
-            "entity.type"        => "organization",
-            "source.rank.opr.min"=> 0.6,
+            "organization.name"  => $stock,
+            "source.rank.opr.min"=> 5,
             "published_at.start" => $start,
-            "language"           => "en",
+            "language.code"      => "en",
             "sort.by"            => "source.rank.opr",
             "sort.order"         => "desc",
             "per_page"           => 5,

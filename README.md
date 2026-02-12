@@ -82,7 +82,7 @@ Each workflow includes a **README** with parameter reference and quick start exa
 ## Quick Start
 
 ```bash
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&language=en&limit=10"
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&language.code=en&per_page=10"
 ```
 
 ```python
@@ -90,8 +90,8 @@ import requests
 
 response = requests.get("https://api.apitube.io/v1/news/everything", params={
     "api_key": "YOUR_API_KEY",
-    "language": "en",
-    "limit": 10
+    "language.code": "en",
+    "per_page": 10
 })
 
 for article in response.json()["results"]:
@@ -100,7 +100,7 @@ for article in response.json()["results"]:
 
 ```javascript
 const response = await fetch(
-  "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&language=en&limit=10"
+  "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&language.code=en&per_page=10"
 );
 const data = await response.json();
 data.results.forEach((a) => console.log(a.title));
