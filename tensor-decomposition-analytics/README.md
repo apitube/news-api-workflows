@@ -95,7 +95,7 @@ class NewsTensorAnalyzer:
                         "topic.id": topic,
                         "published_at.start": start,
                         "published_at.end": end,
-                        "language.code.eq": "en",
+                        "language.code": "en",
                         "per_page": 1,
                     }
 

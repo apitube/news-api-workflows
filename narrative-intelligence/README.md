@@ -26,7 +26,7 @@ GET https://api.apitube.io/v1/news/trends
 | `sentiment.overall.polarity`  | string  | Filter by sentiment: `positive`, `negative`, `neutral`.             |
 | `source.rank.opr.min`         | number  | Minimum source authority (0–7).                                     |
 | `source.domain`               | string  | Filter by specific domains.                                          |
-| `source.country`              | string  | Filter by source country.                                            |
+| `source.country.code`         | string  | Filter by source country code (ISO 3166-1).                          |
 | `published_at.start`          | string  | Start date (ISO 8601 or `YYYY-MM-DD`).                             |
 | `published_at.end`            | string  | End date (ISO 8601 or `YYYY-MM-DD`).                               |
 | `language.code`               | string  | Filter by language code.                                             |

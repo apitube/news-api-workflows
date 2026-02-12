@@ -25,11 +25,11 @@ The Causal Discovery Engine provides:
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `entity.surface_form.in` | array | Entities for causal graph construction |
-| `category.in` | array | Categories: `business`, `finance`, `economy`, `politics` |
-| `published_at.gte` / `.lte` | datetime | Observation window |
-| `source.rank.lte` | number | High-quality source filter |
-| `language.code.eq` | string | Language filter (default: `en`) |
+| `title` | string | Entities for causal graph construction (comma-separated) |
+| `category.id` | string | Category ID: `medtop:04000000` (economy/business/finance) |
+| `published_at.start` / `.end` | datetime | Observation window |
+| `source.rank.opr.min` | number | High-quality source filter (0-7) |
+| `language.code` | string | Language filter (default: `en`) |
 
 ### Causal Discovery Parameters
 
@@ -71,11 +71,11 @@ Pearl's do-calculus provides three rules for manipulating interventional distrib
 ### cURL
 ```bash
 curl -G "https://api.apitube.io/v1/news/everything" \
-  --data-urlencode "entity.surface_form.in=Federal Reserve,S&P 500,USD,Treasury Yields,Inflation" \
-  --data-urlencode "category.in=finance,economy" \
-  --data-urlencode "published_at.gte=2024-01-01" \
-  --data-urlencode "language.code.eq=en" \
-  --data-urlencode "limit=50" \
+  --data-urlencode "title=Federal Reserve,S&P 500,USD,Treasury Yields,Inflation" \
+  --data-urlencode "category.id=medtop:04000000" \
+  --data-urlencode "published_at.start=2024-01-01" \
+  --data-urlencode "language.code=en" \
+  --data-urlencode "per_page=50" \
   --data-urlencode "api_key=YOUR_API_KEY"
 ```
 
@@ -822,12 +822,12 @@ class CausalDiscoveryEngine:
 
                 response = requests.get(BASE_URL, params={
                     "api_key": self.api_key,
-                    "entity.surface_form.eq": entity,
-                    "published_at.gte": current_date.strftime("%Y-%m-%d"),
-                    "published_at.lt": next_date.strftime("%Y-%m-%d"),
-                    "category.in": "finance,economy,business",
-                    "language.code.eq": "en",
-                    "limit": 50
+                    "title": entity,
+                    "published_at.start": current_date.strftime("%Y-%m-%d"),
+                    "published_at.end": next_date.strftime("%Y-%m-%d"),
+                    "category.id": "medtop:04000000",
+                    "language.code": "en",
+                    "per_page": 50
                 })
 
                 articles = response.json().get("results", [])
@@ -1284,12 +1284,12 @@ class CausalDiscoveryEngine {
 
         const params = new URLSearchParams({
           api_key: this.apiKey,
-          "entity.surface_form.eq": entity,
-          "published_at.gte": current.toISOString().split("T")[0],
-          "published_at.lt": next.toISOString().split("T")[0],
-          "category.in": "finance,economy,business",
-          "language.code.eq": "en",
-          limit: "50"
+          "title": entity,
+          "published_at.start": current.toISOString().split("T")[0],
+          "published_at.end": next.toISOString().split("T")[0],
+          "category.id": "medtop:04000000",
+          "language.code": "en",
+          per_page: "50"
         });
 
         try {
@@ -1661,12 +1661,12 @@ class CausalDiscoveryEngine {
 
                 $params = http_build_query([
                     'api_key' => $this->apiKey,
-                    'entity.surface_form.eq' => $entity,
-                    'published_at.gte' => $current->format('Y-m-d'),
-                    'published_at.lt' => $next->format('Y-m-d'),
-                    'category.in' => 'finance,economy,business',
-                    'language.code.eq' => 'en',
-                    'limit' => 50
+                    'title' => $entity,
+                    'published_at.start' => $current->format('Y-m-d'),
+                    'published_at.end' => $next->format('Y-m-d'),
+                    'category.id' => 'medtop:04000000',
+                    'language.code' => 'en',
+                    'per_page' => 50
                 ]);
 
                 $response = @file_get_contents(

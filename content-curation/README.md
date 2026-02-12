@@ -38,7 +38,7 @@ https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY
 | `source.rank.opr.min` | integer | Minimum source authority rank (0–7). |
 | `source.domain` | string | Filter by source domain (e.g., `techcrunch.com`). |
 | `is_duplicate` | integer | Filter duplicates (`0` = exclude duplicates). |
-| `is_free` | integer | Filter paywall content (`1` = free articles only). |
+| `is_paywall` | integer | Filter paywall content (`0` = free articles only). |
 | `is_breaking` | integer | Filter breaking news (`1` = breaking only). |
 | `sort.by` | string | Sort field: `published_at`, `sentiment.overall.score`. |
 | `sort.order` | string | Sort order: `asc`, `desc`. |
@@ -56,7 +56,7 @@ https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY
 ### cURL
 
 ```bash
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&topic.id=artificial_intelligence&source.rank.opr.min=5&is_duplicate=0&is_free=1&per_page=20"
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&topic.id=artificial_intelligence&source.rank.opr.min=5&is_duplicate=0&is_paywall=0&per_page=20"
 ```
 
 ### Python
@@ -69,7 +69,7 @@ response = requests.get("https://api.apitube.io/v1/news/everything", params={
     "topic.id": "artificial_intelligence",
     "source.rank.opr.min": 5,
     "is_duplicate": 0,
-    "is_free": 1,
+    "is_paywall": 0,
     "per_page": 20
 })
 
@@ -87,7 +87,7 @@ const params = new URLSearchParams({
     "topic.id": "artificial_intelligence",
     "source.rank.opr.min": "5",
     is_duplicate: "0",
-    is_free: "1",
+    is_paywall: "0",
     per_page: "20"
 });
 
@@ -108,7 +108,7 @@ $url = "https://api.apitube.io/v1/news/everything?" . http_build_query([
     "topic.id" => "artificial_intelligence",
     "source.rank.opr.min" => 5,
     "is_duplicate" => 0,
-    "is_free" => 1,
+    "is_paywall" => 0,
     "per_page" => 20
 ]);
 

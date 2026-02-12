@@ -119,7 +119,7 @@ class NewsParticleFilter:
                 "organization.name": self.entity,
                 "published_at.start": start,
                 "published_at.end": end,
-                "language.code.eq": "en",
+                "language.code": "en",
                 "per_page": 100,
             }
 
@@ -157,7 +157,7 @@ class NewsParticleFilter:
             "api_key": API_KEY,
             "organization.name": self.entity,
             "published_at.start": start,
-            "language.code.eq": "en",
+            "language.code": "en",
             "per_page": 100,
             "sort.by": "published_at",
             "sort.order": "desc",

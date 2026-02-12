@@ -94,7 +94,7 @@ foreach ($response["results"] as $article) {
 ```json
 {
   "status": "ok",
-  "limit": 1,
+  "per_page": 1,
   "page": 1,
   "path": "https://api.apitube.io/v1/news/everything?language.code=en&per_page=1",
   "has_next_pages": true,

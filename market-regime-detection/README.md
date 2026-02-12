@@ -21,12 +21,12 @@ The Market Regime Detection system provides:
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `entity.surface_form.eq` | string | Company/sector to monitor for regime signals |
-| `sentiment.overall.gte` / `.lte` | number | Sentiment thresholds for state observation |
-| `published_at.gte` / `.lte` | datetime | Time window for historical regime estimation |
-| `source.rank.lte` | number | Filter by source authority for signal quality |
-| `language.code.eq` | string | Language filter (default: `en`) |
-| `category.eq` | string | Category filter: `business`, `finance`, `economy` |
+| `organization.name` | string | Company/sector to monitor for regime signals |
+| `sentiment.overall.score.min` / `.max` | number | Sentiment thresholds for state observation |
+| `published_at.start` / `.end` | datetime | Time window for historical regime estimation |
+| `source.rank.opr.min` | number | Filter by source authority for signal quality (0-7) |
+| `language.code` | string | Language filter (default: `en`) |
+| `category.id` | string | Category ID: `medtop:04000000` (economy/business/finance) |
 
 ### HMM Configuration
 
@@ -53,13 +53,13 @@ The Market Regime Detection system provides:
 ### cURL
 ```bash
 curl -G "https://api.apitube.io/v1/news/everything" \
-  --data-urlencode "entity.surface_form.eq=S&P 500" \
-  --data-urlencode "category.eq=finance" \
-  --data-urlencode "published_at.gte=2024-01-01" \
-  --data-urlencode "sentiment.overall.gte=-1" \
-  --data-urlencode "sentiment.overall.lte=1" \
-  --data-urlencode "language.code.eq=en" \
-  --data-urlencode "limit=50" \
+  --data-urlencode "title=S&P 500" \
+  --data-urlencode "category.id=medtop:04000000" \
+  --data-urlencode "published_at.start=2024-01-01" \
+  --data-urlencode "sentiment.overall.score.min=-1" \
+  --data-urlencode "sentiment.overall.score.max=1" \
+  --data-urlencode "language.code=en" \
+  --data-urlencode "per_page=50" \
   --data-urlencode "api_key=YOUR_API_KEY"
 ```
 
@@ -366,12 +366,12 @@ class MarketRegimeDetector:
 
             response = requests.get(BASE_URL, params={
                 "api_key": self.api_key,
-                "entity.surface_form.eq": entity,
-                "published_at.gte": current_date.strftime("%Y-%m-%d"),
-                "published_at.lt": next_date.strftime("%Y-%m-%d"),
-                "category.eq": "finance",
-                "language.code.eq": "en",
-                "limit": 50
+                "organization.name": entity,
+                "published_at.start": current_date.strftime("%Y-%m-%d"),
+                "published_at.end": next_date.strftime("%Y-%m-%d"),
+                "category.id": "medtop:04000000",
+                "language.code": "en",
+                "per_page": 50
             })
 
             articles = response.json().get("results", [])
@@ -797,12 +797,12 @@ class MarketRegimeDetector {
 
       const params = new URLSearchParams({
         api_key: this.apiKey,
-        "entity.surface_form.eq": entity,
-        "published_at.gte": current.toISOString().split("T")[0],
-        "published_at.lt": next.toISOString().split("T")[0],
-        "category.eq": "finance",
-        "language.code.eq": "en",
-        limit: "50"
+        "organization.name": entity,
+        "published_at.start": current.toISOString().split("T")[0],
+        "published_at.end": next.toISOString().split("T")[0],
+        "category.id": "medtop:04000000",
+        "language.code": "en",
+        per_page: "50"
       });
 
       try {
@@ -1100,12 +1100,12 @@ class MarketRegimeDetector {
 
             $params = http_build_query([
                 'api_key' => $this->apiKey,
-                'entity.surface_form.eq' => $entity,
-                'published_at.gte' => $current->format('Y-m-d'),
-                'published_at.lt' => $next->format('Y-m-d'),
-                'category.eq' => 'finance',
-                'language.code.eq' => 'en',
-                'limit' => 50
+                'organization.name' => $entity,
+                'published_at.start' => $current->format('Y-m-d'),
+                'published_at.end' => $next->format('Y-m-d'),
+                'category.id' => 'finance',
+                'language.code' => 'en',
+                'per_page' => 50
             ]);
 
             $response = file_get_contents(

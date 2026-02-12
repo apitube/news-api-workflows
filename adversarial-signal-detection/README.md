@@ -84,7 +84,7 @@ class AdversarialDetector:
             "api_key": API_KEY,
             "title": query,
             "published_at.start": start,
-            "language.code.eq": "en",
+            "language.code": "en",
             "per_page": 100,
             "sort.by": "published_at",
             "sort.order": "asc",
@@ -361,7 +361,7 @@ class AdversarialDetector:
                 "api_key": API_KEY,
                 "title": query,
                 "published_at.start": (datetime.utcnow() - timedelta(hours=hours)).strftime("%Y-%m-%dT%H:%M:%SZ"),
-                "language.code.eq": lang,
+                "language.code": lang,
                 "per_page": 50,
             }
             response = requests.get(BASE_URL, params=params)

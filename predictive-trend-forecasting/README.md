@@ -78,7 +78,7 @@ class TrendForecaster:
                 "topic.id": self.topic,
                 "published_at.start": date,
                 "published_at.end": next_date,
-                "language.code.eq": "en",
+                "language.code": "en",
                 "per_page": 100,
             }
 

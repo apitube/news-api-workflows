@@ -21,12 +21,12 @@ The Cross-Market Contagion Analysis system provides:
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `entity.surface_form.in` | array | Multiple markets/indices to monitor |
-| `category.in` | array | Categories: `business`, `finance`, `economy` |
-| `published_at.gte` / `.lte` | datetime | Analysis time window |
-| `source.rank.lte` | number | Filter high-authority sources |
-| `language.code.in` | array | Languages for multi-regional analysis |
-| `country.code.in` | array | Countries for geographic contagion |
+| `title` | string | Multiple markets/indices to monitor (comma-separated) |
+| `category.id` | string | Category ID: `medtop:04000000` (economy/business/finance) |
+| `published_at.start` / `.end` | datetime | Analysis time window |
+| `source.rank.opr.min` | number | Filter high-authority sources (0-7) |
+| `language.code` | string | Languages for multi-regional analysis |
+| `source.country.code` | string | Countries for geographic contagion |
 
 ### Econometric Parameters
 
@@ -52,11 +52,11 @@ The Cross-Market Contagion Analysis system provides:
 ### cURL
 ```bash
 curl -G "https://api.apitube.io/v1/news/everything" \
-  --data-urlencode "entity.surface_form.in=S&P 500,FTSE 100,DAX,Nikkei 225" \
-  --data-urlencode "category.in=finance,business" \
-  --data-urlencode "published_at.gte=2024-01-01" \
-  --data-urlencode "language.code.eq=en" \
-  --data-urlencode "limit=50" \
+  --data-urlencode "title=S&P 500,FTSE 100,DAX,Nikkei 225" \
+  --data-urlencode "category.id=medtop:04000000" \
+  --data-urlencode "published_at.start=2024-01-01" \
+  --data-urlencode "language.code=en" \
+  --data-urlencode "per_page=50" \
   --data-urlencode "api_key=YOUR_API_KEY"
 ```
 
@@ -478,12 +478,12 @@ class CrossMarketContagionAnalyzer:
 
             response = requests.get(BASE_URL, params={
                 "api_key": self.api_key,
-                "entity.surface_form.eq": market,
-                "published_at.gte": current_date.strftime("%Y-%m-%d"),
-                "published_at.lt": next_date.strftime("%Y-%m-%d"),
-                "category.in": "finance,business",
-                "language.code.eq": "en",
-                "limit": 50
+                "title": market,
+                "published_at.start": current_date.strftime("%Y-%m-%d"),
+                "published_at.end": next_date.strftime("%Y-%m-%d"),
+                "category.id": "medtop:04000000",
+                "language.code": "en",
+                "per_page": 50
             })
 
             articles = response.json().get("results", [])
@@ -941,12 +941,12 @@ class CrossMarketContagionAnalyzer {
 
       const params = new URLSearchParams({
         api_key: this.apiKey,
-        "entity.surface_form.eq": market,
-        "published_at.gte": current.toISOString().split("T")[0],
-        "published_at.lt": next.toISOString().split("T")[0],
-        "category.in": "finance,business",
-        "language.code.eq": "en",
-        limit: "50"
+        "title": market,
+        "published_at.start": current.toISOString().split("T")[0],
+        "published_at.end": next.toISOString().split("T")[0],
+        "category.id": "medtop:04000000",
+        "language.code": "en",
+        per_page: "50"
       });
 
       try {
@@ -1366,12 +1366,12 @@ class CrossMarketContagionAnalyzer {
 
             $params = http_build_query([
                 'api_key' => $this->apiKey,
-                'entity.surface_form.eq' => $market,
-                'published_at.gte' => $current->format('Y-m-d'),
-                'published_at.lt' => $next->format('Y-m-d'),
-                'category.in' => 'finance,business',
-                'language.code.eq' => 'en',
-                'limit' => 50
+                'title' => $market,
+                'published_at.start' => $current->format('Y-m-d'),
+                'published_at.end' => $next->format('Y-m-d'),
+                'category.id' => 'medtop:04000000',
+                'language.code' => 'en',
+                'per_page' => 50
             ]);
 
             $response = @file_get_contents(

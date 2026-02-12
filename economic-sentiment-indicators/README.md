@@ -21,7 +21,7 @@ GET https://api.apitube.io/v1/news/everything
 | `title`                       | string  | Filter by economic keywords.                                         |
 | `sentiment.overall.polarity`  | string  | Filter by sentiment.                                                 |
 | `source.rank.opr.min`         | number  | Minimum source authority (0-7).                                      |
-| `source.country`              | string  | Filter by country.                                                   |
+| `source.country.code`         | string  | Filter by country code (ISO 3166-1).                                 |
 | `published_at.start`          | string  | Start date.                                                          |
 | `published_at.end`            | string  | End date.                                                            |
 | `language.code`               | string  | Filter by language code.                                             |
@@ -147,7 +147,7 @@ class EconomicSentimentIndex:
             resp = requests.get(BASE_URL, params={
                 "api_key": API_KEY,
                 "title": ",".join(theme_config["positive"]),
-                "source.country": self.country,
+                "source.country.code": self.country,
                 "published_at.start": date,
                 "published_at.end": next_date,
                 "language.code": "en",
@@ -159,7 +159,7 @@ class EconomicSentimentIndex:
             resp = requests.get(BASE_URL, params={
                 "api_key": API_KEY,
                 "title": ",".join(theme_config["negative"]),
-                "source.country": self.country,
+                "source.country.code": self.country,
                 "published_at.start": date,
                 "published_at.end": next_date,
                 "language.code": "en",
@@ -353,7 +353,7 @@ class EconomicSentimentIndex:
                     "api_key": API_KEY,
                     "title": ",".join(keywords),
                     "sentiment.overall.polarity": "positive",
-                    "source.country": self.country,
+                    "source.country.code": self.country,
                     "published_at.start": date,
                     "published_at.end": next_date,
                     "language.code": "en",
@@ -366,7 +366,7 @@ class EconomicSentimentIndex:
                     "api_key": API_KEY,
                     "title": ",".join(keywords),
                     "sentiment.overall.polarity": "negative",
-                    "source.country": self.country,
+                    "source.country.code": self.country,
                     "published_at.start": date,
                     "published_at.end": next_date,
                     "language.code": "en",
@@ -438,7 +438,7 @@ class InflationExpectations:
                 resp = requests.get(BASE_URL, params={
                     "api_key": API_KEY,
                     "title": ",".join(keywords),
-                    "source.country": country,
+                    "source.country.code": country,
                     "published_at.start": date,
                     "published_at.end": next_date,
                     "language.code": "en",
