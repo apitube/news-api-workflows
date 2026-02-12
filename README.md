@@ -1,6 +1,10 @@
 # News API Workflows
 
-A collection of workflows and code examples for integrating with the [APITube News API](https://apitube.io) — a real-time news aggregation API providing access to over 500,000 sources across 200 countries and 60 languages.
+> **Workflow templates and code examples for news aggregation, media monitoring, competitive intelligence, sentiment analysis, and real-time alerts** — built for the [APITube News API](https://apitube.io).
+
+A collection of ready-to-use workflows for integrating with the APITube News API — a real-time news aggregation API providing access to over 500,000 sources across 200 countries and 60 languages.
+
+**Keywords:** news API, news aggregation, media monitoring, competitive intelligence, competitor tracking, brand monitoring, sentiment analysis, real-time alerts, news analytics, market research, PR monitoring, reputation management, news feed, RSS alternative
 
 ## About APITube News API
 
@@ -27,6 +31,51 @@ APITube News API is a simple HTTP REST API for searching and retrieving live new
 | [Real-Time Alerts](./real-time-alerts/) | Build automated alerting pipelines that detect breaking news, sentiment spikes, and anomalies. |
 | [Multilingual Analysis](./multilingual-analysis/) | Cross-language news monitoring, comparison, and translation-aware analytics. |
 | [Content Curation](./content-curation/) | Automated content curation with quality scoring, deduplication, and newsletter generation. |
+
+### Advanced Workflows
+
+| Workflow | Description |
+|----------|-------------|
+| [Crisis Management](./crisis-management/) | Comprehensive crisis detection, reputation monitoring, escalation tracking, and rapid response coordination. |
+| [Investment Research](./investment-research/) | Pre-earnings sentiment analysis, M&A rumor detection, sector rotation signals, and quantitative trading signals. |
+| [Geopolitical Risk Monitoring](./geopolitical-risk-monitoring/) | Track conflicts, sanctions, trade disputes, and regional instability with multi-jurisdictional coverage. |
+| [Supply Chain Intelligence](./supply-chain-intelligence/) | Monitor disruptions, port congestion, commodity supply, and supplier risk across global supply chains. |
+| [Regulatory News Tracking](./regulatory-news-tracking/) | Track enforcement actions, new regulations, compliance deadlines, and policy changes across jurisdictions. |
+| [Market-Moving Events](./market-moving-events/) | Real-time detection of market-moving news with multi-signal scoring, velocity analysis, and cross-asset correlation. |
+| [Executive Intelligence](./executive-intelligence/) | Executive reputation dashboards, leadership change detection, and executive-company sentiment correlation. |
+| [Brand Health Scorecard](./brand-health-scorecard/) | Multi-dimensional brand health scoring with competitive benchmarking and share of voice analysis. |
+| [Event Impact Analysis](./event-impact-analysis/) | Before/after event comparison, daily timeline reconstruction, spillover effects, and recovery tracking. |
+| [Industry Disruption Radar](./industry-disruption-radar/) | Detect emerging disruptions, track startup activity, analyze incumbent responses, and monitor innovation trends. |
+
+### Expert Workflows
+
+| Workflow | Description |
+|----------|-------------|
+| [Predictive News Analytics](./predictive-news-analytics/) | Statistical forecasting, anomaly detection with z-scores, trend prediction, moving averages, and early warning systems. |
+| [Multi-Entity Network Analysis](./multi-entity-network-analysis/) | Entity relationship mapping, influence networks with PageRank, community detection, and sentiment propagation analysis. |
+| [Narrative Intelligence](./narrative-intelligence/) | Narrative lifecycle tracking, frame analysis, coordinated messaging detection, and counter-narrative dynamics. |
+| [ESG Media Intelligence](./esg-media-intelligence/) | Environmental, Social, Governance scoring, controversy detection, greenwashing analysis, and peer benchmarking. |
+| [M&A Deal Intelligence](./ma-deal-intelligence/) | M&A rumor detection, deal tracking, regulatory risk analysis, and deal success probability estimation. |
+
+### Institutional Workflows
+
+| Workflow | Description |
+|----------|-------------|
+| [Algorithmic Trading Signals](./algorithmic-trading-signals/) | Multi-factor alpha generation, sentiment momentum, coverage velocity, cross-sectional normalization, and signal backtesting. |
+| [News Knowledge Graph](./news-knowledge-graph/) | Dynamic knowledge graph construction, entity resolution, relationship extraction, PageRank influence, path finding, and graph inference. |
+| [Reputation Risk Engine](./reputation-risk-engine/) | Multi-dimensional reputation scoring, controversy half-life decay, crisis simulation, regime detection, and recovery forecasting. |
+| [Economic Sentiment Indicators](./economic-sentiment-indicators/) | News-based economic indices, recession probability models, sector rotation signals, and inflation expectations tracking. |
+| [Real-Time Anomaly Detection](./realtime-anomaly-detection/) | Ensemble anomaly detection (Z-score, IQR, CUSUM), pattern classification, adaptive thresholds, and automated root cause analysis. |
+
+### Enterprise Workflows
+
+| Workflow | Description |
+|----------|-------------|
+| [Intelligence Fusion System](./intelligence-fusion-system/) | Bayesian source credibility modeling, information cascade detection, contradiction analysis, and multi-source consensus building. |
+| [Event Cascade Modeling](./event-cascade-modeling/) | Graph-based event propagation, Monte Carlo cascade simulation, scenario analysis with VaR, and systemic impact forecasting. |
+| [Market Regime Detection](./market-regime-detection/) | Hidden Markov Model regime identification, Baum-Welch parameter estimation, Viterbi decoding, and regime-conditional signal generation. |
+| [Cross-Market Contagion](./cross-market-contagion/) | Granger causality testing, Diebold-Yilmaz spillover index, dynamic conditional correlation, and impulse response analysis. |
+| [Systemic Risk Monitoring](./systemic-risk-monitoring/) | Value-at-Risk and Expected Shortfall, absorption ratio, turbulence index, network-based contagion risk, and stress testing frameworks. |
 
 Each workflow includes a **README** with parameter reference and quick start examples, plus an **examples.md** with detailed code samples in Python, JavaScript, and PHP.
 
