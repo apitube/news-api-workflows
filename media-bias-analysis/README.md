@@ -91,8 +91,7 @@ class MediaBiasAnalyzer:
     REFERENCE_SOURCES = {
         'left': ['msnbc.com', 'huffpost.com', 'dailykos.com'],
         'center_left': ['nytimes.com', 'washingtonpost.com', 'cnn.com'],
-        'center': ['reuters.com', 'apnews.com', 'bbc.com'],
-        'center_right': ['wsj.com', 'economist.com', 'forbes.com'],
+        'center': ['theverge.com', 'apnews.com', 'bbc.com'],
         'right': ['foxnews.com', 'nypost.com', 'washingtonexaminer.com']
     }
 
@@ -500,8 +499,7 @@ analyzer = MediaBiasAnalyzer(api_key="YOUR_API_KEY")
 
 # Analyze bias of multiple sources
 sources = [
-    "nytimes.com", "wsj.com", "foxnews.com", "cnn.com",
-    "bbc.com", "reuters.com", "breitbart.com", "huffpost.com"
+    "bbc.com", "theverge.com", "breitbart.com", "huffpost.com"
 ]
 
 report = analyzer.generate_bias_report(sources)
@@ -662,7 +660,7 @@ const analyzer = new MediaBiasAnalyzer('YOUR_API_KEY');
 (async () => {
     // Analyze sources
     const report = await analyzer.generateBiasReport([
-        'nytimes.com', 'wsj.com', 'bbc.com', 'reuters.com'
+        'nytimes.com', 'bbc.com', 'theverge.com'
     ]);
     console.log(JSON.stringify(report, null, 2));
 
