@@ -17,7 +17,7 @@ GET https://api.apitube.io/v1/news/everything
 | Parameter                      | Type    | Description                                                          |
 |-------------------------------|---------|----------------------------------------------------------------------|
 | `api_key`                     | string  | **Required.** Your API key.                                          |
-| `topic.id`                    | string  | Filter by topic ID (e.g., `cryptocurrency`, `climate_change`).      |
+| `topic.name`                    | string  | Filter by topic ID (e.g., `cryptocurrency`, `climate_change`).      |
 | `category.id`                 | string  | Filter by IPTC category (e.g., `medtop:13000000` for science).      |
 | `title`                       | string  | Filter by keywords in article title (comma-separated).              |
 | `sentiment.overall.polarity`  | string  | Filter by sentiment: `positive`, `negative`, `neutral`.             |
@@ -52,10 +52,10 @@ For the complete list, see the [APITube Topics Reference](https://docs.apitube.i
 
 ```bash
 # Get crypto news sorted by date
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&topic.id=cryptocurrency&language.code=en&sort.by=published_at&sort.order=desc&per_page=10"
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&topic.name=cryptocurrency&language.code=en&sort.by=published_at&sort.order=desc&per_page=10"
 
 # Get AI news with positive sentiment
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&topic.id=artificial_intelligence&sentiment.overall.polarity=positive&language.code=en&per_page=10"
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&topic.name=artificial_intelligence&sentiment.overall.polarity=positive&language.code=en&per_page=10"
 ```
 
 ### Python
@@ -65,7 +65,7 @@ import requests
 
 response = requests.get("https://api.apitube.io/v1/news/everything", params={
     "api_key": "YOUR_API_KEY",
-    "topic.id": "cryptocurrency",
+    "topic.name": "cryptocurrency",
     "language.code": "en",
     "sort.by": "published_at",
     "sort.order": "desc",
@@ -82,7 +82,7 @@ for article in data["results"]:
 ```javascript
 const params = new URLSearchParams({
   api_key: "YOUR_API_KEY",
-  "topic.id": "cryptocurrency",
+  "topic.name": "cryptocurrency",
   language.code: "en",
   "sort.by": "published_at",
   "sort.order": "desc",
@@ -104,7 +104,7 @@ data.results.forEach((a) => {
 ```php
 $query = http_build_query([
     "api_key"    => "YOUR_API_KEY",
-    "topic.id"   => "cryptocurrency",
+    "topic.name"   => "cryptocurrency",
     "language.code"   => "en",
     "sort.by"    => "published_at",
     "sort.order" => "desc",

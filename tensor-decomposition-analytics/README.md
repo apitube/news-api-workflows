@@ -18,7 +18,7 @@ GET https://api.apitube.io/v1/news/everything
 |-------------------------------|---------|----------------------------------------------------------------------|
 | `api_key`                     | string  | **Required.** Your API key.                                          |
 | `organization.name`           | string  | Filter by organization name.                                         |
-| `topic.id`                    | string  | Filter by topic ID.                                                  |
+| `topic.name`                    | string  | Filter by topic ID.                                                  |
 | `category.id`                 | string  | Filter by category ID.                                               |
 | `sentiment.overall.polarity`  | string  | Filter by sentiment: `positive`, `negative`, `neutral`.             |
 | `source.rank.opr.min`         | number  | Minimum source authority (0–7).                                     |
@@ -92,7 +92,7 @@ class NewsTensorAnalyzer:
                     params = {
                         "api_key": API_KEY,
                         "organization.name": entity,
-                        "topic.id": topic,
+                        "topic.name": topic,
                         "published_at.start": start,
                         "published_at.end": end,
                         "language.code": "en",

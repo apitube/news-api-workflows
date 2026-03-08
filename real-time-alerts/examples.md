@@ -245,7 +245,7 @@ def get_hourly_sentiment():
 
     response = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "topic.id": TOPIC_ID,
+        "topic.name": TOPIC_ID,
         "published_at.start": start,
         "language.code": "en",
         "sort.by": "published_at",
@@ -582,7 +582,7 @@ async function getHourlySentiment() {
 
   const params = new URLSearchParams({
     api_key: API_KEY,
-    "topic.id": TOPIC_ID,
+    "topic.name": TOPIC_ID,
     "published_at.start": start,
     "language.code": "en",
     "sort.by": "published_at",

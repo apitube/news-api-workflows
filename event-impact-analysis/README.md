@@ -37,13 +37,13 @@ GET https://api.apitube.io/v1/news/trends
 
 ```bash
 # Get coverage before event
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&organization.name=Boeing&published_at.start=2024-01-01&published_at.end=2024-01-05&language.code=en&per_page=100" | jq '.results | length'
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&organization.name=Boeing&published_at.start=2025-01-01&published_at.end=2025-01-15&language.code=en&per_page=100" | jq '.results | length'
 
 # Get coverage after event
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&organization.name=Boeing&published_at.start=2024-01-05&published_at.end=2024-01-15&language.code=en&per_page=100" | jq '.results | length'
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&organization.name=Boeing&published_at.start=2025-01-15&published_at.end=2025-02-15&language.code=en&per_page=100" | jq '.results | length'
 
 # Track event-specific keywords
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&organization.name=Boeing&title=door,plug,incident,grounded&published_at.start=2024-01-05&per_page=20"
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&organization.name=Boeing&title=crash,incident,safety,grounded&language.code=en&per_page=20"
 ```
 
 ### Python
@@ -146,7 +146,7 @@ def analyze_event_impact(entity, event_date, event_keywords, before_days=7, afte
 
 # Analyze event
 entity = "Boeing"
-event_date = "2024-01-05"  # Door plug incident
+event_date = "2025-01-15"  # Door plug incident
 keywords = ["door", "plug", "incident", "grounded", "Alaska Airlines"]
 
 print("EVENT IMPACT ANALYSIS")
@@ -221,7 +221,7 @@ async function analyzeEventImpact(entity, eventDate, keywords, beforeDays = 7, a
 }
 
 async function runAnalysis() {
-  const analysis = await analyzeEventImpact("Boeing", "2024-01-05", ["door", "plug"], 7, 14);
+  const analysis = await analyzeEventImpact("Boeing", "2025-01-15", ["door", "plug"], 7, 14);
 
   console.log("EVENT IMPACT ANALYSIS");
   console.log("=".repeat(50));
@@ -283,7 +283,7 @@ function analyzeEventImpact(string $entity, string $eventDate, int $beforeDays =
     ];
 }
 
-$analysis = analyzeEventImpact("Boeing", "2024-01-05", 7, 14);
+$analysis = analyzeEventImpact("Boeing", "2025-01-15", 7, 14);
 
 echo "EVENT IMPACT ANALYSIS\n";
 echo str_repeat("=", 50) . "\n";

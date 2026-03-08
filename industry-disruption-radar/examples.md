@@ -120,7 +120,7 @@ class DisruptionRadar:
         for incumbent in config["incumbents"]:
             resp = requests.get(BASE_URL, params={
                 "api_key": API_KEY,
-                "organization.name": incumbent,
+                "title": incumbent,
                 "title": ",".join(config["keywords"]),
                 "published_at.start": start,
                 "language.code": "en",
@@ -130,7 +130,7 @@ class DisruptionRadar:
 
             resp = requests.get(BASE_URL, params={
                 "api_key": API_KEY,
-                "organization.name": incumbent,
+                "title": incumbent,
                 "title": ",".join(config["keywords"] + self.DISRUPTION_SIGNALS),
                 "published_at.start": start,
                 "language.code": "en",
@@ -148,7 +148,7 @@ class DisruptionRadar:
         for disruptor in config["disruptors"]:
             resp = requests.get(BASE_URL, params={
                 "api_key": API_KEY,
-                "organization.name": disruptor,
+                "title": disruptor,
                 "published_at.start": start,
                 "language.code": "en",
                 "per_page": 1,
@@ -157,7 +157,7 @@ class DisruptionRadar:
 
             resp = requests.get(BASE_URL, params={
                 "api_key": API_KEY,
-                "organization.name": disruptor,
+                "title": disruptor,
                 "title": ",".join(self.MOMENTUM_SIGNALS),
                 "published_at.start": start,
                 "language.code": "en",

@@ -27,7 +27,7 @@ def get_language_volume(topic, languages, days=7):
     for lang in languages:
         response = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "topic.id": topic,
+            "topic.name": topic,
             "language.code": lang,
             "published_at.start": start_date.strftime("%Y-%m-%d"),
             "published_at.end": end_date.strftime("%Y-%m-%d"),
@@ -82,7 +82,7 @@ def build_sentiment_matrix(topic, languages, days=7):
         for polarity in ["positive", "negative", "neutral"]:
             response = requests.get(BASE_URL, params={
                 "api_key": API_KEY,
-                "topic.id": topic,
+                "topic.name": topic,
                 "language.code": lang,
                 "sentiment.overall.polarity": polarity,
                 "published_at.start": start_date.strftime("%Y-%m-%d"),
@@ -198,7 +198,7 @@ def analyze_source_diversity(topic, country_language_pairs, per_page=100):
         while len(sources) < per_page:
             response = requests.get(BASE_URL, params={
                 "api_key": API_KEY,
-                "topic.id": topic,
+                "topic.name": topic,
                 "language": language,
                 "source.country.code": country,
                 "per_page": 100,
@@ -365,7 +365,7 @@ async function getLanguageVolume(topic, languages, days = 7) {
   const requests = languages.map(async (lang) => {
     const params = new URLSearchParams({
       api_key: API_KEY,
-      "topic.id": topic,
+      "topic.name": topic,
       "language.code": lang,
       "published_at.start": startDate.toISOString().split("T")[0],
       "published_at.end": endDate.toISOString().split("T")[0],
@@ -411,7 +411,7 @@ async function buildSentimentMatrix(topic, languages, days = 7) {
     for (const polarity of ["positive", "negative", "neutral"]) {
       const params = new URLSearchParams({
         api_key: API_KEY,
-        "topic.id": topic,
+        "topic.name": topic,
         "language.code": lang,
         "sentiment.overall.polarity": polarity,
         "published_at.start": startDate.toISOString().split("T")[0],
@@ -560,7 +560,7 @@ function getLanguageVolume(string $topic, array $languages, int $days = 7): arra
     foreach ($languages as $lang) {
         $query = http_build_query([
             "api_key"            => $apiKey,
-            "topic.id"           => $topic,
+            "topic.name"           => $topic,
             "language.code"      => $lang,
             "published_at.start" => $startDate->format("Y-m-d"),
             "published_at.end"   => $endDate->format("Y-m-d"),
@@ -727,7 +727,7 @@ function analyzeSourceDiversity(string $topic, array $countryLanguagePairs, int 
         while (count($sources) < $perPage) {
             $query = http_build_query([
                 "api_key"             => $apiKey,
-                "topic.id"            => $topic,
+                "topic.name"            => $topic,
                 "language"            => $language,
                 "source.country.code" => $country,
                 "per_page"            => 100,

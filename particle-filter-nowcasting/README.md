@@ -18,7 +18,7 @@ GET https://api.apitube.io/v1/news/everything
 |-------------------------------|---------|----------------------------------------------------------------------|
 | `api_key`                     | string  | **Required.** Your API key.                                          |
 | `organization.name`           | string  | Filter by organization name.                                         |
-| `topic.id`                    | string  | Filter by topic ID.                                                  |
+| `topic.name`                    | string  | Filter by topic ID.                                                  |
 | `title`                       | string  | Filter by keywords in title.                                         |
 | `sentiment.overall.polarity`  | string  | Filter by sentiment: `positive`, `negative`, `neutral`.             |
 | `sentiment.overall.score.min` | number  | Minimum sentiment score (-1.0 to 1.0).                              |

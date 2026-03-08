@@ -22,7 +22,7 @@ def get_news_by_sentiment(polarity, topic=None, language="en", per_page=20):
         "per_page": per_page,
     }
     if topic:
-        params["topic.id"] = topic
+        params["topic.name"] = topic
 
     response = requests.get(BASE_URL, params=params)
     response.raise_for_status()
@@ -47,7 +47,7 @@ BASE_URL = "https://api.apitube.io/v1/news/everything"
 
 response = requests.get(BASE_URL, params={
     "api_key": API_KEY,
-    "topic.id": "cryptocurrency",
+    "topic.name": "cryptocurrency",
     "sort.by": "sentiment.overall.score",
     "sort.order": "desc",
     "language.code": "en",
@@ -83,7 +83,7 @@ for topic in topics:
     for polarity in ["positive", "negative", "neutral"]:
         response = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "topic.id": topic,
+            "topic.name": topic,
             "sentiment.overall.polarity": polarity,
             "language.code": "en",
             "per_page": 1,
@@ -121,7 +121,7 @@ def get_daily_sentiment(topic, days=14, language="en"):
         for polarity in ["positive", "negative", "neutral"]:
             response = requests.get(BASE_URL, params={
                 "api_key": API_KEY,
-                "topic.id": topic,
+                "topic.name": topic,
                 "sentiment.overall.polarity": polarity,
                 "published_at.start": day_start.strftime("%Y-%m-%d"),
                 "published_at.end": day_end.strftime("%Y-%m-%d"),
@@ -167,7 +167,7 @@ POLL_INTERVAL = 300  # seconds
 def check_negative_spike(topic, language="en"):
     response = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "topic.id": topic,
+        "topic.name": topic,
         "sentiment.overall.polarity": "negative",
         "published_at.start": datetime.utcnow().strftime("%Y-%m-%dT00:00:00Z"),
         "language.code": language,
@@ -191,7 +191,7 @@ while True:
         if count >= ALERT_THRESHOLD:
             response = requests.get(BASE_URL, params={
                 "api_key": API_KEY,
-                "topic.id": topic,
+                "topic.name": topic,
                 "sentiment.overall.polarity": "negative",
                 "sort.by": "sentiment.overall.score",
                 "sort.order": "asc",
@@ -224,7 +224,7 @@ async function getNewsBySentiment(polarity, options = {}) {
     per_page: String(options.perPage || 20),
   });
 
-  if (options.topic) params.set("topic.id", options.topic);
+  if (options.topic) params.set("topic.name", options.topic);
 
   const response = await fetch(`${BASE_URL}?${params}`);
   if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -249,7 +249,7 @@ const BASE_URL = "https://api.apitube.io/v1/news/everything";
 async function getCryptoNewsBySentiment() {
   const params = new URLSearchParams({
     api_key: API_KEY,
-    "topic.id": "cryptocurrency",
+    "topic.name": "cryptocurrency",
     "sort.by": "sentiment.overall.score",
     "sort.order": "desc",
     "language.code": "en",
@@ -287,7 +287,7 @@ async function compareSentiment(topics) {
     for (const polarity of ["positive", "negative", "neutral"]) {
       const params = new URLSearchParams({
         api_key: API_KEY,
-        "topic.id": topic,
+        "topic.name": topic,
         "sentiment.overall.polarity": polarity,
         "language.code": "en",
         per_page: "1",
@@ -332,7 +332,7 @@ async function getDailySentiment(topic, days = 14) {
     for (const polarity of ["positive", "negative", "neutral"]) {
       const params = new URLSearchParams({
         api_key: API_KEY,
-        "topic.id": topic,
+        "topic.name": topic,
         "sentiment.overall.polarity": polarity,
         "published_at.start": dayStart.toISOString().split("T")[0],
         "published_at.end": dayEnd.toISOString().split("T")[0],
@@ -394,7 +394,7 @@ function getNewsBySentiment(string $polarity, ?string $topic = null, string $lan
         "per_page"                   => $perPage,
     ];
     if ($topic !== null) {
-        $params["topic.id"] = $topic;
+        $params["topic.name"] = $topic;
     }
 
     $url      = $baseUrl . "?" . http_build_query($params);
@@ -421,7 +421,7 @@ $baseUrl = "https://api.apitube.io/v1/news/everything";
 
 $query = http_build_query([
     "api_key"       => $apiKey,
-    "topic.id"      => "cryptocurrency",
+    "topic.name"      => "cryptocurrency",
     "sort.by"       => "sentiment.overall.score",
     "sort.order"    => "desc",
     "language.code" => "en",
@@ -457,7 +457,7 @@ foreach ($topics as $topic) {
     foreach (["positive", "negative", "neutral"] as $polarity) {
         $query = http_build_query([
             "api_key"                    => $apiKey,
-            "topic.id"                   => $topic,
+            "topic.name"                   => $topic,
             "sentiment.overall.polarity" => $polarity,
             "language.code"              => "en",
             "per_page"                   => 1,
@@ -502,7 +502,7 @@ function getDailySentiment(string $topic, int $days = 14, string $language = "en
         foreach (["positive", "negative", "neutral"] as $polarity) {
             $query = http_build_query([
                 "api_key"                    => $apiKey,
-                "topic.id"                   => $topic,
+                "topic.name"                   => $topic,
                 "sentiment.overall.polarity" => $polarity,
                 "published_at.start"         => $dayStart->format("Y-m-d"),
                 "published_at.end"           => $dayEnd->format("Y-m-d"),

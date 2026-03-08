@@ -20,7 +20,7 @@ GET https://api.apitube.io/v1/news/everything
 | `organization.name`           | string  | Filter by organization name (e.g., `Tesla`, `Google`).            |
 | `person.name`                 | string  | Filter by person name (e.g., `Elon Musk`).                        |
 | `brand.name`                  | string  | Filter by brand name.                                              |
-| `topic.id`                    | string  | Filter by topic ID (comma-separated).                             |
+| `topic.name`                    | string  | Filter by topic ID (comma-separated).                             |
 | `sentiment.overall.polarity`  | string  | Filter by sentiment: `positive`, `negative`, `neutral`.           |
 | `is_breaking`                 | integer | Filter for breaking news articles (`1` = yes, `0` = no).          |
 | `published_at.start`          | string  | Start date (ISO 8601 or `YYYY-MM-DD`).                           |

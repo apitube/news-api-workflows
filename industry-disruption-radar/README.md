@@ -19,8 +19,8 @@ GET https://api.apitube.io/v1/news/topic
 | Parameter                      | Type    | Description                                                          |
 |-------------------------------|---------|----------------------------------------------------------------------|
 | `api_key`                     | string  | **Required.** Your API key.                                          |
-| `topic.id`                    | string  | Filter by technology/industry topic.                                |
-| `industry.id`                 | string  | Filter by industry.                                                  |
+| `topic.name`                    | string  | Filter by technology/industry topic.                                |
+| `industry.name`                 | string  | Filter by industry.                                                  |
 | `organization.name`           | string  | Filter by company name.                                             |
 | `title`                       | string  | Filter by disruption-related keywords.                               |
 | `sentiment.overall.polarity`  | string  | Filter by sentiment: `positive`, `negative`, `neutral`.             |
@@ -38,13 +38,13 @@ GET https://api.apitube.io/v1/news/topic
 
 ```bash
 # Track AI disruption news
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&topic.id=artificial_intelligence&title=disrupt,transform,replace,automate&source.rank.opr.min=5&per_page=20"
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&topic.name=artificial_intelligence&title=disrupt,transform,replace,automate&source.rank.opr.min=5&per_page=20"
 
 # Monitor startup funding news
 curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&title=startup,funding,Series A,Series B,raised,valuation&language.code=en&per_page=30"
 
 # Track emerging technology coverage
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&topic.id=quantum_computing,blockchain,autonomous_vehicles&language.code=en&per_page=30"
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&topic.name=quantum_computing,blockchain,autonomous_vehicles&language.code=en&per_page=30"
 ```
 
 ### Python

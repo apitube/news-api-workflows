@@ -47,7 +47,7 @@ class DynamicTensorAnalyzer:
                 params = {
                     "api_key": API_KEY,
                     "organization.name": entity,
-                    "topic.id": topic,
+                    "topic.name": topic,
                     "published_at.start": start_date,
                     "published_at.end": end_date,
                     "language.code": "en",
@@ -374,7 +374,7 @@ class SparseTensorFactorizer:
                     params = {
                         "api_key": API_KEY,
                         "organization.name": entity,
-                        "topic.id": topic,
+                        "topic.name": topic,
                         "published_at.start": start,
                         "published_at.end": end,
                         "language.code": "en",
@@ -647,7 +647,7 @@ class MultiModalTensorAnalyzer:
                         params = {
                             "api_key": API_KEY,
                             "organization.name": entity,
-                            "topic.id": topic,
+                            "topic.name": topic,
                             "sentiment.overall.polarity": sentiment,
                             "published_at.start": start,
                             "published_at.end": end,

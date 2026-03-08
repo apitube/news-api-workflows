@@ -17,7 +17,7 @@ GET https://api.apitube.io/v1/news/everything
 | Parameter                      | Type    | Description                                                          |
 |-------------------------------|---------|----------------------------------------------------------------------|
 | `api_key`                     | string  | **Required.** Your API key.                                          |
-| `topic.id`                    | string  | Filter by topic ID.                                                  |
+| `topic.name`                    | string  | Filter by topic ID.                                                  |
 | `organization.name`           | string  | Filter by organization name.                                         |
 | `category.id`                 | string  | Filter by category ID.                                               |
 | `title`                       | string  | Filter by keywords in title.                                         |
@@ -75,7 +75,7 @@ class TrendForecaster:
 
             params = {
                 "api_key": API_KEY,
-                "topic.id": self.topic,
+                "topic.name": self.topic,
                 "published_at.start": date,
                 "published_at.end": next_date,
                 "language.code": "en",

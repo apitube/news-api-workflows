@@ -43,7 +43,7 @@ class PortfolioForecaster:
 
             params = {
                 "api_key": self.api_key,
-                "topic.id": topic,
+                "topic.name": topic,
                 "published_at.start": start_time.isoformat() + "Z",
                 "published_at.end": end_time.isoformat() + "Z",
                 "per_page": 100
@@ -320,7 +320,7 @@ class TrendBreakoutDetector:
 
         params = {
             "api_key": self.api_key,
-            "topic.id": topic,
+            "topic.name": topic,
             "published_at.start": start_time.isoformat() + "Z",
             "published_at.end": end_time.isoformat() + "Z",
             "per_page": 100
@@ -378,7 +378,7 @@ class TrendBreakoutDetector:
 
             params = {
                 "api_key": self.api_key,
-                "topic.id": topic,
+                "topic.name": topic,
                 "published_at.start": start_time.isoformat() + "Z",
                 "published_at.end": end_time.isoformat() + "Z",
                 "per_page": 100
@@ -611,7 +611,7 @@ class SeasonalForecaster:
 
                     params = {
                         "api_key": self.api_key,
-                        "topic.id": topic,
+                        "topic.name": topic,
                         "published_at.start": start_time.isoformat() + "Z",
                         "published_at.end": target_time.isoformat() + "Z",
                         "per_page": 100

@@ -32,7 +32,7 @@ https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY
 | Parameter | Type | Description |
 |-----------|------|-------------|
 | `api_key` | string | **Required.** Your API key. |
-| `topic.id` | string | Filter by topic ID (e.g., `crypto_news`, `climate_change`). |
+| `topic.name` | string | Filter by topic ID (e.g., `crypto_news`, `climate_change`). |
 | `category.id` | string | Filter by IPTC category ID (e.g., `medtop:04000000`). |
 | `language.code` | string | Filter by language code (e.g., `en`, `fr`, `de`). |
 | `source.rank.opr.min` | integer | Minimum source authority rank (0–7). |
@@ -56,7 +56,7 @@ https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY
 ### cURL
 
 ```bash
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&topic.id=artificial_intelligence&source.rank.opr.min=5&is_duplicate=0&is_paywall=0&per_page=20"
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&topic.name=artificial_intelligence&source.rank.opr.min=5&is_duplicate=0&is_paywall=0&per_page=20"
 ```
 
 ### Python
@@ -66,7 +66,7 @@ import requests
 
 response = requests.get("https://api.apitube.io/v1/news/everything", params={
     "api_key": "YOUR_API_KEY",
-    "topic.id": "artificial_intelligence",
+    "topic.name": "artificial_intelligence",
     "source.rank.opr.min": 5,
     "is_duplicate": 0,
     "is_paywall": 0,
@@ -84,7 +84,7 @@ for article in results:
 ```javascript
 const params = new URLSearchParams({
     api_key: "YOUR_API_KEY",
-    "topic.id": "artificial_intelligence",
+    "topic.name": "artificial_intelligence",
     "source.rank.opr.min": "5",
     is_duplicate: "0",
     is_paywall: "0",
@@ -105,7 +105,7 @@ data.results.forEach(article => {
 ```php
 $url = "https://api.apitube.io/v1/news/everything?" . http_build_query([
     "api_key" => "YOUR_API_KEY",
-    "topic.id" => "artificial_intelligence",
+    "topic.name" => "artificial_intelligence",
     "source.rank.opr.min" => 5,
     "is_duplicate" => 0,
     "is_paywall" => 0,

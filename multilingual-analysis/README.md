@@ -22,7 +22,7 @@ GET https://api.apitube.io/v1/news/everything
 | `organization.name`           | string | Filter by organization name (e.g., `Tesla`, `Apple`).              |
 | `person.name`                 | string | Filter by person name (e.g., `Elon Musk`).                         |
 | `location.name`               | string | Filter by location name (e.g., `Tokyo`, `Berlin`).                 |
-| `topic.id`                    | string | Filter by topic (e.g., `crypto_news`, `climate_change`).           |
+| `topic.name`                    | string | Filter by topic (e.g., `crypto_news`, `climate_change`).           |
 | `sentiment.overall.polarity`  | string | Filter by polarity: `positive`, `negative`, or `neutral`.         |
 | `title`                       | string | Filter by keywords in article title (comma-separated).            |
 | `sort.by`                     | string | Sort field (e.g., `published_at`, `sentiment.overall.score`).     |
@@ -41,7 +41,7 @@ GET https://api.apitube.io/v1/news/everything
 curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&organization.name=Tesla&language.code=en&per_page=10"
 
 # Compare climate change coverage in German vs French sources
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&topic.id=climate_change&language.code=de&per_page=10"
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&topic.name=climate_change&language.code=de&per_page=10"
 ```
 
 ### Python

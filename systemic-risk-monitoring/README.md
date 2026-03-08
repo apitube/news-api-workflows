@@ -55,10 +55,9 @@ The Systemic Risk Monitoring system provides:
 ### cURL
 ```bash
 curl -G "https://api.apitube.io/v1/news/everything" \
-  --data-urlencode "organization.name=JPMorgan,Goldman Sachs,Bank of America,Citigroup,Wells Fargo" \
+  --data-urlencode "title=JPMorgan,Goldman Sachs,Bank of America,Citigroup,Wells Fargo" \
   --data-urlencode "category.id=medtop:04000000" \
-  --data-urlencode "published_at.start=2024-01-01" \
-  --data-urlencode "sentiment.overall.score.max=0" \
+  --data-urlencode "sentiment.overall.polarity=negative" \
   --data-urlencode "language.code=en" \
   --data-urlencode "per_page=50" \
   --data-urlencode "api_key=YOUR_API_KEY"

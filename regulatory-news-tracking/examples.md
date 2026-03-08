@@ -63,7 +63,7 @@ def analyze_jurisdiction(name, config, days=14):
         # Get total regulatory news
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "organization.name": regulator,
+            "title": regulator,
             "published_at.start": start,
             "language": config["language"],
             "per_page": 1,
@@ -75,7 +75,7 @@ def analyze_jurisdiction(name, config, days=14):
         for category, keywords in REGULATORY_CATEGORIES.items():
             resp = requests.get(BASE_URL, params={
                 "api_key": API_KEY,
-                "organization.name": regulator,
+                "title": regulator,
                 "title": ",".join(keywords),
                 "published_at.start": start,
                 "language.code": config["language"],
@@ -88,7 +88,7 @@ def analyze_jurisdiction(name, config, days=14):
         # Get top stories
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "organization.name": regulator,
+            "title": regulator,
             "source.rank.opr.min": 5,
             "published_at.start": start,
             "language": config["language"],
@@ -198,7 +198,7 @@ def track_enforcement_by_regulator(regulator, days=30):
 
     response = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "organization.name": regulator,
+        "title": regulator,
         "title": ",".join(ENFORCEMENT_KEYWORDS),
         "published_at.start": start,
         "language.code": "en",
@@ -354,7 +354,7 @@ def analyze_industry_regulation(industry, config, days=14):
     for regulator in config["regulators"]:
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "organization.name": regulator,
+            "title": regulator,
             "title": ",".join(config["topics"]),
             "published_at.start": start,
             "language.code": "en",
@@ -480,7 +480,7 @@ class RegulatoryAlertSystem {
       for (const [alertType, keywords] of Object.entries(ALERT_TRIGGERS)) {
         const params = new URLSearchParams({
           api_key: API_KEY,
-          "organization.name": regulator,
+          "title": regulator,
           title: keywords.join(","),
           "published_at.start": oneHourAgo,
           "source.rank.opr.min": "4",
@@ -689,7 +689,7 @@ function analyzeRegulator(string $regulator, int $days = 14): array
     // Total coverage
     $query = http_build_query([
         "api_key"            => $apiKey,
-        "organization.name"  => $regulator,
+        "title"  => $regulator,
         "published_at.start" => $start,
         "language.code"      => "en",
         "per_page"           => 1,
@@ -701,7 +701,7 @@ function analyzeRegulator(string $regulator, int $days = 14): array
     foreach ($categories as $category => $keywords) {
         $query = http_build_query([
             "api_key"            => $apiKey,
-            "organization.name"  => $regulator,
+            "title"  => $regulator,
             "title"              => implode(",", $keywords),
             "published_at.start" => $start,
             "language.code"      => "en",
@@ -714,7 +714,7 @@ function analyzeRegulator(string $regulator, int $days = 14): array
     // Recent news
     $query = http_build_query([
         "api_key"             => $apiKey,
-        "organization.name"   => $regulator,
+        "title"   => $regulator,
         "published_at.start"  => $start,
         "language.code"       => "en",
         "source.rank.opr.min" => 4,

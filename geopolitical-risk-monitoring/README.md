@@ -22,7 +22,7 @@ GET https://api.apitube.io/v1/news/entity
 | `location.name`               | string  | Filter by country or region.                                        |
 | `person.name`                 | string  | Filter by political figure.                                         |
 | `organization.name`           | string  | Filter by organization.                                             |
-| `topic.id`                    | string  | Filter by topic (e.g., `war`, `sanctions`, `trade`).               |
+| `topic.name`                    | string  | Filter by topic (e.g., `war`, `sanctions`, `trade`).               |
 | `category.id`                 | string  | Filter by IPTC category (e.g., `medtop:11000000` for politics).    |
 | `source.country.code`         | string  | Filter by source country (ISO 3166-1).                              |
 | `sentiment.overall.polarity`  | string  | Filter by sentiment: `positive`, `negative`, `neutral`.             |

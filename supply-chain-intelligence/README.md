@@ -21,8 +21,8 @@ GET https://api.apitube.io/v1/news/entity
 | `api_key`                     | string  | **Required.** Your API key.                                          |
 | `organization.name`           | string  | Filter by company.                                                   |
 | `location.name`               | string  | Filter by port or shipping route.                                   |
-| `industry.id`                 | string  | Filter by industry (logistics, manufacturing, agriculture, etc.).   |
-| `topic.id`                    | string  | Filter by topic (commodities, shipping, trade).                     |
+| `industry.name`                 | string  | Filter by industry (logistics, manufacturing, agriculture, etc.).   |
+| `topic.name`                    | string  | Filter by topic (commodities, shipping, trade).                     |
 | `title`                       | string  | Filter by keywords (shortage, delay, disruption, etc.).             |
 | `category.id`                 | string  | Filter by IPTC category.                                             |
 | `source.country.code`         | string  | Filter by source country.                                            |
@@ -44,10 +44,10 @@ GET https://api.apitube.io/v1/news/entity
 curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&title=supply chain,shortage,disruption,delay,bottleneck&language.code=en&per_page=20"
 
 # Track shipping and logistics news
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&industry.id=logistics&title=shipping,freight,port,container&per_page=20"
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&industry.name=logistics&title=shipping,freight,port,container&per_page=20"
 
 # Monitor semiconductor supply chain
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&industry.id=semiconductors&title=chip shortage,supply,production,fab&per_page=20"
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&industry.name=semiconductors&title=chip shortage,supply,production,fab&per_page=20"
 ```
 
 ### Python

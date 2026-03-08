@@ -62,7 +62,7 @@ def fetch_quality_scored_feed(topic_id, language="en", limit=100):
     """Fetch and rank articles by quality score"""
     response = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "topic.id": topic_id,
+        "topic.name": topic_id,
         "language": language,
         "is_duplicate": False,
         "source.rankings.opr.min": 3,
@@ -122,7 +122,7 @@ def fetch_top_articles_by_topic(topic_id, count=3):
 
     response = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "topic.id": topic_id,
+        "topic.name": topic_id,
         "is_duplicate": False,
         "is_paywall": False,
         "source.rankings.opr.min": 4,
@@ -218,7 +218,7 @@ def fetch_articles_by_sentiment(topic_id, polarity, count=10):
     """Fetch articles filtered by sentiment polarity"""
     response = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "topic.id": topic_id,
+        "topic.name": topic_id,
         "sentiment.overall.polarity": polarity,
         "is_duplicate": False,
         "is_paywall": False,
@@ -420,7 +420,7 @@ def fetch_articles_for_date_range(topic_id, start_date, end_date):
     """Fetch articles for a specific date range"""
     response = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "topic.id": topic_id,
+        "topic.name": topic_id,
         "published_at.start": start_date.isoformat() + "Z",
         "published_at.end": end_date.isoformat() + "Z",
         "per_page": 100
@@ -578,7 +578,7 @@ async function fetchQualityScoredFeed(topicId, language = "en", limit = 100) {
 
     const params = new URLSearchParams({
         api_key: API_KEY,
-        "topic.id": topicId,
+        "topic.name": topicId,
         language,
         is_duplicate: "false",
         "source.rankings.opr.min": "3",
@@ -631,7 +631,7 @@ async function fetchTopArticlesByTopic(topicId, count = 3) {
 
     const params = new URLSearchParams({
         api_key: API_KEY,
-        "topic.id": topicId,
+        "topic.name": topicId,
         is_duplicate: "false",
         is_paywall: "false",
         "source.rankings.opr.min": "4",
@@ -725,7 +725,7 @@ async function fetchArticlesBySentiment(topicId, polarity, count = 10) {
 
     const params = new URLSearchParams({
         api_key: API_KEY,
-        "topic.id": topicId,
+        "topic.name": topicId,
         "sentiment.overall.polarity": polarity,
         is_duplicate: "false",
         is_paywall: "false",
@@ -863,7 +863,7 @@ function fetchQualityScoredFeed(string $topicId, string $language = "en", int $l
 
     $query = http_build_query([
         "api_key" => $apiKey,
-        "topic.id" => $topicId,
+        "topic.name" => $topicId,
         "language" => $language,
         "is_duplicate" => false,
         "source.rankings.opr.min" => 3,
@@ -926,7 +926,7 @@ function fetchTopArticlesByTopic(string $topicId, int $count = 3): array
 
     $query = http_build_query([
         "api_key" => $apiKey,
-        "topic.id" => $topicId,
+        "topic.name" => $topicId,
         "is_duplicate" => false,
         "is_paywall" => false,
         "source.rankings.opr.min" => 4,

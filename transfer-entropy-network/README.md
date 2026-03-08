@@ -68,7 +68,7 @@ Where:
 ```bash
 curl -G "https://api.apitube.io/v1/news/everything" \
   --data-urlencode "organization.name=Apple,Microsoft,Google,Amazon,Meta" \
-  --data-urlencode "category.id=technology" \
+  --data-urlencode "category.name=technology" \
   --data-urlencode "published_at.start=2024-01-01" \
   --data-urlencode "language.code=en" \
   --data-urlencode "per_page=50" \

@@ -121,7 +121,7 @@ class MediaBiasAnalyzer:
         }
 
         if topic:
-            params["topic.id"] = topic
+            params["topic.name"] = topic
 
         response = requests.get(self.base_url, params=params)
         return response.json().get("results", [])

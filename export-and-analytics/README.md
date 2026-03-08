@@ -23,7 +23,7 @@ GET https://api.apitube.io/v1/news/everything
 | `sort.by`                     | string  | Sort field: `published_at`, `sentiment.overall.score`.              |
 | `sort.order`                  | string  | Sort direction: `asc` or `desc`.                                    |
 | `title`                       | string  | Filter by keywords in article title.                                |
-| `topic.id`                    | string  | Filter by topic.                                                     |
+| `topic.name`                    | string  | Filter by topic.                                                     |
 | `organization.name`           | string  | Filter by organization name (e.g., `Tesla`).                        |
 | `person.name`                 | string  | Filter by person name (e.g., `Elon Musk`).                          |
 | `brand.name`                  | string  | Filter by brand name.                                                |
@@ -41,10 +41,10 @@ GET https://api.apitube.io/v1/news/everything
 
 ```bash
 # Export tech news as CSV
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&topic.id=technology&language.code=en&export=csv&per_page=50" -o tech_news.csv
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&topic.name=technology&language.code=en&export=csv&per_page=50" -o tech_news.csv
 
 # Paginated JSON export
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&topic.id=technology&language.code=en&per_page=50&page=1" -o page1.json
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&topic.name=technology&language.code=en&per_page=50&page=1" -o page1.json
 ```
 
 ### Python
@@ -58,7 +58,7 @@ BASE_URL = "https://api.apitube.io/v1/news/everything"
 
 response = requests.get(BASE_URL, params={
     "api_key": API_KEY,
-    "topic.id": "technology",
+    "topic.name": "technology",
     "language.code": "en",
     "per_page": 50,
 })
@@ -87,7 +87,7 @@ const BASE_URL = "https://api.apitube.io/v1/news/everything";
 
 const params = new URLSearchParams({
   api_key: API_KEY,
-  "topic.id": "technology",
+  "topic.name": "technology",
   "language.code": "en",
   per_page: "50",
 });
@@ -107,7 +107,7 @@ $baseUrl = "https://api.apitube.io/v1/news/everything";
 
 $query = http_build_query([
     "api_key"  => $apiKey,
-    "topic.id" => "technology",
+    "topic.name" => "technology",
     "language" => "en",
     "per_page" => 50,
 ]);

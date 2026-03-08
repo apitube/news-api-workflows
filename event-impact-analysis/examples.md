@@ -224,7 +224,7 @@ class EventImpactAnalyzer:
 
 # Analyze event
 entity = "Boeing"
-event_date = "2024-01-05"
+event_date = "2025-01-15"
 keywords = ["door", "plug", "incident", "grounded", "737", "Alaska Airlines"]
 
 analyzer = EventImpactAnalyzer(entity, event_date, keywords)
@@ -378,7 +378,7 @@ def analyze_spillover(primary_entity, related_entities, event_date, before_days=
 # Analyze Boeing event spillover
 primary = "Boeing"
 related = ["Airbus", "Spirit AeroSystems", "Alaska Airlines", "FAA"]
-event_date = "2024-01-05"
+event_date = "2025-01-15"
 
 print("CROSS-ENTITY SPILLOVER ANALYSIS")
 print("=" * 70)
@@ -487,7 +487,7 @@ async function runAnalysis() {
   console.log("EVENT IMPACT DASHBOARD");
   console.log("=".repeat(50));
 
-  const analysis = await analyzeEventImpact("Boeing", "2024-01-05", 7, 14);
+  const analysis = await analyzeEventImpact("Boeing", "2025-01-15", 7, 14);
 
   console.log(`\nEntity: ${analysis.entity}`);
   console.log(`Event: ${analysis.eventDate}`);
@@ -582,7 +582,7 @@ function analyzeEventImpact(string $entity, string $eventDate, int $beforeDays =
     ];
 }
 
-$analysis = analyzeEventImpact("Boeing", "2024-01-05", 7, 14);
+$analysis = analyzeEventImpact("Boeing", "2025-01-15", 7, 14);
 
 echo "EVENT IMPACT REPORT\n";
 echo str_repeat("=", 50) . "\n";

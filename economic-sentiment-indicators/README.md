@@ -17,7 +17,7 @@ GET https://api.apitube.io/v1/news/everything
 | Parameter                      | Type    | Description                                                          |
 |-------------------------------|---------|----------------------------------------------------------------------|
 | `api_key`                     | string  | **Required.** Your API key.                                          |
-| `topic.id`                    | string  | Filter by economic topic.                                            |
+| `topic.name`                    | string  | Filter by economic topic.                                            |
 | `title`                       | string  | Filter by economic keywords.                                         |
 | `sentiment.overall.polarity`  | string  | Filter by sentiment.                                                 |
 | `source.rank.opr.min`         | number  | Minimum source authority (0-7).                                      |

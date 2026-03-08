@@ -20,7 +20,7 @@ GET https://api.apitube.io/v1/news/trends
 | `api_key`                     | string  | **Required.** Your API key.                                          |
 | `organization.name`           | string  | Filter by organization for trend analysis.                           |
 | `person.name`                 | string  | Filter by person for trend analysis.                                 |
-| `topic.id`                    | string  | Filter by topic for category trends.                                 |
+| `topic.name`                    | string  | Filter by topic for category trends.                                 |
 | `title`                       | string  | Filter by keywords for signal detection.                             |
 | `sentiment.overall.polarity`  | string  | Filter by sentiment: `positive`, `negative`, `neutral`.             |
 | `source.rank.opr.min`         | number  | Minimum source authority (0–7).                                     |
@@ -37,13 +37,13 @@ GET https://api.apitube.io/v1/news/trends
 
 ```bash
 # Get historical coverage for trend analysis
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&organization.name=Tesla&published_at.start=2024-01-01&published_at.end=2024-01-31&language.code=en&per_page=100" | jq '.results | length'
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&organization.name=Tesla&published_at.start=2025-06-01&published_at.end=2025-12-31&language.code=en&per_page=100" | jq '.results | length'
 
 # Monitor emerging topics
 curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&title=breakthrough,revolutionary,first-ever&source.rank.opr.min=6&language.code=en&per_page=20"
 
 # Detect sudden coverage spikes
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&organization.name=OpenAI&published_at.start=$(date -v-1d +%Y-%m-%d)&language.code=en&per_page=100" | jq '.results | length'
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&title=OpenAI&language.code=en&per_page=100" | jq '.results | length'
 ```
 
 ### Python

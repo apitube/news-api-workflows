@@ -23,9 +23,9 @@ GET https://api.apitube.io/v1/news/category
 | `location.name`               | string  | Filter by jurisdiction.                                             |
 | `person.name`                 | string  | Filter by person name.                                              |
 | `category.id`                 | string  | Filter by IPTC category (e.g., `medtop:11000000` for politics).    |
-| `topic.id`                    | string  | Filter by topic (regulation, compliance, policy).                   |
+| `topic.name`                    | string  | Filter by topic (regulation, compliance, policy).                   |
 | `title`                       | string  | Filter by keywords (fine, penalty, regulation, compliance, etc.).   |
-| `industry.id`                 | string  | Filter by industry for sector-specific regulations.                 |
+| `industry.name`                 | string  | Filter by industry for sector-specific regulations.                 |
 | `source.country.code`         | string  | Filter by jurisdiction (source country).                            |
 | `sentiment.overall.polarity`  | string  | Filter by sentiment: `positive`, `negative`, `neutral`.             |
 | `published_at.start`          | string  | Start date (ISO 8601 or `YYYY-MM-DD`).                             |
@@ -48,7 +48,7 @@ curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&title=fi
 curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&title=GDPR,privacy,data protection,CCPA&language.code=en&per_page=20"
 
 # Monitor financial regulations
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&organization.name=SEC,FCA,FINRA&title=regulation,rule,enforcement&per_page=20"
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&title=SEC,FCA,FINRA,regulation,enforcement&language.code=en&per_page=20"
 ```
 
 ### Python

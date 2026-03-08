@@ -31,7 +31,7 @@ volumes = {}
 for topic in TOPICS:
     response = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "topic.id": topic,
+        "topic.name": topic,
         "language.code": "en",
         "per_page": 1,
     })
@@ -62,7 +62,7 @@ def build_digest(topics, articles_per_topic=5, days=1):
     for topic in topics:
         response = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "topic.id": topic,
+            "topic.name": topic,
             "published_at.start": yesterday.strftime("%Y-%m-%d"),
             "published_at.end": today.strftime("%Y-%m-%d"),
             "sort.by": "published_at",
@@ -117,7 +117,7 @@ for topic in topics:
 
         pos_resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "topic.id": topic,
+            "topic.name": topic,
             "sentiment.overall.polarity": "positive",
             "published_at.start": day_start.strftime("%Y-%m-%d"),
             "published_at.end": day_end.strftime("%Y-%m-%d"),
@@ -129,7 +129,7 @@ for topic in topics:
 
         total_resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "topic.id": topic,
+            "topic.name": topic,
             "published_at.start": day_start.strftime("%Y-%m-%d"),
             "published_at.end": day_end.strftime("%Y-%m-%d"),
             "language.code": "en",
@@ -170,7 +170,7 @@ for topic in topics:
     # This week
     resp1 = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "topic.id": topic,
+        "topic.name": topic,
         "published_at.start": this_week_start.strftime("%Y-%m-%d"),
         "published_at.end": today.strftime("%Y-%m-%d"),
         "language.code": "en",
@@ -182,7 +182,7 @@ for topic in topics:
     # Last week
     resp2 = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "topic.id": topic,
+        "topic.name": topic,
         "published_at.start": last_week_start.strftime("%Y-%m-%d"),
         "published_at.end": this_week_start.strftime("%Y-%m-%d"),
         "language.code": "en",
@@ -212,7 +212,7 @@ topic = "artificial_intelligence"
 
 response = requests.get(BASE_URL, params={
     "api_key": API_KEY,
-    "topic.id": topic,
+    "topic.name": topic,
     "language.code": "en",
     "sort.by": "published_at",
     "sort.order": "desc",
@@ -265,7 +265,7 @@ const volumes = {};
 for (const topic of TOPICS) {
   const params = new URLSearchParams({
     api_key: API_KEY,
-    "topic.id": topic,
+    "topic.name": topic,
     "language.code": "en",
     per_page: "1",
   });
@@ -300,7 +300,7 @@ async function buildDigest(topics, articlesPerTopic = 5, days = 1) {
   for (const topic of topics) {
     const params = new URLSearchParams({
       api_key: API_KEY,
-      "topic.id": topic,
+      "topic.name": topic,
       "published_at.start": start.toISOString().split("T")[0],
       "published_at.end": now.toISOString().split("T")[0],
       "sort.by": "published_at",
@@ -361,7 +361,7 @@ console.log("-".repeat(58));
 for (const topic of topics) {
   const thisParams = new URLSearchParams({
     api_key: API_KEY,
-    "topic.id": topic,
+    "topic.name": topic,
     "published_at.start": fmt(thisWeekStart),
     "published_at.end": fmt(now),
     "language.code": "en",
@@ -370,7 +370,7 @@ for (const topic of topics) {
 
   const lastParams = new URLSearchParams({
     api_key: API_KEY,
-    "topic.id": topic,
+    "topic.name": topic,
     "published_at.start": fmt(lastWeekStart),
     "published_at.end": fmt(thisWeekStart),
     "language.code": "en",
@@ -431,7 +431,7 @@ $volumes = [];
 foreach ($topics as $topic) {
     $query = http_build_query([
         "api_key"       => $apiKey,
-        "topic.id"      => $topic,
+        "topic.name"      => $topic,
         "language.code" => "en",
         "per_page"      => 1,
     ]);
@@ -468,7 +468,7 @@ function buildDigest(array $topics, int $articlesPerTopic = 5, int $days = 1): a
     foreach ($topics as $topic) {
         $query = http_build_query([
             "api_key"            => $apiKey,
-            "topic.id"           => $topic,
+            "topic.name"           => $topic,
             "published_at.start" => $start->format("Y-m-d"),
             "published_at.end"   => $now->format("Y-m-d"),
             "sort.by"            => "published_at",
@@ -526,7 +526,7 @@ foreach ($topics as $topic) {
     // This week
     $q1 = http_build_query([
         "api_key"            => $apiKey,
-        "topic.id"           => $topic,
+        "topic.name"           => $topic,
         "published_at.start" => $thisWeekStart->format("Y-m-d"),
         "published_at.end"   => $now->format("Y-m-d"),
         "language.code"      => "en",
@@ -538,7 +538,7 @@ foreach ($topics as $topic) {
     // Last week
     $q2 = http_build_query([
         "api_key"            => $apiKey,
-        "topic.id"           => $topic,
+        "topic.name"           => $topic,
         "published_at.start" => $lastWeekStart->format("Y-m-d"),
         "published_at.end"   => $thisWeekStart->format("Y-m-d"),
         "language.code"      => "en",
