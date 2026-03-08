@@ -48,7 +48,7 @@ def assess_supplier_risk(supplier, days=7):
     # Total coverage
     resp = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "organization.name": supplier["name"],
+        "title": supplier["name"],
         "published_at.start": start,
         "language.code": "en",
         "per_page": 1,
@@ -58,7 +58,7 @@ def assess_supplier_risk(supplier, days=7):
     # Negative coverage
     resp = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "organization.name": supplier["name"],
+        "title": supplier["name"],
         "sentiment.overall.polarity": "negative",
         "published_at.start": start,
         "language.code": "en",
@@ -69,7 +69,7 @@ def assess_supplier_risk(supplier, days=7):
     # Risk keywords
     resp = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "organization.name": supplier["name"],
+        "title": supplier["name"],
         "title": ",".join(RISK_KEYWORDS),
         "published_at.start": start,
         "language.code": "en",
@@ -489,7 +489,7 @@ class SupplyChainAlertSystem {
 
     const params = new URLSearchParams({
       api_key: API_KEY,
-      "organization.name": entity,
+      "title": entity,
       title: DISRUPTION_KEYWORDS.join(","),
       "published_at.start": oneHourAgo,
       "sentiment.overall.polarity": "negative",
@@ -688,7 +688,7 @@ $suppliers = [
     ["name" => "Samsung Electronics", "category" => "Electronics"],
     ["name" => "Foxconn", "category" => "Manufacturing"],
     ["name" => "Intel", "category" => "Semiconductors"],
-    ["name" => "Micron", "category" => "Memory"],
+    ["name" => "Micron Technology", "category" => "Memory"],
 ];
 
 $riskKeywords = ["shortage", "disruption", "delay", "fire", "strike", "closure"];
@@ -702,7 +702,7 @@ function getSupplierNews(array $supplier, int $days = 7): array
     // Get all news
     $query = http_build_query([
         "api_key"            => $apiKey,
-        "organization.name"  => $supplier["name"],
+        "title"  => $supplier["name"],
         "published_at.start" => $start,
         "language.code"      => "en",
         "sort.by"            => "published_at",
@@ -716,7 +716,7 @@ function getSupplierNews(array $supplier, int $days = 7): array
     // Get risk news
     $query = http_build_query([
         "api_key"            => $apiKey,
-        "organization.name"  => $supplier["name"],
+        "title"  => $supplier["name"],
         "title"              => implode(",", $riskKeywords),
         "published_at.start" => $start,
         "language.code"      => "en",

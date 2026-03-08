@@ -220,7 +220,7 @@ class EntityNetworkAnalyzer:
 
 # Build network
 analyzer = EntityNetworkAnalyzer()
-seed_entities = ["Tesla", "SpaceX", "Elon Musk"]
+seed_entities = ["Tesla", "SpaceX", "Apple"]
 
 print("MULTI-ENTITY NETWORK ANALYSIS")
 print("=" * 60)

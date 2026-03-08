@@ -162,7 +162,7 @@ BASE_URL = "https://api.apitube.io/v1/news/everything"
 
 SANCTIONED_ENTITIES = {
     "countries": ["Russia", "Iran", "North Korea", "Venezuela", "Cuba", "Syria", "Belarus"],
-    "organizations": ["Wagner Group", "Huawei", "ZTE", "Kaspersky"],
+    "organizations": ["Rosneft", "Huawei", "ZTE", "TikTok"],
 }
 
 SANCTION_KEYWORDS = [

@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 API_KEY = "YOUR_API_KEY"
 BASE_URL = "https://api.apitube.io/v1/news/everything"
 
-LANGUAGES = ["en", "es", "fr", "de", "it", "pt", "ru", "ar", "zh", "ja", "ko", "hi"]
+LANGUAGES = ["en", "es", "fr", "de", "it", "pt", "tr", "ar", "zh", "ja", "ko", "hi"]
 
 def get_language_volume(topic, languages, days=7):
     from datetime import datetime, timedelta
@@ -102,7 +102,7 @@ def build_sentiment_matrix(topic, languages, days=7):
 
     return pd.DataFrame(matrix)
 
-languages = ["en", "es", "fr", "de", "it", "pt", "ru", "ar", "zh", "ja"]
+languages = ["en", "es", "fr", "de", "it", "pt", "tr", "ar", "zh", "ja"]
 df = build_sentiment_matrix("technology", languages)
 
 print("Multilingual Sentiment Matrix for 'technology':\n")
@@ -158,7 +158,7 @@ def track_daily_coverage(keyword, languages, days=7):
 
     return coverage
 
-languages = ["en", "es", "fr", "de", "zh", "ja", "ru"]
+languages = ["en", "es", "fr", "de", "zh", "ja", "tr"]
 coverage = track_daily_coverage("OpenAI", languages, days=7)
 
 print(f"Global coverage tracker for 'OpenAI' (last 7 days):\n")
@@ -236,7 +236,7 @@ country_language_pairs = [
     ("DE", "de"),
     ("IT", "it"),
     ("BR", "pt"),
-    ("RU", "ru"),
+    ("TR", "tr"),
     ("CN", "zh"),
     ("JP", "ja"),
 ]
@@ -321,7 +321,7 @@ def analyze_entity_perception(entity_name, languages, days=30):
 
     return perceptions
 
-languages = ["en", "es", "fr", "de", "it", "pt", "ru", "ar", "zh", "ja", "ko"]
+languages = ["en", "es", "fr", "de", "it", "pt", "tr", "ar", "zh", "ja", "ko"]
 perceptions = analyze_entity_perception("Tesla", languages)
 
 print(f"Cross-Language Entity Perception: 'Tesla' (last 30 days)\n")
@@ -356,7 +356,7 @@ print(f"  Most coverage: {most_coverage[0]} ({most_coverage[1]['total']} article
 const API_KEY = "YOUR_API_KEY";
 const BASE_URL = "https://api.apitube.io/v1/news/everything";
 
-const LANGUAGES = ["en", "es", "fr", "de", "it", "pt", "ru", "ar", "zh", "ja", "ko", "hi"];
+const LANGUAGES = ["en", "es", "fr", "de", "it", "pt", "tr", "ar", "zh", "ja", "ko", "hi"];
 
 async function getLanguageVolume(topic, languages, days = 7) {
   const endDate = new Date();
@@ -435,7 +435,7 @@ async function buildSentimentMatrix(topic, languages, days = 7) {
   return matrix;
 }
 
-const languages = ["en", "es", "fr", "de", "it", "pt", "ru", "ar", "zh", "ja"];
+const languages = ["en", "es", "fr", "de", "it", "pt", "tr", "ar", "zh", "ja"];
 const matrix = await buildSentimentMatrix("technology", languages);
 
 console.log("Multilingual Sentiment Matrix for 'technology':\n");
@@ -505,7 +505,7 @@ async function trackDailyCoverage(keyword, languages, days = 7) {
   return coverage;
 }
 
-const languages = ["en", "es", "fr", "de", "zh", "ja", "ru"];
+const languages = ["en", "es", "fr", "de", "zh", "ja", "tr"];
 const coverage = await trackDailyCoverage("OpenAI", languages, 7);
 
 console.log("Global coverage tracker for 'OpenAI' (last 7 days):\n");
@@ -546,7 +546,7 @@ for (const lang of languages) {
 $apiKey  = "YOUR_API_KEY";
 $baseUrl = "https://api.apitube.io/v1/news/everything";
 
-$languages = ["en", "es", "fr", "de", "it", "pt", "ru", "ar", "zh", "ja", "ko", "hi"];
+$languages = ["en", "es", "fr", "de", "it", "pt", "tr", "ar", "zh", "ja", "ko", "hi"];
 
 function getLanguageVolume(string $topic, array $languages, int $days = 7): array
 {
@@ -659,7 +659,7 @@ function analyzeEntityPerception(string $entityName, array $languages, int $days
     return $perceptions;
 }
 
-$languages   = ["en", "es", "fr", "de", "it", "pt", "ru", "ar", "zh", "ja", "ko"];
+$languages   = ["en", "es", "fr", "de", "it", "pt", "tr", "ar", "zh", "ja", "ko"];
 $perceptions = analyzeEntityPerception("Tesla", $languages);
 
 echo "Cross-Language Entity Perception: 'Tesla' (last 30 days)\n\n";
@@ -771,7 +771,7 @@ $countryLanguagePairs = [
     ["DE", "de"],
     ["IT", "it"],
     ["BR", "pt"],
-    ["RU", "ru"],
+    ["TR", "tr"],
     ["CN", "zh"],
     ["JP", "ja"],
 ];

@@ -78,8 +78,7 @@ def track_enforcement_actions(regulator, days=7):
 
     response = requests.get(BASE_URL, params={
         "api_key": API_KEY,
-        "organization.name": regulator,
-        "title": ",".join(ENFORCEMENT_KEYWORDS),
+        "title": f"{regulator},{','.join(ENFORCEMENT_KEYWORDS)}",
         "published_at.start": start,
         "language.code": "en",
         "source.rank.opr.min": 3,
@@ -146,8 +145,7 @@ async function trackRegulatoryNews(regulator, days = 7) {
 
   const params = new URLSearchParams({
     api_key: API_KEY,
-    "organization.name": regulator,
-    title: REGULATORY_KEYWORDS.join(","),
+    title: `${regulator},${REGULATORY_KEYWORDS.join(",")}`,
     "published_at.start": start,
     "language.code": "en",
     "source.rank.opr.min": "3",
@@ -211,8 +209,7 @@ function trackRegulator(string $regulator, int $days = 7): array
 
     $query = http_build_query([
         "api_key"             => $apiKey,
-        "organization.name"   => $regulator,
-        "title"               => implode(",", $keywords),
+        "title"               => $regulator . "," . implode(",", $keywords),
         "published_at.start"  => $start,
         "language.code"       => "en",
         "source.rank.opr.min" => 3,

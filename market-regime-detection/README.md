@@ -366,7 +366,7 @@ class MarketRegimeDetector:
 
             response = requests.get(BASE_URL, params={
                 "api_key": self.api_key,
-                "organization.name": entity,
+                "title": entity,
                 "published_at.start": current_date.strftime("%Y-%m-%d"),
                 "published_at.end": next_date.strftime("%Y-%m-%d"),
                 "category.id": "medtop:04000000",
@@ -797,7 +797,7 @@ class MarketRegimeDetector {
 
       const params = new URLSearchParams({
         api_key: this.apiKey,
-        "organization.name": entity,
+        "title": entity,
         "published_at.start": current.toISOString().split("T")[0],
         "published_at.end": next.toISOString().split("T")[0],
         "category.id": "medtop:04000000",

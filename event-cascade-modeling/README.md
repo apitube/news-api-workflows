@@ -520,7 +520,7 @@ print("=" * 70)
 system = EventCascadeSystem()
 
 # Build network
-seeds = ["Apple", "Microsoft", "Google", "Amazon", "NVIDIA", "Tesla"]
+seeds = ["Apple", "Microsoft", "Google", "Amazon", "Meta", "Tesla"]
 network_stats = system.build_network(seeds, days=30)
 
 print(f"\nNetwork built:")

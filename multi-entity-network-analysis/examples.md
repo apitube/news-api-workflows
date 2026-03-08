@@ -452,7 +452,7 @@ print("=" * 70)
 network = AdvancedNetworkAnalyzer()
 
 # Seed entities
-seeds = ["Tesla", "SpaceX", "Elon Musk", "NVIDIA", "OpenAI"]
+seeds = ["Tesla", "SpaceX", "Apple", "Microsoft", "Google"]
 print(f"Seed entities: {seeds}")
 
 print("\nFetching articles...")
@@ -886,7 +886,7 @@ class CommunityDetector {
 // Run monitoring
 async function main() {
   const monitor = new NetworkMonitor();
-  const watchEntities = ["Tesla", "SpaceX", "NVIDIA", "OpenAI", "Apple"];
+  const watchEntities = ["Tesla", "SpaceX", "Apple", "Microsoft", "Google"];
 
   await monitor.startMonitoring(watchEntities, 60);
 
@@ -1291,7 +1291,7 @@ class EnterpriseNetworkAnalyzer
 
 // Run analysis
 $analyzer = new EnterpriseNetworkAnalyzer();
-$entities = ["Tesla", "SpaceX", "NVIDIA", "OpenAI"];
+$entities = ["Tesla", "SpaceX", "Apple", "Microsoft"];
 
 echo "ENTERPRISE NETWORK ANALYSIS\n";
 echo str_repeat("=", 60) . "\n";

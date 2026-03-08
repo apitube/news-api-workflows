@@ -772,7 +772,7 @@ class CrossPlatformTracker:
         "unknown": {"min_opr": 0, "max_opr": 1}
     }
 
-    REGIONS = ["us", "gb", "de", "fr", "ru", "cn", "in", "br"]
+    REGIONS = ["us", "gb", "de", "fr", "tr", "cn", "in", "br"]
 
     def __init__(self, api_key: str):
         self.api_key = api_key

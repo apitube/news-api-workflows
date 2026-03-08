@@ -495,7 +495,7 @@ for alert in alert_report["alerts"]:
 print("\n6. LEADING INDICATOR ANALYSIS")
 print("-" * 40)
 correlator = MultiEntityCorrelationAnalyzer(forecaster)
-candidates = ["NVIDIA", "Apple", "Microsoft"]
+candidates = ["Amazon", "Apple", "Microsoft"]
 print(f"Checking if {candidates} lead {entity}...")
 indicators = correlator.find_leading_indicators(entity, candidates, max_lag=5)
 for ind in indicators[:3]:

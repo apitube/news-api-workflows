@@ -76,7 +76,7 @@ class AlphaFactorEngine:
             # Total coverage
             resp = requests.get(BASE_URL, params={
                 "api_key": API_KEY,
-                "organization.name": ticker,
+                "title": ticker,
                 "published_at.start": date,
                 "published_at.end": next_date,
                 "language.code": "en",
@@ -88,7 +88,7 @@ class AlphaFactorEngine:
             for polarity in ["positive", "negative"]:
                 resp = requests.get(BASE_URL, params={
                     "api_key": API_KEY,
-                    "organization.name": ticker,
+                    "title": ticker,
                     "sentiment.overall.polarity": polarity,
                     "published_at.start": date,
                     "published_at.end": next_date,
@@ -100,7 +100,7 @@ class AlphaFactorEngine:
             # Tier-1 sources
             resp = requests.get(BASE_URL, params={
                 "api_key": API_KEY,
-                "organization.name": ticker,
+                "title": ticker,
                 "source.rank.opr.min": 5,
                 "published_at.start": date,
                 "published_at.end": next_date,
@@ -208,7 +208,7 @@ class AlphaFactorEngine:
 
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "organization.name": ticker,
+            "title": ticker,
             "title": ",".join(impact_keywords),
             "source.rank.opr.min": 5,
             "published_at.start": start,
@@ -221,7 +221,7 @@ class AlphaFactorEngine:
         # Normalize by total coverage
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "organization.name": ticker,
+            "title": ticker,
             "published_at.start": start,
             "language.code": "en",
             "per_page": 100,
@@ -238,7 +238,7 @@ class AlphaFactorEngine:
 
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "organization.name": ticker,
+            "title": ticker,
             "published_at.start": start,
             "language.code": "en",
             "sort.by": "published_at",
@@ -264,7 +264,7 @@ class AlphaFactorEngine:
 
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "organization.name": ticker,
+            "title": ticker,
             "title": ",".join(controversy_keywords),
             "sentiment.overall.polarity": "negative",
             "published_at.start": start,
@@ -276,7 +276,7 @@ class AlphaFactorEngine:
 
         resp = requests.get(BASE_URL, params={
             "api_key": API_KEY,
-            "organization.name": ticker,
+            "title": ticker,
             "published_at.start": start,
             "language.code": "en",
             "per_page": 100,

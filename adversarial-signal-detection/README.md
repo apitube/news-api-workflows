@@ -352,7 +352,7 @@ class AdversarialDetector:
         """
         Detect coordinated campaigns across multiple languages.
         """
-        languages = ["en", "es", "fr", "de", "ru", "zh", "ar"]
+        languages = ["en", "es", "fr", "de", "tr", "zh", "ar"]
         language_counts = {}
         language_articles = {}
 
