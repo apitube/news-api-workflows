@@ -47,7 +47,7 @@ BASE_URL = "https://api.apitube.io/v1/news/everything"
 
 response = requests.get(BASE_URL, params={
     "api_key": API_KEY,
-    "topic.name": "cryptocurrency",
+    "topic.id": "cryptocurrency",
     "sort.by": "sentiment.overall.score",
     "sort.order": "desc",
     "language.code": "en",
@@ -249,7 +249,7 @@ const BASE_URL = "https://api.apitube.io/v1/news/everything";
 async function getCryptoNewsBySentiment() {
   const params = new URLSearchParams({
     api_key: API_KEY,
-    "topic.name": "cryptocurrency",
+    "topic.id": "cryptocurrency",
     "sort.by": "sentiment.overall.score",
     "sort.order": "desc",
     "language.code": "en",
@@ -421,7 +421,7 @@ $baseUrl = "https://api.apitube.io/v1/news/everything";
 
 $query = http_build_query([
     "api_key"       => $apiKey,
-    "topic.name"      => "cryptocurrency",
+    "topic.id"      => "cryptocurrency",
     "sort.by"       => "sentiment.overall.score",
     "sort.order"    => "desc",
     "language.code" => "en",
@@ -457,7 +457,7 @@ foreach ($topics as $topic) {
     foreach (["positive", "negative", "neutral"] as $polarity) {
         $query = http_build_query([
             "api_key"                    => $apiKey,
-            "topic.name"                   => $topic,
+            "topic.id"                   => $topic,
             "sentiment.overall.polarity" => $polarity,
             "language.code"              => "en",
             "per_page"                   => 1,
@@ -502,7 +502,7 @@ function getDailySentiment(string $topic, int $days = 14, string $language = "en
         foreach (["positive", "negative", "neutral"] as $polarity) {
             $query = http_build_query([
                 "api_key"                    => $apiKey,
-                "topic.name"                   => $topic,
+                "topic.id"                   => $topic,
                 "sentiment.overall.polarity" => $polarity,
                 "published_at.start"         => $dayStart->format("Y-m-d"),
                 "published_at.end"           => $dayEnd->format("Y-m-d"),

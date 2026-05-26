@@ -1103,7 +1103,7 @@ class MarketRegimeDetector {
                 'organization.name' => $entity,
                 'published_at.start' => $current->format('Y-m-d'),
                 'published_at.end' => $next->format('Y-m-d'),
-                'category.id' => 'finance',
+                'category.id' => 'medtop:04000000',
                 'language.code' => 'en',
                 'per_page' => 50
             ]);

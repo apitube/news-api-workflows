@@ -20,7 +20,7 @@ GET https://api.apitube.io/v1/news/trends
 | `api_key`                     | string  | **Required.** Your API key.                                          |
 | `organization.name`           | string  | Filter by organization for trend analysis.                           |
 | `person.name`                 | string  | Filter by person for trend analysis.                                 |
-| `topic.name`                    | string  | Filter by topic for category trends.                                 |
+| `topic.id`                    | string  | Filter by topic for category trends.                                 |
 | `title`                       | string  | Filter by keywords for signal detection.                             |
 | `sentiment.overall.polarity`  | string  | Filter by sentiment: `positive`, `negative`, `neutral`.             |
 | `source.rank.opr.min`         | number  | Minimum source authority (0–7).                                     |

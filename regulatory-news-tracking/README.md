@@ -23,9 +23,9 @@ GET https://api.apitube.io/v1/news/category
 | `location.name`               | string  | Filter by jurisdiction.                                             |
 | `person.name`                 | string  | Filter by person name.                                              |
 | `category.id`                 | string  | Filter by IPTC category (e.g., `medtop:11000000` for politics).    |
-| `topic.name`                    | string  | Filter by topic (regulation, compliance, policy).                   |
+| `topic.id`                    | string  | Filter by topic (regulation, compliance, policy).                   |
 | `title`                       | string  | Filter by keywords (fine, penalty, regulation, compliance, etc.).   |
-| `industry.name`                 | string  | Filter by industry for sector-specific regulations.                 |
+| `industry.id`                 | string  | Filter by industry for sector-specific regulations.                 |
 | `source.country.code`         | string  | Filter by jurisdiction (source country).                            |
 | `sentiment.overall.polarity`  | string  | Filter by sentiment: `positive`, `negative`, `neutral`.             |
 | `published_at.start`          | string  | Start date (ISO 8601 or `YYYY-MM-DD`).                             |

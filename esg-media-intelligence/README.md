@@ -236,7 +236,7 @@ class ESGAnalyzer:
                 "title": article.get("title"),
                 "source": article.get("source", {}).get("domain"),
                 "category": category,
-                "url": article.get("url")
+                "url": article.get("href")
             })
 
         self.controversies = controversies

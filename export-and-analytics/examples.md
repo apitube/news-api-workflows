@@ -63,7 +63,7 @@ def export_to_csv(filename, params, max_articles=500):
     return len(all_articles)
 
 export_to_csv("tech_news.csv", {
-    "topic.name": "technology",
+    "topic.id": "technology",
     "language.code": "en",
     "sort.by": "published_at",
     "sort.order": "desc",
@@ -110,7 +110,7 @@ def export_to_jsonl(filename, params, max_articles=1000):
     return count
 
 export_to_jsonl("ai_news.jsonl", {
-    "topic.name": "artificial_intelligence",
+    "topic.id": "artificial_intelligence",
     "language.code": "en",
     "sort.by": "published_at",
     "sort.order": "desc",
@@ -395,7 +395,7 @@ async function exportToCsv(filename, filterParams, maxArticles = 500) {
 }
 
 await exportToCsv("tech_news.csv", {
-  "topic.name": "technology",
+  "topic.id": "technology",
   "language.code": "en",
   "sort.by": "published_at",
   "sort.order": "desc",
@@ -444,7 +444,7 @@ async function exportToJsonl(filename, filterParams, maxArticles = 1000) {
 }
 
 await exportToJsonl("ai_news.jsonl", {
-  "topic.name": "artificial_intelligence",
+  "topic.id": "artificial_intelligence",
   "language.code": "en",
   "sort.by": "published_at",
   "sort.order": "desc",
@@ -625,7 +625,7 @@ function exportToCsv(string $filename, array $filterParams, int $maxArticles = 5
 }
 
 exportToCsv("tech_news.csv", [
-    "topic.name"      => "technology",
+    "topic.id"      => "technology",
     "language.code" => "en",
     "sort.by"       => "published_at",
     "sort.order"    => "desc",
@@ -681,7 +681,7 @@ function exportToJsonl(string $filename, array $filterParams, int $maxArticles =
 }
 
 exportToJsonl("ai_news.jsonl", [
-    "topic.name"      => "artificial_intelligence",
+    "topic.id"      => "artificial_intelligence",
     "language.code" => "en",
     "sort.by"       => "published_at",
     "sort.order"    => "desc",
@@ -708,7 +708,7 @@ $page = 1;
 while (count($allArticles) < 200) {
     $query = http_build_query([
         "api_key"            => $apiKey,
-        "topic.name"           => $topic,
+        "topic.id"           => $topic,
         "published_at.start" => $start->format("Y-m-d"),
         "published_at.end"   => $now->format("Y-m-d"),
         "language.code"      => "en",

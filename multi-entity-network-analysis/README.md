@@ -123,7 +123,7 @@ class EntityNetworkAnalyzer:
                     edge_key = tuple(sorted([e1, e2]))
                     self.edges[edge_key]["weight"] += 1
                     self.edges[edge_key]["sentiment_sum"] += sentiment
-                    self.edges[edge_key]["articles"].append(article.get("url"))
+                    self.edges[edge_key]["articles"].append(article.get("href"))
 
             self.articles_processed += 1
 

@@ -68,7 +68,7 @@ Where:
 ```bash
 curl -G "https://api.apitube.io/v1/news/everything" \
   --data-urlencode "organization.name=Apple,Microsoft,Google,Amazon,Meta" \
-  --data-urlencode "category.name=technology" \
+  --data-urlencode "category.id=medtop:13000000" \
   --data-urlencode "published_at.start=2024-01-01" \
   --data-urlencode "language.code=en" \
   --data-urlencode "per_page=50" \
@@ -1250,7 +1250,7 @@ class TransferEntropyAnalyzer {
                     'organization.name' => $entity,
                     'published_at.start' => $current->format('Y-m-d'),
                     'published_at.end' => $next->format('Y-m-d'),
-                    'category.id' => 'business,technology,finance',
+                    'category.id' => 'medtop:04000000,medtop:13000000',
                     'language.code' => 'en',
                     'per_page' => 50
                 ]);

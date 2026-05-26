@@ -17,7 +17,7 @@ GET https://api.apitube.io/v1/news/everything
 | Parameter                      | Type    | Description                                                          |
 |-------------------------------|---------|----------------------------------------------------------------------|
 | `api_key`                     | string  | **Required.** Your API key.                                          |
-| `topic.name`                    | string  | Filter by topic ID.                                                  |
+| `topic.id`                    | string  | Filter by topic ID.                                                  |
 | `organization.name`           | string  | Filter by organization name.                                         |
 | `category.id`                 | string  | Filter by category ID.                                               |
 | `title`                       | string  | Filter by keywords in title.                                         |

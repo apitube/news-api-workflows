@@ -72,7 +72,7 @@ class AdvancedNetworkAnalyzer:
         seen_urls = set()
         unique_articles = []
         for article in all_articles:
-            url = article.get("url")
+            url = article.get("href")
             if url and url not in seen_urls:
                 seen_urls.add(url)
                 unique_articles.append(article)
@@ -107,7 +107,7 @@ class AdvancedNetworkAnalyzer:
                 node = self.nodes[name]
                 node["mention_count"] += 1
                 node["sentiment_sum"] += sentiment
-                node["articles"].append(article.get("url"))
+                node["articles"].append(article.get("href"))
                 if pub_date < node["first_seen"]:
                     node["first_seen"] = pub_date
                 if pub_date > node["last_seen"]:
@@ -120,7 +120,7 @@ class AdvancedNetworkAnalyzer:
                     edge = self.edges[edge_key]
                     edge["weight"] += 1
                     edge["sentiment_sum"] += sentiment
-                    edge["articles"].append(article.get("url"))
+                    edge["articles"].append(article.get("href"))
 
                     if edge["first_seen"] is None or pub_date < edge["first_seen"]:
                         edge["first_seen"] = pub_date
@@ -578,8 +578,8 @@ class NetworkMonitor {
     // Deduplicate
     const seen = new Set();
     return allArticles.filter((a) => {
-      if (seen.has(a.url)) return false;
-      seen.add(a.url);
+      if (seen.has(a.href)) return false;
+      seen.add(a.href);
       return true;
     });
   }
@@ -631,7 +631,7 @@ class NetworkMonitor {
           const edge = this.edges.get(key);
           edge.weight++;
           edge.sentimentSum += sentiment;
-          edge.recentArticles.push({ date: pubDate, url: article.url });
+          edge.recentArticles.push({ date: pubDate, url: article.href });
 
           if (edge.recentArticles.length > 50) {
             edge.recentArticles = edge.recentArticles.slice(-50);
@@ -990,7 +990,7 @@ class EnterpriseNetworkAnalyzer
         $seen = [];
         $unique = [];
         foreach ($allArticles as $article) {
-            $url = $article["url"] ?? "";
+            $url = $article["href"] ?? "";
             if ($url && !isset($seen[$url])) {
                 $seen[$url] = true;
                 $unique[] = $article;

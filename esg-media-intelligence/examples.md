@@ -247,7 +247,7 @@ class ESGMediaPlatform:
                     "source": article.get("source", {}).get("domain"),
                     "severity": severity,
                     "esg_category": esg_category,
-                    "url": article.get("url")
+                    "url": article.get("href")
                 })
 
         # Sort by date
