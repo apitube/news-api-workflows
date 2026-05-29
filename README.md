@@ -77,6 +77,28 @@ APITube News API is a simple HTTP REST API for searching and retrieving live new
 | [Cross-Market Contagion](./cross-market-contagion/) | Granger causality testing, Diebold-Yilmaz spillover index, dynamic conditional correlation, and impulse response analysis. |
 | [Systemic Risk Monitoring](./systemic-risk-monitoring/) | Value-at-Risk and Expected Shortfall, absorption ratio, turbulence index, network-based contagion risk, and stress testing frameworks. |
 
+### Reference & Profile Workflows
+
+These workflows use the reference, profile, suggest, and raw-feed endpoints.
+
+| Workflow | Description |
+|----------|-------------|
+| [Raw News Firehose](./raw-news-firehose/) | Ingest the raw discovery feed from `/v1/news/raw` before HTML parsing and NLP enrichment — lowest latency, fast-rotating staging articles. |
+| [Raw to Enriched Pipeline](./raw-to-enriched-pipeline/) | Two-stage pipeline: catch headlines instantly from `/v1/news/raw`, then backfill sentiment, entities, and categories from `/v1/news/everything`. |
+| [Autocomplete Suggestions](./autocomplete-suggestions/) | Build typeahead search boxes with `/v1/suggest/{entities,categories,topics,industries}`. |
+| [Query ID Resolver](./query-id-resolver/) | Resolve human-readable input into IDs via the suggest endpoints, then feed `topic.id`/`category.id`/`industry.id`/`entity.id` into `/v1/news/everything`. |
+| [People Profiles](./people-profiles/) | Look up public figures via `/v1/people` and pull full coverage profiles from `/v1/people/:id`. |
+| [Executive Watchlist](./executive-watchlist/) | Maintain a watchlist of executives and track coverage momentum and sentiment over time. |
+| [Entity Coverage Analytics](./entity-coverage-analytics/) | Deep-dive the `coverage` block (timeline, momentum, sentiment, top sources/countries, related entities) for people and companies. |
+| [Company Profiles](./company-profiles/) | Company directory and media-coverage profiles via `/v1/companies` and `/v1/companies/:id`. |
+| [Share of Voice](./share-of-voice/) | Compare competitor coverage volume, sentiment, and momentum to compute share of voice. |
+| [Coverage Momentum Alerts](./coverage-momentum-alerts/) | Alert on coverage surges and declines using the `momentum` field across companies and people. |
+| [Source Directory](./source-directory/) | Browse the publisher directory via `/v1/sources` and inspect per-source coverage with `/v1/sources/:id`. |
+| [Source Benchmarking](./source-benchmarking/) | Benchmark publishers against each other on volume, sentiment balance, and momentum. |
+| [Journalist Profiles](./journalist-profiles/) | Journalist directory and coverage profiles via `/v1/journalists` and `/v1/journalists/:id`. |
+| [Journalist Beat Mapping](./journalist-beat-mapping/) | Determine a journalist's beat and expertise from coverage `top_topics` and `top_entities`. |
+| [Newsroom Network](./newsroom-network/) | Map which journalists write for which outlets and find cross-outlet authors. |
+
 Each workflow includes a **README** with parameter reference and quick start examples, plus an **examples.md** with detailed code samples in Python, JavaScript, and PHP.
 
 ## Quick Start
