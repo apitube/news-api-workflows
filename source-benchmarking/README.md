@@ -1,49 +1,50 @@
 # Source Benchmarking
 
-Workflow for comparing the publishing coverage of several news sources side by side using the [APITube News API](https://apitube.io).
+Workflow for comparing several news sources side by side using the [APITube News API](https://apitube.io).
 
 ## Overview
 
-The **Source Benchmarking** workflow polls the source profile endpoint (`/v1/sources/:id`) for a list of publisher IDs and compares their coverage metrics: total article count, sentiment balance (positive / neutral / negative), and 30-day publishing momentum. With those numbers you can rank publishers by output, rank them by positivity, and spot which outlets are accelerating or slowing down. The endpoint returns the source summary coverage form, so the comparison uses only `article_count`, `first_seen`, `last_seen`, `sentiment`, `momentum`, and `timeline`.
+The **Source Benchmarking** workflow compares a list of publishers on three metrics — total article volume, sentiment balance (positive / neutral / negative), and 30-day publishing momentum — and ranks them by output, positivity, or acceleration. Because APITube does not expose a per-source coverage endpoint, every metric is derived from **`/v1/news/count`** scoped with `source.id`: a plain count for volume, three counts filtered by `sentiment.overall.polarity` for the sentiment split, and two date-windowed counts for momentum. Resolve publisher names into IDs first with [`/v1/suggest/sources`](../source-directory/README.md).
 
-## API Endpoint
+## API Endpoints
 
 ```
-GET https://api.apitube.io/v1/sources/:id
+GET https://api.apitube.io/v1/suggest/sources    (resolve a name/domain prefix into source IDs)
+GET https://api.apitube.io/v1/news/count           (one metric per call, scoped by source.id)
 ```
 
-Call the endpoint once per source ID you want to benchmark.
+`/v1/news/count` costs **1 point** per call and returns `{ "status": "ok", "count": <int>, "request_id": "..." }`.
 
 ## Authentication
 
-All requests require an API key passed via the `api_key` query parameter:
+All requests require an API key passed via the `api_key` query parameter (or the `X-API-Key` header):
 
 ```
-https://api.apitube.io/v1/sources/4232?api_key=YOUR_API_KEY
+https://api.apitube.io/v1/news/count?api_key=YOUR_API_KEY&source.id=4232
 ```
 
 ## Parameters
 
-| Parameter   | Type    | Description                                                                  |
-|-------------|---------|------------------------------------------------------------------------------|
-| `api_key`   | string  | **Required.** Your API key.                                                  |
-| `:id`       | integer | **Required.** Source ID in the path (e.g., `/v1/sources/4232`).              |
-| `coverage`  | boolean | Set to `false` to omit the `coverage` block. Leave default to keep coverage. |
-
-Returns `404` (`ER0151`) if a source ID is not found.
+| Parameter                   | Type    | Description                                                            |
+|-----------------------------|---------|-----------------------------------------------------------------------|
+| `api_key`                   | string  | **Required.** Your API key.                                           |
+| `source.id`                 | integer | Publisher to scope the count to. Accepts up to 3 comma-separated IDs. |
+| `published_at.start` / `.end` | string | Date window (ISO 8601 or date math like `NOW-30DAYS`).                |
+| `sentiment.overall.polarity` | string | `positive`, `negative`, or `neutral` — for the sentiment split.       |
 
 ## Quick Start
 
 ### cURL
 
 ```bash
-# Pull the coverage block for one source
-curl -s "https://api.apitube.io/v1/sources/4232?api_key=YOUR_API_KEY"
+# Total volume for one source
+curl -s "https://api.apitube.io/v1/news/count?api_key=YOUR_API_KEY&source.id=4232"
 
-# Benchmark several sources by calling the endpoint per ID
-for id in 4232 771 5510; do
-  curl -s "https://api.apitube.io/v1/sources/${id}?api_key=YOUR_API_KEY"
-done
+# Last-30-days volume (for momentum)
+curl -s "https://api.apitube.io/v1/news/count?api_key=YOUR_API_KEY&source.id=4232&published_at.start=NOW-30DAYS"
+
+# Positive-coverage volume
+curl -s "https://api.apitube.io/v1/news/count?api_key=YOUR_API_KEY&source.id=4232&sentiment.overall.polarity=positive"
 ```
 
 ### Python
@@ -53,18 +54,22 @@ import requests
 
 API_KEY = "YOUR_API_KEY"
 SOURCE_IDS = [4232, 771, 5510]
+COUNT_URL = "https://api.apitube.io/v1/news/count"
+
+
+def count(**filters):
+    response = requests.get(COUNT_URL, params={"api_key": API_KEY, **filters})
+    response.raise_for_status()
+    return response.json()["count"]
+
 
 for source_id in SOURCE_IDS:
-    response = requests.get(
-        f"https://api.apitube.io/v1/sources/{source_id}",
-        params={"api_key": API_KEY},
-    )
-    response.raise_for_status()
-    source = response.json()
-    cov = source["coverage"] or {}
-    change = cov["momentum"]["change_pct"]
+    total = count(**{"source.id": source_id})
+    last_30 = count(**{"source.id": source_id, "published_at.start": "NOW-30DAYS"})
+    prev_30 = count(**{"source.id": source_id, "published_at.start": "NOW-60DAYS", "published_at.end": "NOW-30DAYS"})
+    change = None if prev_30 == 0 else round((last_30 - prev_30) / prev_30 * 100)
     change_str = "n/a" if change is None else f"{change:+d}%"
-    print(f"{source['name']:<25} {cov['article_count']:>10,}  {change_str}")
+    print(f"source {source_id:<8} total={total:>10,}  30d={last_30:>7,}  momentum={change_str}")
 ```
 
 ### JavaScript (Node.js)
@@ -73,17 +78,19 @@ for source_id in SOURCE_IDS:
 const API_KEY = "YOUR_API_KEY";
 const SOURCE_IDS = [4232, 771, 5510];
 
+async function count(filters) {
+  const params = new URLSearchParams({ api_key: API_KEY, ...filters });
+  const response = await fetch(`https://api.apitube.io/v1/news/count?${params}`);
+  const data = await response.json();
+  return data.count;
+}
+
 for (const id of SOURCE_IDS) {
-  const params = new URLSearchParams({ api_key: API_KEY });
-  const response = await fetch(`https://api.apitube.io/v1/sources/${id}?${params}`);
-  const source = await response.json();
-  const cov = source.coverage ?? {};
-  const change = cov.momentum.change_pct == null
-    ? "n/a"
-    : `${cov.momentum.change_pct >= 0 ? "+" : ""}${cov.momentum.change_pct}%`;
-  console.log(
-    `${source.name.padEnd(25)} ${cov.article_count.toLocaleString().padStart(10)}  ${change}`
-  );
+  const total = await count({ "source.id": id });
+  const last30 = await count({ "source.id": id, "published_at.start": "NOW-30DAYS" });
+  const prev30 = await count({ "source.id": id, "published_at.start": "NOW-60DAYS", "published_at.end": "NOW-30DAYS" });
+  const change = prev30 === 0 ? "n/a" : `${Math.round(((last30 - prev30) / prev30) * 100)}%`;
+  console.log(`source ${id}  total=${total.toLocaleString()}  30d=${last30.toLocaleString()}  momentum=${change}`);
 }
 ```
 
@@ -93,62 +100,45 @@ for (const id of SOURCE_IDS) {
 $apiKey    = "YOUR_API_KEY";
 $sourceIds = [4232, 771, 5510];
 
-foreach ($sourceIds as $id) {
-    $query  = http_build_query(["api_key" => $apiKey]);
-    $source = json_decode(file_get_contents(
-        "https://api.apitube.io/v1/sources/{$id}?{$query}"
+function count_articles(string $apiKey, array $filters): int {
+    $query = http_build_query(array_merge(["api_key" => $apiKey], $filters));
+    $data  = json_decode(file_get_contents(
+        "https://api.apitube.io/v1/news/count?{$query}"
     ), true);
-    $cov = $source["coverage"] ?? [];
-    $changeStr = $cov["momentum"]["change_pct"] === null
-        ? "n/a"
-        : sprintf("%+d%%", $cov["momentum"]["change_pct"]);
-    printf("%-25s %10s  %s\n",
-        $source["name"], number_format($cov["article_count"]), $changeStr);
+    return $data["count"];
+}
+
+foreach ($sourceIds as $id) {
+    $total  = count_articles($apiKey, ["source.id" => $id]);
+    $last30 = count_articles($apiKey, ["source.id" => $id, "published_at.start" => "NOW-30DAYS"]);
+    $prev30 = count_articles($apiKey, ["source.id" => $id, "published_at.start" => "NOW-60DAYS", "published_at.end" => "NOW-30DAYS"]);
+    $change = $prev30 === 0 ? "n/a" : sprintf("%+d%%", round(($last30 - $prev30) / $prev30 * 100));
+    printf("source %-8d total=%10s  30d=%7s  momentum=%s\n",
+        $id, number_format($total), number_format($last30), $change);
 }
 ```
 
 ## Response Example
 
-A single `/v1/sources/:id` response used in benchmarking:
+Each `/v1/news/count` call returns a small envelope:
 
 ```json
 {
-  "id": 4232,
-  "name": "Example News",
-  "domain": "example.com",
-  "resource_type": "news",
-  "country_id": 840,
-  "language_id": 1,
-  "bias": "center",
-  "rank": { "opr": 5 },
-  "links": {
-    "self": "https://api.apitube.io/v1/sources/4232",
-    "articles": "https://api.apitube.io/v1/news/everything?source.id=4232",
-    "website": "https://example.com"
-  },
-  "coverage": {
-    "article_count": 502310,
-    "first_seen": "2015-01-02",
-    "last_seen": "2026-05-29",
-    "sentiment": { "positive": 180400, "neutral": 250100, "negative": 71810 },
-    "momentum": { "last_30_days": 8200, "previous_30_days": 7900, "change_pct": 3 },
-    "timeline": [
-      { "period": "2024-06-01", "count": 8100 }
-    ]
-  },
-  "recent_articles": []
+  "status": "ok",
+  "count": 502310,
+  "request_id": "b1e2..."
 }
 ```
 
-The source `coverage` block is the summary form. It exposes `article_count`, `first_seen`, `last_seen`, `sentiment`, `momentum`, and `timeline`, and contains no `top_*` breakdowns. Note that `momentum.change_pct`, `first_seen`, and `last_seen` may be `null` (e.g. no articles in the previous 30-day window), and the entire `coverage` block may be `null` when analytics are unavailable — guard for these before formatting, comparing, or sorting.
+Build the benchmark by combining several counts per source: one unscoped (total volume), one per `sentiment.overall.polarity` value (sentiment split), and two date-windowed (`NOW-30DAYS` vs the preceding 30 days) for momentum. Guard against a zero previous-window count before computing a percentage change.
 
 ## Common Use Cases
 
-- **Output benchmark** — rank a set of publishers by total tracked article count.
-- **Sentiment profiling** — compare the positive / neutral / negative balance of each publisher's coverage.
-- **Momentum scan** — find which outlets are publishing more (or fewer) articles than the previous 30 days via `momentum.change_pct`.
-- **Positivity ranking** — order publishers by their share of positive coverage.
+- **Output benchmark** — rank a set of publishers by total tracked article count (`source.id` + `/v1/news/count`).
+- **Sentiment profiling** — compare positive / neutral / negative shares with three `sentiment.overall.polarity` counts per source.
+- **Momentum scan** — find which outlets are accelerating via last-30-days vs previous-30-days counts.
 
 ## See Also
 
 - [examples.md](./examples.md) — detailed code examples in Python, JavaScript, and PHP.
+- [source-directory](../source-directory/README.md) — resolve publisher names into source IDs.

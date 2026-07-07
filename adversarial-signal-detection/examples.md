@@ -488,7 +488,7 @@ class BotNetworkDetector:
                 source_data[domain].append({
                     "hour": pub_time.hour,
                     "date": pub_time.date(),
-                    "topic": article.get("topic", {}).get("id", "unknown"),
+                    "topic": (article.get("topics") or [{}])[0].get("id", "unknown"),
                     "opr": source.get("rankings", {}).get("opr", 0),
                     "published_at": pub_time
                 })

@@ -1,10 +1,10 @@
 # Autocomplete Suggestions
 
-Build a typeahead/autocomplete UI for a news search box using the four suggest endpoints of the [APITube News API](https://apitube.io).
+Build a typeahead/autocomplete UI for a news search box using the five suggest endpoints of the [APITube News API](https://apitube.io).
 
 ## Overview
 
-The **Autocomplete Suggestions** workflow powers a search-as-you-type dropdown. As the user types, you query one or more of the suggest endpoints with a `prefix` and resolve free text into concrete IDs (`entity.id`, `category.id`, `topic.id`, `industry.id`) that can then be passed to `/v1/news/everything`. There are four suggest endpoints, one per dimension: entities, categories, topics, and industries. Each returns a **flat array** (the results are not wrapped in a `results` object), and every endpoint **requires** the `prefix` parameter. Omitting `prefix` returns error `ER0346` ("`Prefix` in query required.").
+The **Autocomplete Suggestions** workflow powers a search-as-you-type dropdown. As the user types, you query one or more of the suggest endpoints with a `prefix` and resolve free text into concrete IDs (`entity.id`, `category.id`, `topic.id`, `industry.id`, `source.id`) that can then be passed to `/v1/news/everything`. There are five suggest endpoints, one per dimension: entities, categories, topics, industries, and sources. Each returns a **flat array** (the results are not wrapped in a `results` object), and every endpoint **requires** the `prefix` parameter. Omitting `prefix` returns error `ER0346` ("`Prefix` in query required.").
 
 ## API Endpoints
 
@@ -13,6 +13,7 @@ GET https://api.apitube.io/v1/suggest/entities
 GET https://api.apitube.io/v1/suggest/categories
 GET https://api.apitube.io/v1/suggest/topics
 GET https://api.apitube.io/v1/suggest/industries
+GET https://api.apitube.io/v1/suggest/sources
 ```
 
 ## Authentication
@@ -44,6 +45,9 @@ curl -s "https://api.apitube.io/v1/suggest/entities?api_key=YOUR_API_KEY&prefix=
 # Category and industry suggestions
 curl -s "https://api.apitube.io/v1/suggest/categories?api_key=YOUR_API_KEY&prefix=econ"
 curl -s "https://api.apitube.io/v1/suggest/industries?api_key=YOUR_API_KEY&prefix=semi"
+
+# Source suggestions for "bbc" (resolves to source.id)
+curl -s "https://api.apitube.io/v1/suggest/sources?api_key=YOUR_API_KEY&prefix=bbc"
 ```
 
 ### Python
