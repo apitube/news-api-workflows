@@ -93,8 +93,6 @@ These workflows use the reference, profile, suggest, and raw-feed endpoints.
 | [Company Profiles](./company-profiles/) | Company directory and media-coverage profiles via `/v1/companies` and `/v1/companies/:id`. |
 | [Share of Voice](./share-of-voice/) | Compare competitor coverage volume, sentiment, and momentum to compute share of voice. |
 | [Coverage Momentum Alerts](./coverage-momentum-alerts/) | Alert on coverage surges and declines using the `momentum` field across companies and people. |
-| [Source Directory](./source-directory/) | Resolve publisher names into source IDs via `/v1/suggest/sources` and pivot to their articles with `source.id`. |
-| [Source Benchmarking](./source-benchmarking/) | Benchmark publishers against each other on volume, sentiment balance, and momentum. |
 | [Journalist Profiles](./journalist-profiles/) | Journalist directory and coverage profiles via `/v1/journalists` and `/v1/journalists/:id`. |
 | [Journalist Beat Mapping](./journalist-beat-mapping/) | Determine a journalist's beat and expertise from coverage `top_topics` and `top_entities`. |
 | [Newsroom Network](./newsroom-network/) | Map which journalists write for which outlets and find cross-outlet authors. |
