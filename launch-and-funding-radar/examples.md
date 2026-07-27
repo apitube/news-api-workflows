@@ -156,16 +156,28 @@ class FundingHeatMap {
     this.pauseMs = pauseMs;
   }
 
-  async get(params) {
+  // The trends endpoint returns intermittent 500s (ER0183) on queries that
+  // succeed moments later — in one 12-request sample only 1 came back OK.
+  // Without retries this heat map renders an empty table most runs.
+  async get(params, retries = 5) {
     const query = new URLSearchParams({ api_key: this.apiKey, ...params });
 
-    try {
-      const payload = await (await fetch(`${TRENDS_URL}?${query}`)).json();
+    for (let attempt = 0; attempt < retries; attempt++) {
+      let payload = null;
+
+      try {
+        payload = await (await fetch(`${TRENDS_URL}?${query}`)).json();
+      } catch {
+        payload = null;
+      }
+
       await sleep(this.pauseMs);
-      return payload.status === "ok" ? payload : null;
-    } catch {
-      return null;
+
+      if (payload?.status === "ok" && payload.trends?.length) return payload;
+      if (attempt < retries - 1) await sleep(this.pauseMs * (attempt + 2));
     }
+
+    return null;
   }
 
   // trending_history is a { "YYYY-MM-DD": count } object, which is everything
@@ -247,6 +259,14 @@ class FundingHeatMap {
 
 const heatMap = new FundingHeatMap(API_KEY);
 const report = await heatMap.report({ limit: 12, trendingDays: 14 });
+
+// Say so out loud. An empty table after retries means the endpoint is down,
+// not that no industry has activity — silently printing headers with no rows
+// reads like "no data" and hides an outage.
+if (report.length === 0) {
+  console.error("trends unavailable after retries — /v1/news/trends is returning ER0183");
+  process.exit(1);
+}
 
 console.log("Industry activity, 14-day history:\n");
 console.log(
@@ -440,6 +460,7 @@ foreach ($companies as $name => $mentions) {
 
 ## Notes on Behaviour
 
+- **`/v1/news/trends` fails intermittently.** The same query returns `500 ER0183` several times in a row and then succeeds — a 12-request sample of one unchanged query came back OK once. This is not parameter-dependent: `compare`, `trending` and plain count queries all show it. Retry with a growing delay, and treat an empty trends result as "retry exhausted" rather than "no data". Every example here retries.
 - **`sort=change` and `sort=trending_score` need `compare=true`.** Both are rejected without it, and `compare=true` itself requires `compare_window`. `sort=count`, `sort=value` and `sort=growth_rate` work unconditionally.
 - **Trends `field` accepts five values only.** `source.id`, `category.id`, `topic.id`, `industry.id`, `entity.id`. Anything else returns `ER0350` with the allowed list in the message.
 - **`trend.value` is an object for resolved fields.** For `industry.id` it comes back as `{"id": 644, "name": "Printed Material"}` rather than a bare id, so handle both shapes if you switch fields.

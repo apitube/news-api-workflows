@@ -166,6 +166,12 @@ if stats:
 
 rising = monitor.rising(min_rate=1.0)
 print(f"\nRising articles: {len(rising)}")
+
+if not rising:
+    # Expected with the 5-second demo gap above: share counts barely move in
+    # that window, so every observed velocity rounds to zero. Space the passes
+    # 15-30 minutes apart and this fills in.
+    print("  (none — the demo interval is too short for shares to move; use 15-30 min)")
 for row in rising[:10]:
     accel = f"accel={row['acceleration']:+.1f}" if row["acceleration"] is not None else "accel=n/a"
     print(f"  {row['rate_per_hour']:>7}/h {accel:<14} total={row['current_total']:<6} "

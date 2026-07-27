@@ -85,16 +85,31 @@ class LaunchRadar:
         self.api_key = api_key
         self.pause = pause
 
-    def _get(self, url, params, timeout=60):
-        try:
-            payload = requests.get(
-                url, params={"api_key": self.api_key, **params}, timeout=timeout
-            ).json()
-        except (requests.RequestException, ValueError):
-            return None
+    def _get(self, url, params, timeout=60, retries=4):
+        """GET with retries.
 
-        time.sleep(self.pause)
-        return payload if payload.get("status") == "ok" else None
+        `/v1/news/trends` returns intermittent 500s (`ER0183`) on requests that
+        succeed moments later — the same query can fail several times in a row
+        and then work. Retrying with a growing delay is the difference between
+        a usable trends call and an empty dashboard.
+        """
+        for attempt in range(retries):
+            try:
+                payload = requests.get(
+                    url, params={"api_key": self.api_key, **params}, timeout=timeout
+                ).json()
+            except (requests.RequestException, ValueError):
+                payload = None
+
+            time.sleep(self.pause)
+
+            if payload and payload.get("status") == "ok":
+                return payload
+
+            if attempt < retries - 1:
+                time.sleep(self.pause * (attempt + 2))
+
+        return None
 
     def event_split(self, days=30, **filters):
         """Volume per event type over a window."""
@@ -237,9 +252,16 @@ split = radar.event_split(days=30)
 for event, count in sorted(split.items(), key=lambda kv: -kv[1]):
     print(f"  {event:<20} {count:>9,}")
 
+trending = radar.trending_industries(limit=10)
+
+# An empty list after retries means the endpoint is failing, not that no
+# industry is trending. Distinguish the two rather than printing an empty table.
+if not trending:
+    print("\n[warn] /v1/news/trends unavailable after retries (ER0183) — skipping trend sections")
+
 print("\nIndustries trending above their own baseline:\n")
 print(f"  {'Industry':<44}{'articles':>10}{'score':>8}{'growth/h':>10}")
-for row in radar.trending_industries(limit=10)[:10]:
+for row in trending[:10]:
     score = row["trending_score"]
     growth = row["growth_rate"]
     print(f"  {(row['name'] or '')[:42]:<44}{row['articles']:>10,}"
@@ -283,16 +305,27 @@ class LaunchRadar {
     this.pauseMs = pauseMs;
   }
 
-  async get(url, params) {
+  // /v1/news/trends returns intermittent 500s (ER0183) on queries that succeed
+  // moments later, so retry with a growing delay before giving up.
+  async get(url, params, retries = 4) {
     const query = new URLSearchParams({ api_key: this.apiKey, ...params });
 
-    try {
-      const payload = await (await fetch(`${url}?${query}`)).json();
+    for (let attempt = 0; attempt < retries; attempt++) {
+      let payload = null;
+
+      try {
+        payload = await (await fetch(`${url}?${query}`)).json();
+      } catch {
+        payload = null;
+      }
+
       await sleep(this.pauseMs);
-      return payload.status === "ok" ? payload : null;
-    } catch {
-      return null;
+
+      if (payload?.status === "ok") return payload;
+      if (attempt < retries - 1) await sleep(this.pauseMs * (attempt + 2));
     }
+
+    return null;
   }
 
   async eventSplit({ days = 30, ...filters } = {}) {
@@ -411,9 +444,16 @@ for (const [event, count] of Object.entries(split).sort((a, b) => b[1] - a[1])) 
   console.log(`  ${event.padEnd(20)}${count.toLocaleString().padStart(10)}`);
 }
 
+const trending = await radar.trendingIndustries({ limit: 10 });
+
+// Empty after retries means the endpoint is failing, not that nothing trends.
+if (trending.length === 0) {
+  console.warn("\n[warn] /v1/news/trends unavailable after retries (ER0183) — skipping trend sections");
+}
+
 console.log("\nIndustries trending above their own baseline:\n");
 console.log(`  ${"Industry".padEnd(44)}${"articles".padStart(10)}${"score".padStart(8)}`);
-for (const row of await radar.trendingIndustries({ limit: 10 })) {
+for (const row of trending) {
   console.log(
     `  ${(row.name || "").slice(0, 42).padEnd(44)}${row.articles.toLocaleString().padStart(10)}` +
       `${String(row.trendingScore ?? "—").padStart(8)}`
@@ -456,25 +496,37 @@ const TRENDS_URL = "https://api.apitube.io/v1/news/trends";
 
 const LAUNCH_EVENTS = ["product-launch", "funding-round", "ipo", "merger-acquisition"];
 
-function radarGet(string $url, array $params, int $timeout = 60): ?array
+/**
+ * GET with retries. /v1/news/trends returns intermittent 500s (ER0183) on
+ * queries that succeed moments later, so retry with a growing delay.
+ */
+function radarGet(string $url, array $params, int $timeout = 60, int $retries = 4): ?array
 {
-    $handle = curl_init($url . "?" . http_build_query($params + ["api_key" => API_KEY]));
-    curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($handle, CURLOPT_TIMEOUT, $timeout);
+    for ($attempt = 0; $attempt < $retries; $attempt++) {
+        $handle = curl_init($url . "?" . http_build_query($params + ["api_key" => API_KEY]));
+        curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($handle, CURLOPT_TIMEOUT, $timeout);
 
-    $body = curl_exec($handle);
-    $failed = curl_errno($handle) !== 0;
-    curl_close($handle);
+        $body = curl_exec($handle);
+        $failed = curl_errno($handle) !== 0;
+        curl_close($handle);
 
-    usleep(800000);
+        usleep(800000);
 
-    if ($failed) {
-        return null;
+        if (!$failed) {
+            $payload = json_decode($body, true) ?: [];
+
+            if (($payload["status"] ?? "") === "ok") {
+                return $payload;
+            }
+        }
+
+        if ($attempt < $retries - 1) {
+            usleep(800000 * ($attempt + 2));
+        }
     }
 
-    $payload = json_decode($body, true) ?: [];
-
-    return ($payload["status"] ?? "") === "ok" ? $payload : null;
+    return null;
 }
 
 function eventSplit(int $days = 30): array
@@ -621,9 +673,16 @@ foreach (eventSplit(30) as $event => $count) {
     printf("  %-20s %9s\n", $event, number_format($count));
 }
 
+$trending = trendingIndustries(10);
+
+// Empty after retries means the endpoint is failing, not that nothing trends.
+if (empty($trending)) {
+    fwrite(STDERR, "\n[warn] /v1/news/trends unavailable after retries (ER0183) — skipping trend sections\n");
+}
+
 printf("\nIndustries trending above their own baseline:\n\n");
 printf("  %-44s%10s%8s\n", "Industry", "articles", "score");
-foreach (array_slice(trendingIndustries(10), 0, 10) as $row) {
+foreach (array_slice($trending, 0, 10) as $row) {
     printf(
         "  %-44s%10s%8s\n",
         substr($row["name"], 0, 42),
@@ -677,6 +736,8 @@ Ranking industries by article count always returns the same large sectors. `tren
 | `trending_history` | Daily counts keyed by date — plot it directly.                                 |
 | `growth_rate`      | Articles per hour between first and last seen.                                 |
 | `percentage`       | Share of all matching articles this value represents.                          |
+
+> **Reliability note.** `/v1/news/trends` currently returns intermittent `500 ER0183` responses: the same unchanged query fails several times in a row and then succeeds. In one 12-request sample only one came back OK. It is not parameter-dependent — `trending`, `compare` and plain count queries all show it. Every code example here retries with a growing delay; treat an empty trends result as "retries exhausted", not "no data".
 
 `compare=true` with `compare_window` adds a second, simpler view — `previous_count`, `change_absolute` and `change_percent` against the prior period — and is the only way to unlock `sort=change` or `sort=trending_score`. Requesting those sort values without `compare=true` is rejected.
 
