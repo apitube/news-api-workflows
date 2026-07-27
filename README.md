@@ -31,6 +31,8 @@ APITube News API is a simple HTTP REST API for searching and retrieving live new
 | [Real-Time Alerts](./real-time-alerts/) | Build automated alerting pipelines that detect breaking news, sentiment spikes, and anomalies. |
 | [Multilingual Analysis](./multilingual-analysis/) | Cross-language news monitoring, comparison, and translation-aware analytics. |
 | [Content Curation](./content-curation/) | Automated content curation with quality scoring, deduplication, and newsletter generation. |
+| [Layoffs Tracker](./layoffs-tracker/) | Track workforce reductions and bankruptcies with industry breakdowns, weekly timelines, and company watchlists. |
+| [Sports Intelligence](./sports-intelligence/) | Per-discipline sports coverage — transfer rumours, injury reports, athlete profiles, and fan sentiment. |
 
 ### Advanced Workflows
 
@@ -46,6 +48,9 @@ APITube News API is a simple HTTP REST API for searching and retrieving live new
 | [Brand Health Scorecard](./brand-health-scorecard/) | Multi-dimensional brand health scoring with competitive benchmarking and share of voice analysis. |
 | [Event Impact Analysis](./event-impact-analysis/) | Before/after event comparison, daily timeline reconstruction, spillover effects, and recovery tracking. |
 | [Industry Disruption Radar](./industry-disruption-radar/) | Detect emerging disruptions, track startup activity, analyze incumbent responses, and monitor innovation trends. |
+| [LLM News Grounding](./llm-news-grounding/) | Ground language models in live news — highlighted retrieval passages, citation-ready context, and claim verification. |
+| [Virality Prediction](./virality-prediction/) | Catch stories before they peak with engagement scoring, share velocity sampling, and per-category breakout detection. |
+| [Launch and Funding Radar](./launch-and-funding-radar/) | Track product launches, funding rounds and IPOs with industry trend scoring and period-over-period comparison. |
 
 ### Expert Workflows
 
