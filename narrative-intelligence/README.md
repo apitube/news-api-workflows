@@ -46,7 +46,7 @@ curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&title=AI
 curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&title=climate,crisis,emergency&source.rank.opr.min=5&language.code=en&per_page=30"
 
 # Detect narrative spread across sources
-curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&title=breakthrough,revolutionary&published_at.start=2024-01-01&language.code=en&per_page=50"
+curl -s "https://api.apitube.io/v1/news/everything?api_key=YOUR_API_KEY&title=breakthrough,revolutionary&published_at.start=2024-01-01&published_at.end=2024-01-31&language.code=en&per_page=50"
 ```
 
 ### Python
